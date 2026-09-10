@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SFM — Entrar</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="login-wrap">
+  <div class="login-box">
+    <h1>SFM</h1>
+    <p class="subtitulo">Shop Floor Management</p>
+
+    <div id="alertaLogin" hidden></div>
+
+    <form id="formLogin">
+      <div class="campo">
+        <label for="campoNome">Usuário</label>
+        <input type="text" id="campoNome" autocomplete="username" required>
+      </div>
+      <div class="campo">
+        <label for="campoSenha">Senha</label>
+        <input type="password" id="campoSenha" autocomplete="current-password" required>
+      </div>
+      <button type="submit" id="btnEntrar" style="width:100%;">Entrar</button>
+    </form>
+
+    <p class="rodape-nota">Autenticação local, sem servidor — apenas para organizar o uso do sistema.</p>
+  </div>
+</div>
+
+<script src="bd/dados.js"></script>
+<script src="bd/notas.js"></script>
+<script src="js/util.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/db.js"></script>
+<script src="js/db-ui.js"></script>
+<script src="js/login.js"></script>
+</body>
+</html>

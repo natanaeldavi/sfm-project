@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SFM — Levantamento SFM</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/quadro.css">
+</head>
+<body>
+<header class="topbar" id="topbar"></header>
+<nav class="subbar no-print">
+  <a href="menu.html">&larr; Menu</a>
+  <span class="sep">|</span>
+  <a href="passar-turno.html">Passar Turno</a>
+  <a href="receber-turno.html">Receber Turno</a>
+  <a href="sfm.html">Painel da Reunião</a>
+  <a href="quadro-sfm.html">SFM</a>
+</nav>
+
+<main>
+  <h1>Quadro SFM do Setor</h1>
+  <p class="subtitulo">Mesmo modelo da folha impressa que fica exposta no quadro — S (Segurança), Q (Qualidade), D (Entrega) e C (Custo). Válido para o mês inteiro.</p>
+
+  <div id="dbStatus" class="db-status no-print"></div>
+  <div id="alerta" hidden></div>
+
+  <div class="card no-print" id="cardFiltros">
+    <div class="toolbar">
+      <div class="campo" style="margin:0;min-width:160px;" id="campoSetor">
+        <label for="seletorSetor">Setor</label>
+        <select id="seletorSetor"></select>
+      </div>
+      <div class="campo" style="margin:0;min-width:160px;">
+        <label for="seletorMes">Mês</label>
+        <input type="month" id="seletorMes">
+      </div>
+      <button type="button" id="btnHoje" style="margin-top:18px;" class="secundario">Mês atual</button>
+      <div class="espaco"></div>
+      <button type="button" id="btnSalvar" style="margin-top:18px;">Salvar marcações</button>
+      <button type="button" id="btnImprimir" style="margin-top:18px;" class="secundario">Imprimir / PDF</button>
+    </div>
+  </div>
+
+  <div id="quadro"></div>
+
+  <div class="card no-print" id="cardComoAlimentar">
+    <h2>Como cada linha é preenchida</h2>
+    <table>
+      <thead><tr><th>Linha</th><th>Origem hoje</th><th>Alternativas se quisermos automatizar</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>S — Acidente / Quase acidente</strong></td>
+          <td>Marcação manual (verde = sem ocorrência, vermelho = ocorrência), só pelo responsável pela SFM do setor (definido em Administração) e só no(s) dia(s) que a reunião de hoje cobre — gestor/admin podem marcar qualquer dia. Fica salvo em <code>bd/quadro.json</code>.</td>
+          <td>Importar de uma planilha/sistema de segurança (SESMT) por mês, do mesmo jeito que a planilha do SAP é importada hoje; ou um formulário de "reportar ocorrência" dentro do próprio sistema.</td>
+        </tr>
+        <tr>
+          <td><strong>Q — Retrabalho da corretiva / Falha fornecedor</strong></td>
+          <td>Mesma regra de marcação manual e permissão da linha S.</td>
+          <td>Se o SAP tiver um campo/relatório de retrabalho (nota repetida no mesmo equipamento em até 2 semanas) ou de garantia de peça, dá pra calcular automático como já é feito com "Atendidas/Não atendidas"; até lá, fica manual.</td>
+        </tr>
+        <tr>
+          <td><strong>D — Controle de Corretivas Realizadas</strong></td>
+          <td>Automático, a partir de <code>bd/notas.json</code> (mesma lógica do painel de SFM): "Realizadas" = notas atendidas, "Abertas" = total de notas do dia, "Pendentes" = notas não atendidas, todas pela data de referência (Dt. referência) da planilha do SAP.</td>
+          <td>Se o setor tratar "Realizadas/Abertas/Pendentes" de um jeito diferente de "Atendidas/Total/Não atendidas" (ex.: usando data de fechamento da ordem em vez da data de referência), dá pra ajustar a fórmula — precisa dizer qual coluna do SAP deve valer.</td>
+        </tr>
+        <tr>
+          <td><strong>C — Controle de Quebra Graves</strong></td>
+          <td>Automático, a partir das passagens de turno finalizadas em <code>bd/dados.json</code>: conta como quebra grave toda máquina que ficou parada 10h ou mais (mesma meta usada no "Top problemas" do painel de SFM).</td>
+          <td>Se a definição de "quebra grave" do setor for outra (não só tempo parado — ex.: só quando gera custo de peça, ou outro limite de horas), é só ajustar a meta/regra.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<script src="bd/dados.js"></script>
+<script src="bd/notas.js"></script>
+<script src="bd/quadro.js"></script>
+<script src="js/chart.umd.min.js"></script>
+<script src="js/util.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/db.js"></script>
+<script src="js/db-ui.js"></script>
+<script src="js/quadro-sfm.js"></script>
+</body>
+</html>

@@ -1,0 +1,193 @@
+/* SFM — admin.html (somente papel admin) */
+
+(function () {
+  const usuario = Auth.exigirPapel(["admin"]);
+  if (!usuario) return;
+  montarTopbar(document.getElementById("topbar"), usuario, "Administração");
+
+  const alerta = document.getElementById("alerta");
+  const conteudo = document.getElementById("conteudo");
+  const form = document.getElementById("formNovoUsuario");
+  const campoPapel = document.getElementById("campoPapel");
+  const campoSetorWrap = document.getElementById("campoSetorWrap");
+  const campoSetor = document.getElementById("campoSetor");
+  const campoTurnoWrap = document.getElementById("campoTurnoWrap");
+  const campoTurno = document.getElementById("campoTurno");
+
+  campoSetor.innerHTML = SETORES.map((s) => `<option value="${s}">${s}</option>`).join("");
+  campoTurno.innerHTML = TURNOS.map((t) => `<option value="${t}">${t}</option>`).join("");
+
+  function atualizarVisibilidadeSetor() {
+    const mostrar = campoPapel.value === "operador";
+    campoSetorWrap.style.display = mostrar ? "" : "none";
+    campoTurnoWrap.style.display = mostrar ? "" : "none";
+  }
+  campoPapel.addEventListener("change", atualizarVisibilidadeSetor);
+  atualizarVisibilidadeSetor();
+
+  // ---------- Dados de ordens (notas do SAP): backup e exclusão ----------
+
+  const btnBackupNotas = document.getElementById("btnBackupNotas");
+  const btnExcluirNotas = document.getElementById("btnExcluirNotas");
+  const contagemNotasAdmin = document.getElementById("contagemNotasAdmin");
+
+  function renderNotasAdmin() {
+    contagemNotasAdmin.textContent = `${DB.notas.length} nota(s)/ordem(ns) atualmente no banco.`;
+    btnExcluirNotas.disabled = DB.notas.length === 0;
+  }
+
+  btnBackupNotas.addEventListener("click", () => {
+    DB.baixarBackupNotas();
+    mostrarAlerta(alerta, "ok", `Backup baixado com ${DB.notas.length} nota(s).`);
+  });
+
+  btnExcluirNotas.addEventListener("click", async () => {
+    const total = DB.notas.length;
+    if (total === 0) return;
+
+    if (!confirm(`Isso vai excluir todas as ${total} nota(s)/ordem(ns) do banco, sem afetar usuários ou passagens de turno. Já baixou o backup? Esta ação não pode ser desfeita por aqui.`)) return;
+
+    const digitado = prompt(`Para confirmar, digite EXCLUIR (em maiúsculas):`);
+    if (digitado !== "EXCLUIR") {
+      if (digitado !== null) mostrarAlerta(alerta, "erro", "Texto de confirmação não confere — nada foi excluído.");
+      return;
+    }
+
+    DB.notas = [];
+    btnExcluirNotas.disabled = true;
+    const ok = await DbUI.salvarNotas(alerta);
+    if (ok) {
+      mostrarAlerta(alerta, "ok", `${total} nota(s) excluída(s).`);
+      renderNotasAdmin();
+    } else {
+      btnExcluirNotas.disabled = false;
+    }
+  });
+
+  DB.carregarAutoLoad();
+  Auth.atualizarUsuarioDoBanco(usuario);
+  if (Auth.aplicarGatePassagemObrigatoria(usuario)) return;
+  if (Auth.aplicarGateRecebimento(usuario)) return;
+  conteudo.hidden = false;
+  renderTabela();
+  renderNotasAdmin();
+  DbUI.definirCallbackRecarregar(() => { renderTabela(); renderNotasAdmin(); });
+  DbUI.iniciar(document.getElementById("dbStatus"));
+
+  function renderTabela() {
+    const corpo = document.getElementById("corpoTabelaUsuarios");
+    corpo.innerHTML = DB.dados.usuarios.map((u) => {
+      const turnoCelula = u.papel === "operador"
+        ? `<select class="seletorTurnoLinha" style="display:inline-block;width:auto;">` +
+            `<option value="">— sem turno —</option>` +
+            TURNOS.map((t) => `<option value="${t}" ${u.turno === t ? "selected" : ""}>${t}</option>`).join("") +
+          `</select> <button type="button" class="secundario btnSalvarTurno" style="padding:4px 8px;">Salvar</button>`
+        : "—";
+      const podeSerResponsavel = u.papel === "operador" && u.turno === "Manhã";
+      const responsavelCelula = u.papel === "operador"
+        ? `<label class="checkbox-linha" title="${podeSerResponsavel ? "" : "Só operadores do turno Manhã podem ser responsáveis pela SFM"}">` +
+            `<input type="checkbox" class="chkResponsavelSfm" ${u.responsavelSfm ? "checked" : ""} ${podeSerResponsavel ? "" : "disabled"}>` +
+          `</label>`
+        : "—";
+      return `
+      <tr data-id="${escaparHtml(u.id)}">
+        <td>${escaparHtml(u.nome)}</td>
+        <td>${escaparHtml(u.papel)}</td>
+        <td>${u.setor ? `<span class="tag setor-${u.setor}">${u.setor}</span>` : "—"}</td>
+        <td>${turnoCelula}</td>
+        <td>${responsavelCelula}</td>
+        <td><button type="button" class="perigo btnExcluir" ${u.id === usuario.id ? "disabled title='Você não pode excluir seu próprio usuário'" : ""}>Excluir</button></td>
+      </tr>`;
+    }).join("");
+
+    corpo.querySelectorAll(".chkResponsavelSfm").forEach((chk) => {
+      chk.addEventListener("change", async () => {
+        const tr = chk.closest("tr");
+        const id = tr.dataset.id;
+        const alvo = DB.dados.usuarios.find((u) => u.id === id);
+        if (!alvo) return;
+
+        if (chk.checked) {
+          for (const u of DB.dados.usuarios) {
+            if (u.id !== alvo.id && u.papel === "operador" && u.setor === alvo.setor) u.responsavelSfm = false;
+          }
+        }
+        alvo.responsavelSfm = chk.checked;
+
+        chk.disabled = true;
+        const ok = await DbUI.salvarDados(alerta);
+        if (ok) {
+          mostrarAlerta(alerta, "ok", chk.checked
+            ? `"${alvo.nome}" agora é o responsável pela SFM do setor ${alvo.setor}.`
+            : `"${alvo.nome}" não é mais responsável pela SFM.`);
+          renderTabela();
+        } else {
+          chk.disabled = false;
+        }
+      });
+    });
+
+    corpo.querySelectorAll(".btnSalvarTurno").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const tr = btn.closest("tr");
+        const id = tr.dataset.id;
+        const alvo = DB.dados.usuarios.find((u) => u.id === id);
+        if (!alvo) return;
+        alvo.turno = tr.querySelector(".seletorTurnoLinha").value || null;
+        if (alvo.turno !== "Manhã") alvo.responsavelSfm = false; // só quem é do turno Manhã pode ser responsável pela SFM
+        btn.disabled = true;
+        const ok = await DbUI.salvarDados(alerta);
+        btn.disabled = false;
+        if (ok) mostrarAlerta(alerta, "ok", `Turno de "${alvo.nome}" atualizado.`);
+      });
+    });
+
+    corpo.querySelectorAll(".btnExcluir").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const tr = btn.closest("tr");
+        const id = tr.dataset.id;
+        const alvo = DB.dados.usuarios.find((u) => u.id === id);
+        if (!alvo) return;
+
+        if (alvo.papel === "admin" && DB.dados.usuarios.filter((u) => u.papel === "admin").length <= 1) {
+          mostrarAlerta(alerta, "erro", "Não é possível excluir o último usuário admin.");
+          return;
+        }
+        if (!confirm(`Excluir o usuário "${alvo.nome}"?`)) return;
+
+        DB.dados.usuarios = DB.dados.usuarios.filter((u) => u.id !== id);
+        btn.disabled = true;
+        const ok = await DbUI.salvarDados(alerta);
+        if (ok) renderTabela(); else btn.disabled = false;
+      });
+    });
+  }
+
+  form.addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    limparAlerta(alerta);
+
+    const nome = document.getElementById("campoNome").value.trim();
+    const papel = campoPapel.value;
+    const setor = papel === "operador" ? campoSetor.value : null;
+    const turno = papel === "operador" ? campoTurno.value : null;
+    const senha = document.getElementById("campoSenha").value;
+    const confirmar = document.getElementById("campoConfirmar").value;
+
+    if (!nome) { mostrarAlerta(alerta, "erro", "Informe o nome de usuário."); return; }
+    if (DB.buscarUsuarioPorNome(nome)) { mostrarAlerta(alerta, "erro", "Já existe um usuário com esse nome."); return; }
+    if (senha.length < 3) { mostrarAlerta(alerta, "erro", "A senha deve ter ao menos 3 caracteres."); return; }
+    if (senha !== confirmar) { mostrarAlerta(alerta, "erro", "As senhas não conferem."); return; }
+
+    const { senhaHash, senhaSalt } = await gerarHashSenha(senha);
+    DB.dados.usuarios.push({ id: gerarId("u"), nome, senhaHash, senhaSalt, papel, setor, turno });
+
+    const ok = await DbUI.salvarDados(alerta);
+    if (ok) {
+      form.reset();
+      atualizarVisibilidadeSetor();
+      mostrarAlerta(alerta, "ok", `Usuário "${nome}" criado.`);
+      renderTabela();
+    }
+  });
+})();

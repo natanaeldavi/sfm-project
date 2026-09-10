@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SFM — Passar Turno</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="topbar" id="topbar"></header>
+<nav class="subbar" id="subbar">
+  <a href="menu.html">&larr; Menu</a>
+  <span class="sep">|</span>
+  <a href="passar-turno.html">Passar Turno</a>
+  <a href="receber-turno.html">Receber Turno</a>
+  <a href="sfm.html">Painel da Reunião</a>
+  <a href="quadro-sfm.html">SFM</a>
+</nav>
+
+<main>
+  <h1>Passar Turno</h1>
+  <p class="subtitulo">Importe a planilha do SAP e marque as ordens do seu setor que estão sendo passadas para o próximo turno.</p>
+
+  <div id="dbStatus" class="db-status"></div>
+  <div id="alerta" hidden></div>
+
+  <div class="card" id="cardConcluirPassagem" hidden>
+    <h2>Fechar passagem de turno</h2>
+    <p class="subtitulo" id="infoPassagemTurno" style="margin-bottom:10px;"></p>
+    <button type="button" id="btnConcluirPassagem" hidden>Concluir passagem de turno</button>
+  </div>
+
+  <div class="card" id="cardRecebidas" hidden>
+    <h2>1. Ordens que você recebeu — continuar parada ou finalizar?</h2>
+    <p class="subtitulo" style="margin-bottom:10px;">Ao finalizar, o tempo de máquina parada é calculado automaticamente desde quando a ordem foi passada pela primeira vez.</p>
+    <div class="tabela-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Nota</th>
+            <th>Ordem</th>
+            <th>Equipamento</th>
+            <th>Parada desde</th>
+            <th>Descrição</th>
+            <th style="min-width:280px;">Ação</th>
+          </tr>
+        </thead>
+        <tbody id="corpoRecebidas"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card" id="cardImportar">
+    <h2>2. Importar planilha do SAP (.xlsx)</h2>
+    <div class="linha-campos">
+      <div class="campo" style="flex:2;">
+        <label for="inputXlsx">Arquivo exportado do SAP</label>
+        <input type="file" id="inputXlsx" accept=".xlsx,.xls">
+      </div>
+    </div>
+    <div id="resumoImportacao" hidden></div>
+  </div>
+
+  <div class="card" id="cardTabela" hidden>
+    <h2>3. Novas ordens do setor para passar</h2>
+    <div class="toolbar">
+      <div class="campo" style="margin:0;min-width:220px;">
+        <label for="buscaTexto">Buscar</label>
+        <input type="text" id="buscaTexto" placeholder="Nota, ordem, texto, equipamento...">
+      </div>
+      <label class="checkbox-linha" style="margin-top:18px;">
+        <input type="checkbox" id="chkTodosSetores">
+        Mostrar todos os setores
+      </label>
+      <div class="espaco"></div>
+      <span class="contagem-pill" id="contagemLinhas"></span>
+    </div>
+    <div class="tabela-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Nota</th>
+            <th>Ordem</th>
+            <th>Texto breve</th>
+            <th>Equipamento</th>
+            <th>Setor</th>
+            <th>Área</th>
+            <th>Status</th>
+            <th>Entrada</th>
+            <th>Descrição da passagem</th>
+          </tr>
+        </thead>
+        <tbody id="corpoTabela"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card" id="cardSalvar" hidden>
+    <h2>4. Registrar passagem de turno</h2>
+    <p class="subtitulo" id="turnoInfo" style="margin-bottom:10px;"></p>
+    <button type="button" id="btnSalvarPassagem">Salvar passagem de turno</button>
+    <span id="msgSalvar" style="margin-left:10px;font-size:12px;"></span>
+  </div>
+</main>
+
+<script src="bd/dados.js"></script>
+<script src="bd/notas.js"></script>
+<script src="js/xlsx.full.min.js"></script>
+<script src="js/util.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/db.js"></script>
+<script src="js/db-ui.js"></script>
+<script src="js/passar-turno.js"></script>
+</body>
+</html>

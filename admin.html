@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SFM — Administração</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="topbar" id="topbar"></header>
+<nav class="subbar">
+  <a href="menu.html">&larr; Menu</a>
+  <span class="sep">|</span>
+  <a href="admin.html">Administração</a>
+  <a href="relatorios.html">Relatórios</a>
+</nav>
+
+<main>
+  <h1>Administração de usuários</h1>
+
+  <div id="dbStatus" class="db-status"></div>
+  <div id="alerta" hidden></div>
+
+  <div id="conteudo" hidden>
+
+    <div class="card">
+      <h2>Novo usuário</h2>
+      <form id="formNovoUsuario">
+        <div class="linha-campos">
+          <div class="campo">
+            <label for="campoNome">Nome de usuário</label>
+            <input type="text" id="campoNome" required>
+          </div>
+          <div class="campo">
+            <label for="campoPapel">Papel</label>
+            <select id="campoPapel">
+              <option value="operador">Operador</option>
+              <option value="gestor">Gestor</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div class="campo" id="campoSetorWrap">
+            <label for="campoSetor">Setor</label>
+            <select id="campoSetor"></select>
+          </div>
+          <div class="campo" id="campoTurnoWrap">
+            <label for="campoTurno">Turno</label>
+            <select id="campoTurno"></select>
+          </div>
+        </div>
+        <div class="linha-campos">
+          <div class="campo">
+            <label for="campoSenha">Senha</label>
+            <input type="password" id="campoSenha" required>
+          </div>
+          <div class="campo">
+            <label for="campoConfirmar">Confirmar senha</label>
+            <input type="password" id="campoConfirmar" required>
+          </div>
+        </div>
+        <button type="submit">Criar usuário</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Usuários cadastrados</h2>
+      <div class="tabela-scroll">
+        <table>
+          <thead><tr><th>Nome</th><th>Papel</th><th>Setor</th><th>Turno</th><th>Responsável SFM</th><th></th></tr></thead>
+          <tbody id="corpoTabelaUsuarios"></tbody>
+        </table>
+      </div>
+      <p class="rodape-nota" style="text-align:left;margin-top:8px;">
+        "Responsável SFM" é quem, depois de receber o turno, preenche o quadro SQDC (S/Q) do setor todo dia — só pode ser marcado em operadores do turno Manhã, e só existe um por setor (marcar um novo desmarca o anterior automaticamente).
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>Dados de ordens (notas do SAP)</h2>
+      <p class="subtitulo" id="contagemNotasAdmin" style="margin:0 0 12px;"></p>
+      <div class="toolbar">
+        <button type="button" class="secundario" id="btnBackupNotas">Baixar backup (.json)</button>
+        <button type="button" class="perigo" id="btnExcluirNotas">Excluir todas as notas</button>
+      </div>
+      <p class="rodape-nota" style="text-align:left;margin-top:8px;">
+        O backup baixa um arquivo com a data/hora no nome, com todas as notas/ordens
+        importadas até agora — guarde-o antes de excluir, se quiser poder recuperar
+        depois. Excluir apaga todas as notas do banco (<code>bd/notas.json</code>) e
+        não pode ser desfeito por aqui; isso não afeta usuários nem passagens de
+        turno já registradas.
+      </p>
+    </div>
+
+  </div>
+</main>
+
+<script src="bd/dados.js"></script>
+<script src="bd/notas.js"></script>
+<script src="js/util.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/db.js"></script>
+<script src="js/db-ui.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>

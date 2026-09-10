@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SFM — Relatórios</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="topbar" id="topbar"></header>
+<nav class="subbar">
+  <a href="menu.html">&larr; Menu</a>
+  <span class="sep">|</span>
+  <a href="relatorios.html">Relatórios</a>
+  <a href="admin.html" id="linkAdminSub" hidden>Administração</a>
+</nav>
+
+<main>
+  <h1>Relatórios</h1>
+  <p class="subtitulo">Ordens/notas e passagens de turno de todos os setores.</p>
+
+  <div id="dbStatus" class="db-status"></div>
+  <div id="alerta" hidden></div>
+
+  <div id="conteudo" hidden>
+
+    <div class="card">
+      <h2>Ordens / notas</h2>
+      <div class="toolbar">
+        <div class="campo" style="margin:0;">
+          <label for="filtroSetor">Setor</label>
+          <select id="filtroSetor"><option value="">Todos</option></select>
+        </div>
+        <div class="campo" style="margin:0;">
+          <label for="filtroDataDe">De</label>
+          <input type="date" id="filtroDataDe">
+        </div>
+        <div class="campo" style="margin:0;">
+          <label for="filtroDataAte">Até</label>
+          <input type="date" id="filtroDataAte">
+        </div>
+        <div class="campo" style="margin:0;flex:1;min-width:180px;">
+          <label for="filtroTexto">Buscar</label>
+          <input type="text" id="filtroTexto" placeholder="Nota, ordem, texto, equipamento...">
+        </div>
+        <span class="contagem-pill" id="contagemNotas" style="margin-top:18px;"></span>
+      </div>
+      <div class="tabela-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Nota</th><th>Ordem</th><th>Setor</th><th>Área</th><th>Equipamento</th>
+              <th>Texto breve</th><th>Status</th><th>Entrada</th><th>Hora</th><th>Fim</th>
+            </tr>
+          </thead>
+          <tbody id="corpoTabelaNotas"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Passagens de turno</h2>
+      <div class="toolbar">
+        <div class="campo" style="margin:0;">
+          <label for="filtroSetorPT">Setor</label>
+          <select id="filtroSetorPT"><option value="">Todos</option></select>
+        </div>
+        <div class="campo" style="margin:0;">
+          <label for="filtroStatusPT">Status</label>
+          <select id="filtroStatusPT">
+            <option value="">Todos</option>
+            <option value="aberta">Aberta</option>
+            <option value="recebida">Recebida</option>
+            <option value="finalizada">Finalizada</option>
+          </select>
+        </div>
+        <span class="contagem-pill" id="contagemPT" style="margin-top:18px;"></span>
+      </div>
+      <div class="tabela-scroll">
+        <table>
+          <thead>
+            <tr><th>Nota</th><th>Setor</th><th>Turno</th><th>Descrição</th><th>Status</th><th>Passado por</th><th>Quando</th><th>Finalizada em</th><th>Tempo parado</th></tr>
+          </thead>
+          <tbody id="corpoTabelaPT"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script src="bd/dados.js"></script>
+<script src="bd/notas.js"></script>
+<script src="js/util.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/db.js"></script>
+<script src="js/db-ui.js"></script>
+<script src="js/relatorios.js"></script>
+</body>
+</html>

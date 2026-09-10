@@ -1,0 +1,118 @@
+/* SFM — quadro-sfm.html: reproduz o layout da folha física (S/Q/D/C) por setor. */
+
+.quadro-folha {
+  background: var(--bg-card);
+  border: 1px solid var(--cinza-borda);
+  border-radius: 6px;
+  box-shadow: var(--sombra);
+  padding: 18px;
+  margin-bottom: 20px;
+}
+
+.quadro-folha-titulo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  border-bottom: 2px solid var(--azul-principal);
+  padding-bottom: 8px;
+  margin-bottom: 14px;
+}
+.quadro-folha-titulo h2 { margin: 0; }
+.quadro-folha-titulo .setor-mes { font-size: 12px; color: var(--texto-suave); }
+
+.quadro-bloco { display: flex; gap: 12px; margin-bottom: 14px; align-items: stretch; }
+.quadro-rotulo {
+  width: 66px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.quadro-rotulo .letra { font-size: 34px; font-weight: 800; color: var(--azul-principal); line-height: 1; }
+.quadro-rotulo .nome { font-size: 10px; color: var(--texto-suave); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+
+.quadro-conteudo { flex: 1; min-width: 0; }
+
+.quadro-item {
+  border: 1px solid var(--cinza-borda);
+  border-radius: 4px;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+.quadro-item .item-titulo {
+  padding: 7px 10px;
+  font-weight: 600;
+  font-size: 13px;
+  background: var(--cinza-claro);
+  border-bottom: 1px solid var(--cinza-borda);
+}
+.quadro-item .item-legenda {
+  font-size: 11px;
+  color: var(--vermelho-alerta);
+  padding: 6px 10px 8px;
+  border-top: 1px solid var(--cinza-borda);
+}
+.quadro-item .item-legenda .rodape-meta { color: var(--texto-suave); float: right; }
+
+.quadro-dias-scroll { overflow-x: auto; }
+.quadro-dias {
+  display: grid;
+  gap: 3px;
+  padding: 8px 10px 4px;
+  min-width: 620px;
+}
+.quadro-dias .num {
+  font-size: 10px;
+  text-align: center;
+  color: var(--texto-suave);
+}
+.quadro-cel {
+  aspect-ratio: 1;
+  min-width: 16px;
+  min-height: 16px;
+  border: 1px solid var(--cinza-borda);
+  border-radius: 2px;
+  cursor: pointer;
+  background: #fff;
+  padding: 0;
+}
+.quadro-cel.ok { background: #8FD19E; border-color: #5FA873; }
+.quadro-cel.ocorrencia { background: #E28AA5; border-color: #C85F84; }
+.quadro-cel:disabled { cursor: default; opacity: 0.85; }
+
+.quadro-tabela-scroll { overflow-x: auto; }
+table.quadro-tabela { border-collapse: collapse; font-size: 11px; min-width: 620px; }
+table.quadro-tabela th, table.quadro-tabela td {
+  border: 1px solid var(--cinza-borda);
+  padding: 4px 5px;
+  text-align: center;
+  white-space: nowrap;
+}
+table.quadro-tabela th.rotulo-linha, table.quadro-tabela td.rotulo-linha {
+  text-align: left;
+  font-weight: 600;
+  background: var(--cinza-claro);
+  position: sticky;
+  left: 0;
+}
+table.quadro-tabela td.ac { background: #F4F6F8; color: var(--texto-suave); }
+table.quadro-tabela td.abaixo-meta { color: var(--vermelho-alerta); font-weight: 700; }
+
+.quadro-grafico { position: relative; height: 220px; margin: 6px 10px 10px; }
+
+.quadro-nao-editavel-aviso {
+  font-size: 11px;
+  color: var(--texto-suave);
+  padding: 4px 10px 0;
+}
+
+@media print {
+  .no-print, .topbar, .subbar { display: none !important; }
+  body { background: #fff; }
+  main { max-width: 100%; padding: 0; }
+  .quadro-folha { box-shadow: none; border: 1px solid #999; page-break-after: always; }
+  .quadro-dias-scroll, .quadro-tabela-scroll { overflow: visible; }
+  .quadro-dias, table.quadro-tabela { min-width: 0; }
+}

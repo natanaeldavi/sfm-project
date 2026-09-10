@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SFM — Painel</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="topbar" id="topbar"></header>
+<nav class="subbar">
+  <a href="menu.html">&larr; Menu</a>
+  <span class="sep">|</span>
+  <a href="passar-turno.html">Passar Turno</a>
+  <a href="receber-turno.html">Receber Turno</a>
+  <a href="sfm.html">Painel da Reunião</a>
+  <a href="quadro-sfm.html">SFM</a>
+</nav>
+
+<main>
+  <h1>Painel SFM</h1>
+  <p class="subtitulo" id="subtituloData"></p>
+
+  <div id="dbStatus" class="db-status"></div>
+  <div id="alerta" hidden></div>
+  <div id="semReuniao" hidden></div>
+
+  <div class="card" id="cardPeriodo">
+    <div class="toolbar">
+      <div class="campo" style="margin:0;">
+        <label for="inputDe">De</label>
+        <input type="date" id="inputDe">
+      </div>
+      <div class="campo" style="margin:0;">
+        <label for="inputAte">Até</label>
+        <input type="date" id="inputAte">
+      </div>
+      <button type="button" id="btnAtualizarPeriodo" style="margin-top:18px;">Atualizar</button>
+      <button type="button" class="secundario" id="btnPeriodoHoje" style="margin-top:18px;">Usar período de hoje</button>
+    </div>
+  </div>
+
+  <div id="conteudo" hidden>
+
+    <div class="grid-cards" id="cardsResumo"></div>
+
+    <div class="card">
+      <h2>Ordens por setor</h2>
+      <div class="tabela-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Setor</th>
+              <th>Mecânica</th>
+              <th>Elétrica</th>
+              <th>Outros</th>
+              <th>Total</th>
+              <th>Atendidas</th>
+              <th>Não atendidas</th>
+              <th>Eficiência</th>
+            </tr>
+          </thead>
+          <tbody id="corpoTabelaSetores"></tbody>
+        </table>
+      </div>
+      <p class="rodape-nota" style="text-align:left;margin-top:8px;">
+        Calculado automaticamente pelo campo "Status sistema" da planilha do SAP: notas com status "MSPN" contam como "Não atendidas"; qualquer outro status conta como "Atendidas".
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>Top problemas (parada acima de 10h)</h2>
+      <div class="tabela-scroll" style="max-height:260px;">
+        <table>
+          <thead><tr><th>Equipamento</th><th>Setor</th><th>Descrição</th><th>Tempo parado</th><th>Finalizada em</th></tr></thead>
+          <tbody id="corpoTopProblemas"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="graficos-grid">
+      <div class="card">
+        <h3>Ordens por setor</h3>
+        <div class="grafico-box"><canvas id="graficoSetores"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>Elétrica x Mecânica por setor</h3>
+        <div class="grafico-box"><canvas id="graficoAreas"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>Eficiência ao longo dos dias</h3>
+        <div class="grafico-box"><canvas id="graficoEficiencia"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>Máquinas com mais passagens de turno (histórico)</h3>
+        <div class="tabela-scroll" style="max-height:260px;">
+          <table>
+            <thead><tr><th>Equipamento</th><th>Setor</th><th>Passagens</th></tr></thead>
+            <tbody id="corpoRanking"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <h2 style="margin-top:22px;">Dashboards</h2>
+    <div class="graficos-grid">
+      <div class="card">
+        <h3>Distribuição de ordens por setor</h3>
+        <div class="grafico-box"><canvas id="pizzaSetores"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>Distribuição por área</h3>
+        <div class="grafico-box"><canvas id="pizzaAreas"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>Atendidas x Não atendidas</h3>
+        <div class="grafico-box"><canvas id="pizzaAtendimento"></canvas></div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script src="bd/dados.js"></script>
+<script src="bd/notas.js"></script>
+<script src="js/chart.umd.min.js"></script>
+<script src="js/util.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/db.js"></script>
+<script src="js/db-ui.js"></script>
+<script src="js/sfm.js"></script>
+</body>
+</html>

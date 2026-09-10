@@ -1,0 +1,171 @@
+{
+  "usuarios": [
+    {
+      "id": "u-admin",
+      "nome": "admin",
+      "senhaHash": "WgLoZMvFq4rGIdSFwPd9e+8WtJw0rIysOvlsb0SoFcI=",
+      "senhaSalt": "KN2TlKcQzI8IUONAOOxNuw==",
+      "papel": "admin",
+      "setor": null
+    },
+    {
+      "id": "u-gestor",
+      "nome": "gestor",
+      "senhaHash": "T6uOue+D0EWwK03h2ByJz0NyM2VqljoX5IHigBqh60w=",
+      "senhaSalt": "gpiFvrLghH79fmdJBoi6tQ==",
+      "papel": "gestor",
+      "setor": null
+    },
+    {
+      "id": "u-user1",
+      "nome": "user1",
+      "senhaHash": "T5Y34fcyyy+UfMvYSxfBiRocT7u1lHDCZiiZwtiZeJM=",
+      "senhaSalt": "ir1hR6TR4oAsAi0xtgbtvg==",
+      "papel": "operador",
+      "setor": "Gasolina",
+      "turno": "Manhã"
+    },
+    {
+      "id": "u-user2",
+      "nome": "user2",
+      "senhaHash": "HudZNCrmAGQYpj1mE19dVes6HHR7XhO53dKJmeW6hmk=",
+      "senhaSalt": "m1y/ugTnH0j+7IiXFBX8dw==",
+      "papel": "operador",
+      "setor": "Diesel",
+      "turno": "Tarde"
+    },
+    {
+      "id": "u-user3",
+      "nome": "user3",
+      "senhaHash": "25A8LRn0ZXHQOwaaWJc+sKnK39cTPXiIXPi9AgjjshA=",
+      "senhaSalt": "SBHsKpVAHiNr/zzmkVZhTg==",
+      "papel": "operador",
+      "setor": "Controle",
+      "turno": "Noite"
+    },
+    {
+      "id": "u-23ebfba2-06ae-4334-8c44-c0904d22018e",
+      "nome": "user4",
+      "senhaHash": "vV9pMI3wH0YwGRm65WiB+15yVrzgh12aDoYJOvN1KFs=",
+      "senhaSalt": "iRXmJV0GO4TRQgDvQJjnsg==",
+      "papel": "operador",
+      "setor": "Biela",
+      "turno": "Manhã"
+    }
+  ],
+  "passagensTurno": [
+    {
+      "id": "pt-b1585754-ac30-496d-9eb6-be5a3add599b",
+      "nota": "75",
+      "setor": "Gasolina",
+      "turno": "Tarde",
+      "descricao": "asdkjasd",
+      "dataHora": "2026-09-08T20:20:04.246Z",
+      "status": "finalizada",
+      "finalizadaEm": "2026-09-08T23:16:00.000Z",
+      "registradoPor": "usergas",
+      "recebidoPor": "usergas",
+      "recebidoEm": "2026-09-08T20:20:23.972Z",
+      "inicioParadaEm": "2026-09-08T19:31:51.299Z",
+      "tempoParadoMinutos": 224,
+      "finalizadoPor": "admin"
+    },
+    {
+      "id": "pt-69b2038b-2f01-450e-ad69-de5e295a98c4",
+      "nota": "76",
+      "setor": "Gasolina",
+      "turno": "Tarde",
+      "descricao": "passando ordem",
+      "dataHora": "2026-09-08T20:20:05.831Z",
+      "status": "finalizada",
+      "finalizadaEm": "2026-09-08T23:16:00.000Z",
+      "registradoPor": "usergas",
+      "recebidoPor": "usergas",
+      "recebidoEm": "2026-09-08T20:20:23.972Z",
+      "inicioParadaEm": "2026-09-08T19:31:51.299Z",
+      "tempoParadoMinutos": 224,
+      "finalizadoPor": "admin"
+    },
+    {
+      "id": "pt-94fb6888-c941-4533-935a-f50237639777",
+      "nota": "14",
+      "setor": "Gasolina",
+      "turno": null,
+      "descricao": "askdjasd",
+      "dataHora": "2026-09-08T23:16:10.547Z",
+      "inicioParadaEm": "2026-09-08T20:16:51.657Z",
+      "status": "finalizada",
+      "recebidoPor": "user1",
+      "recebidoEm": "2026-09-08T23:17:07.822Z",
+      "finalizadaEm": "2026-09-08T23:17:00.000Z",
+      "tempoParadoMinutos": 180,
+      "finalizadoPor": "user1",
+      "registradoPor": "admin"
+    }
+  ],
+  "eficiencia": [
+    {
+      "data": "2026-09-08",
+      "setor": "Gasolina",
+      "naoAtendidas": 6,
+      "registradoPor": "user1",
+      "atualizadoEm": "2026-09-08T20:18:03.775Z"
+    },
+    {
+      "data": "2026-09-01_2026-09-07",
+      "setor": "Gasolina",
+      "naoAtendidas": 0,
+      "registradoPor": "admin",
+      "atualizadoEm": "2026-09-08T20:41:51.405Z"
+    },
+    {
+      "data": "2026-09-01_2026-09-07",
+      "setor": "Diesel",
+      "naoAtendidas": 0,
+      "registradoPor": "admin",
+      "atualizadoEm": "2026-09-08T20:42:09.629Z"
+    },
+    {
+      "data": "2026-09-07_2026-09-07",
+      "setor": "Gasolina",
+      "naoAtendidas": 5,
+      "registradoPor": "admin",
+      "atualizadoEm": "2026-09-09T00:19:09.399Z"
+    },
+    {
+      "data": "2026-09-07_2026-09-07",
+      "setor": "Diesel",
+      "naoAtendidas": 3,
+      "registradoPor": "admin",
+      "atualizadoEm": "2026-09-09T00:19:18.393Z"
+    },
+    {
+      "data": "2026-09-07_2026-09-07",
+      "setor": "Controle",
+      "naoAtendidas": 8,
+      "registradoPor": "admin",
+      "atualizadoEm": "2026-09-09T00:19:25.589Z"
+    },
+    {
+      "data": "2026-09-06_2026-09-06",
+      "setor": "Controle",
+      "naoAtendidas": 3,
+      "registradoPor": "admin",
+      "atualizadoEm": "2026-09-09T00:20:18.849Z"
+    },
+    {
+      "data": "2026-09-06_2026-09-06",
+      "setor": "Diesel",
+      "naoAtendidas": 4,
+      "registradoPor": "admin",
+      "atualizadoEm": "2026-09-09T00:20:24.950Z"
+    },
+    {
+      "data": "2026-09-06_2026-09-06",
+      "setor": "Gasolina",
+      "naoAtendidas": 7,
+      "registradoPor": "admin",
+      "atualizadoEm": "2026-09-09T00:20:32.230Z"
+    }
+  ]
+}

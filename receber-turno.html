@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SFM — Receber Turno</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="topbar" id="topbar"></header>
+<nav class="subbar">
+  <a href="menu.html">&larr; Menu</a>
+  <span class="sep">|</span>
+  <a href="passar-turno.html">Passar Turno</a>
+  <a href="receber-turno.html">Receber Turno</a>
+  <a href="sfm.html">Painel da Reunião</a>
+  <a href="quadro-sfm.html">SFM</a>
+</nav>
+
+<main>
+  <h1>Receber Turno</h1>
+  <p class="subtitulo">Ordens deixadas em aberto pelo turno anterior no seu setor.</p>
+
+  <div id="dbStatus" class="db-status"></div>
+  <div id="alerta" hidden></div>
+
+  <div class="card" id="cardLista" hidden>
+    <div class="toolbar">
+      <h2 style="margin:0;">Passagens abertas — aguardando recebimento</h2>
+      <div class="espaco"></div>
+      <span class="contagem-pill" id="contagemAbertas"></span>
+    </div>
+    <div class="tabela-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Nota</th>
+            <th>Ordem</th>
+            <th>Equipamento</th>
+            <th>Texto breve</th>
+            <th>Descrição da passagem</th>
+            <th>Turno</th>
+            <th>Passado por</th>
+            <th>Quando</th>
+          </tr>
+        </thead>
+        <tbody id="corpoTabela"></tbody>
+      </table>
+    </div>
+    <button type="button" id="btnReceberTudo" style="margin-top:12px;" hidden>Receber turno</button>
+    <p class="rodape-nota" style="text-align:left;margin-top:8px;" id="msgReceber"></p>
+  </div>
+
+  <div class="card" id="cardAndamento" hidden>
+    <div class="toolbar">
+      <h2 style="margin:0;">Em andamento (recebidas, sob acompanhamento)</h2>
+      <div class="espaco"></div>
+      <span class="contagem-pill" id="contagemAndamento"></span>
+    </div>
+    <div class="tabela-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Nota</th>
+            <th>Ordem</th>
+            <th>Equipamento</th>
+            <th>Texto breve</th>
+            <th>Descrição</th>
+            <th>Recebida por</th>
+            <th>Recebida em</th>
+          </tr>
+        </thead>
+        <tbody id="corpoAndamento"></tbody>
+      </table>
+    </div>
+    <p class="rodape-nota" style="text-align:left;margin-top:8px;">
+      Continuar parada ou finalizar (com cálculo do tempo parado) é decidido na tela de Passar Turno, no fim do seu turno.
+    </p>
+  </div>
+</main>
+
+<script src="bd/dados.js"></script>
+<script src="bd/notas.js"></script>
+<script src="js/util.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/db.js"></script>
+<script src="js/db-ui.js"></script>
+<script src="js/receber-turno.js"></script>
+</body>
+</html>
