@@ -101,6 +101,11 @@
   function renderTabela() {
     const corpo = document.getElementById("corpoTabelaUsuarios");
     corpo.innerHTML = DB.dados.usuarios.map((u) => {
+      const setorCelula = u.papel === "operador"
+        ? `<select class="seletorSetorLinha" style="display:inline-block;width:auto;">` +
+            SETORES.map((s) => `<option value="${s}" ${u.setor === s ? "selected" : ""}>${s}</option>`).join("") +
+          `</select>`
+        : "—";
       const turnoCelula = u.papel === "operador"
         ? `<select class="seletorTurnoLinha" style="display:inline-block;width:auto;">` +
             `<option value="">— sem turno —</option>` +
@@ -117,7 +122,7 @@
       <tr data-id="${escaparHtml(u.id)}">
         <td>${escaparHtml(u.nome)}</td>
         <td>${escaparHtml(u.papel)}</td>
-        <td>${u.setor ? `<span class="tag setor-${u.setor}">${u.setor}</span>` : "—"}</td>
+        <td>${setorCelula}</td>
         <td>${turnoCelula}</td>
         <td>${responsavelCelula}</td>
         <td><button type="button" class="perigo btnExcluir" ${u.id === usuario.id ? "disabled title='Você não pode excluir seu próprio usuário'" : ""}>Excluir</button></td>
@@ -150,6 +155,19 @@
         if (!alvo) return;
         alvo.turno = sel.value || null;
         if (alvo.turno !== "Manhã") alvo.responsavelSfm = false; // só quem é do turno Manhã pode ser responsável pela SFM
+        marcarUsuariosSujo();
+        renderTabela();
+      });
+    });
+
+    corpo.querySelectorAll(".seletorSetorLinha").forEach((sel) => {
+      sel.addEventListener("change", () => {
+        const tr = sel.closest("tr");
+        const id = tr.dataset.id;
+        const alvo = DB.dados.usuarios.find((u) => u.id === id);
+        if (!alvo) return;
+        alvo.setor = sel.value;
+        alvo.responsavelSfm = false; // responsável é por setor — trocar de setor exige marcar de novo (evita duplicar responsável no setor novo)
         marcarUsuariosSujo();
         renderTabela();
       });
