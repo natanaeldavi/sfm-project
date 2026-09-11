@@ -116,8 +116,8 @@ recebida --[finalizar]--> finalizada  (calcula o tempo parado)
   de a máquina ter voltado a funcionar antes).
 - **Mais de 10h parada**: ao finalizar, se o tempo parado passar de 10h, a
   ordem conta como quebra grave no **C** do quadro SQDC (ver seção abaixo) e
-  aparece na tabela "Top problemas do mês", no final do `quadro-sfm.html`
-  (setor e mês selecionados).
+  aparece na tabela "Top problemas do dia", no final do `quadro-sfm.html`
+  (setor e dia selecionados).
 
 ### Eventos de passagem de turno (log permanente)
 
@@ -192,9 +192,17 @@ js/chart.umd.min.js         – Chart.js, vendorizado (gráficos do quadro SQDC)
 
 Reproduz, tela por tela, a folha impressa que fica exposta no quadro de cada
 setor (modelo em `quadro-sfm.jpeg`): um bloco por letra — **S**afety,
-**Q**uality, **D**elivery, **C**ost — válido para o mês inteiro selecionado.
-Tem botão de impressão (uma folha por setor) para quem ainda quiser pendurar
-a versão em papel.
+**Q**uality, **D**elivery, **C**ost — a folha em si é sempre do mês inteiro
+(igual à impressa), mas o seletor da tela é de **dia**, não de mês: o mês
+mostrado é o do dia escolhido, e tudo que é "estado daquele momento" —
+Status Geral, o corte de "ainda não aconteceu" nos acumulados de D e C, e a
+tabela de Top Problemas — é relativo ao **dia selecionado**, não ao dia
+real de hoje. Isso permite abrir um dia passado e ver o quadro exatamente
+como estava naquela data (dias depois dele no mês ficam em branco nos
+acumulados). A permissão de **editar** S/Q continua amarrada ao dia real de
+hoje e à janela da SFM — visualizar um dia passado não libera marcar
+ocorrência nele. Tem botão de impressão (uma folha por setor) para quem
+ainda quiser pendurar a versão em papel.
 
 - **D e C são automáticos**, sem nenhum lançamento manual:
   - **D — Controle de Corretivas Realizadas**: "Realizadas"/"Abertas"/"Pendentes"
@@ -202,7 +210,7 @@ a versão em papel.
     da planilha do SAP, agrupada por "Dt. referência". Meta: 70%.
   - **C — Controle de Quebra Graves**: conta como quebra grave toda máquina
     finalizada em "Receber/Passar Turno" com 10h ou mais de parada — a mesma
-    regra que alimenta a tabela "Top problemas do mês" no final desta página.
+    regra que alimenta a tabela "Top problemas do dia" no final desta página.
 - **S e Q ainda não têm fonte automática** (não há hoje nenhuma planilha ou
   sistema de segurança/qualidade integrado), então cada dia é marcado à mão
   clicando na célula (cicla: em branco → sem ocorrência, verde → ocorrência,

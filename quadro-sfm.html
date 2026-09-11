@@ -35,10 +35,10 @@
         </div>
       </div>
       <div class="campo" style="margin:0;min-width:160px;">
-        <label for="seletorMes">Mês</label>
-        <input type="month" id="seletorMes">
+        <label for="seletorDia">Dia</label>
+        <input type="date" id="seletorDia">
       </div>
-      <button type="button" id="btnHoje" style="margin-top:18px;" class="secundario">Mês atual</button>
+      <button type="button" id="btnHoje" style="margin-top:18px;" class="secundario">Hoje</button>
       <div class="espaco"></div>
       <button type="button" id="btnSalvar" style="margin-top:18px;">Salvar marcações</button>
       <button type="button" id="btnImprimir" style="margin-top:18px;" class="secundario">Imprimir / PDF</button>
@@ -69,7 +69,7 @@
         </tr>
         <tr>
           <td><strong>C — Controle de Quebra Graves</strong></td>
-          <td>Automático, a partir das passagens de turno finalizadas em <code>bd/dados.json</code>: conta como quebra grave toda máquina que ficou parada 10h ou mais (mesma meta usada no "Top problemas do mês", no final desta página).</td>
+          <td>Automático, a partir das passagens de turno finalizadas em <code>bd/dados.json</code>: conta como quebra grave toda máquina que ficou parada 10h ou mais (mesma meta usada no "Top problemas do dia", no final desta página).</td>
           <td>Se a definição de "quebra grave" do setor for outra (não só tempo parado — ex.: só quando gera custo de peça, ou outro limite de horas), é só ajustar a meta/regra.</td>
         </tr>
       </tbody>
@@ -77,7 +77,7 @@
   </div>
 
   <div class="card no-print" id="cardTopProblemas">
-    <h2>Top problemas do mês (parada acima de 10h)</h2>
+    <h2>Top problemas do dia (parada acima de 10h)</h2>
     <div class="tabela-scroll" style="max-height:260px;">
       <table>
         <thead><tr><th>Equipamento</th><th>Descrição</th><th>Tempo parado</th><th>Finalizada em</th></tr></thead>
@@ -90,7 +90,7 @@
   <div id="folhaTop3" hidden>
     <div class="quadro-folha">
       <div class="quadro-folha-titulo">
-        <h2>Top 3 Problemas do Mês</h2>
+        <h2>Top 3 Problemas do Dia</h2>
         <span class="setor-mes" id="top3SetorMes"></span>
       </div>
       <table class="top3-tabela">
