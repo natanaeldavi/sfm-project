@@ -9,9 +9,8 @@
  *    em bd/quadro.json.
  *  - D (Controle de Corretivas Realizadas) e C (Controle de Quebra Graves):
  *    calculados automaticamente a partir de bd/notas.json e das passagens
- *    de turno finalizadas em bd/dados.json — mesma lógica já usada em
- *    sfm.html (ver README, seção "Atendidas/Não atendidas" e "Mais de 10h
- *    parada").
+ *    de turno finalizadas em bd/dados.json (ver README, seção "Atendidas/Não
+ *    atendidas" e "Mais de 10h parada").
  */
 
 const QUADRO_META_EFICIENCIA = 70; // %, mesma meta impressa na folha física

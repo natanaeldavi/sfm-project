@@ -60,8 +60,9 @@ turno, senão as passagens ficam sem turno registrado.
   mudou desde a última leitura e avisa antes de deixar sobrescrever. Se
   aparecer o aviso de conflito, clique em "Recarregar do disco" na barra do
   topo, refaça a última ação e salve de novo.
-- **"Atendidas"/"Não atendidas" no painel de SFM são calculadas
-  automaticamente** a partir da coluna "Status sistema" da planilha do SAP:
+- **"Atendidas"/"Não atendidas" (usadas no cálculo de Delivery do quadro
+  SQDC) são calculadas automaticamente** a partir da coluna "Status sistema"
+  da planilha do SAP:
   nota com status contendo "MSPN" conta como "Não atendida" (ainda sem ordem
   gerada no SAP); qualquer outro status conta como "Atendida". Não há
   lançamento manual — reimportar a planilha já atualiza os números.
@@ -113,28 +114,24 @@ recebida --[finalizar]--> finalizada  (calcula o tempo parado)
   finalização vem preenchido com "agora" mas pode ser alterado (para o caso
   de a máquina ter voltado a funcionar antes).
 - **Mais de 10h parada**: ao finalizar, se o tempo parado passar de 10h, a
-  ordem entra automaticamente no card "Top problemas" da próxima reunião de
-  SFM que cobrir a data da finalização.
+  ordem conta como quebra grave no **C** do quadro SQDC (ver seção abaixo).
 
-## Regra da reunião de SFM (janela de datas)
+## Regra da janela da SFM (janela de datas)
 
-A reunião de SFM acontece de terça a sexta cobrindo só o dia anterior. Como
-não há reunião aos sábados e domingos, a de **segunda-feira cobre os três
-dias acumulados: sexta, sábado e domingo**. `sfm.html` calcula essa janela
-sozinho a partir do dia da semana atual — se você abrir a página num
-sábado ou domingo, aparece um aviso em vez do painel (não há reunião
-naquele dia). "Atendidas"/"não atendidas" são recalculadas automaticamente
-para a janela de datas selecionada (ver seção de "Atendidas"/"Não
-atendidas" acima).
+A SFM cobre, de terça a sexta, só o dia anterior. Como não há reunião aos
+sábados e domingos, a de **segunda-feira cobre os três dias acumulados:
+sexta, sábado e domingo**. `calcularJanelaSfm()` (`js/util.js`) calcula essa
+janela sozinha a partir do dia da semana atual — é ela quem limita quais
+dias o responsável pode marcar em S/Q no `quadro-sfm.html` (ver seção
+abaixo).
 
 ## Estrutura do projeto
 
 ```
 login.html               – autenticação (lê bd/ sozinho, sem vincular nada)
-menu.html                – escolha de setor e da ação (Passar/Receber Turno, SFM, Quadro)
+menu.html                – escolha de setor e da ação (Passar/Receber Turno, SFM)
 passar-turno.html        – importa a planilha do SAP e registra passagem de turno
 receber-turno.html       – lista e finaliza passagens abertas do setor
-sfm.html                 – painel da reunião diária (tabelas, gráficos, ranking)
 quadro-sfm.html          – folha SQDC do mês por setor, no mesmo layout da folha impressa
                            que fica exposta no quadro (ver seção própria abaixo)
 admin.html               – gestão de usuários (só admin)
@@ -159,7 +156,7 @@ js/db.js                  – leitura automática e escrita (File System Access 
 js/db-ui.js                – barra de status + vínculo da pasta bd (reaproveitada em cada página)
 js/quadro-sfm.js           – lógica da folha SQDC (quadro-sfm.html)
 js/xlsx.full.min.js        – SheetJS, vendorizado (leitura da planilha do SAP)
-js/chart.umd.min.js         – Chart.js, vendorizado (gráficos do painel)
+js/chart.umd.min.js         – Chart.js, vendorizado (gráficos do quadro SQDC)
 ```
 
 ## Quadro SQDC por setor (`quadro-sfm.html`)
@@ -208,8 +205,7 @@ a versão em papel.
   de recebimento, o sistema já redireciona pra "Receber Turno" antes de
   deixar acessar a SFM).
 - **Reunião de SFM**: diária, de segunda a sexta, às 07:40. Quem comanda é
-  o gestor, que acompanha o "Painel da Reunião" (`sfm.html`, dashboards
-  comparando os setores) e o quadro SQDC de cada setor (`quadro-sfm.html`,
+  o gestor, que acompanha o quadro SQDC de cada setor (`quadro-sfm.html`,
   com seletor de setor) — sem precisar editar nada, mas com permissão pra
   corrigir qualquer dia caso necessário.
 
