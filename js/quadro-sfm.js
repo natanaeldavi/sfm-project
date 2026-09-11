@@ -246,7 +246,7 @@ const QUADRO_META_EFICIENCIA = 70; // %, mesma meta impressa na folha física
       </div>
     `;
 
-    renderDiasEditaveis(setor, dias, hojeReal);
+    renderDiasEditaveis(setor, dias, hojeReal, diaSelecionado);
     renderTabelaD(setor, ano, mes, dias, diaSelecionado);
     renderTabelaC(setor, ano, mes, dias, diaSelecionado);
     renderTopProblemas(setor, diaSelecionado);
@@ -273,7 +273,15 @@ const QUADRO_META_EFICIENCIA = 70; // %, mesma meta impressa na folha física
     return janela.includes(dataISO);
   }
 
-  function renderDiasEditaveis(setor, dias, hoje) {
+  /**
+   * dias depois do diaSelecionado ainda "não aconteceram" nessa visualização
+   * (mesmo que já tenham marcação salva de verdade) — não mostra o valor
+   * nem libera edição, pra reproduzir fielmente como o quadro estava
+   * naquele dia. Independe de diaEditavel, que trata de QUEM pode editar
+   * (papel/janela da SFM); aqui é só "isso já devia estar marcado a essa
+   * altura?".
+   */
+  function renderDiasEditaveis(setor, dias, hoje, diaSelecionado) {
     const podeEditar = podeEditarSecaoSQ(setor);
     if (!podeEditar) {
       const aviso = quadroEl.querySelector(".quadro-nao-editavel-aviso");
@@ -288,8 +296,9 @@ const QUADRO_META_EFICIENCIA = 70; // %, mesma meta impressa na folha física
       const grid = item.querySelector(".quadro-dias");
       grid.innerHTML = dias.map((dataISO, i) => {
         const dia = i + 1;
-        const editavel = diaEditavel(setor, dataISO, hoje);
-        const registro = DB.buscarRegistroQuadro(setor, dataISO);
+        const aindaNaoAconteceu = dataISO > diaSelecionado;
+        const editavel = !aindaNaoAconteceu && diaEditavel(setor, dataISO, hoje);
+        const registro = aindaNaoAconteceu ? null : DB.buscarRegistroQuadro(setor, dataISO);
         const valor = registro ? registro[campo] : undefined;
         const classe = valor === true ? "ocorrencia" : valor === false ? "ok" : "";
         return `<button type="button" class="quadro-cel ${classe}" data-dia="${dia}" data-data="${dataISO}" title="Dia ${dia}" ${editavel ? "" : "disabled"}></button>`;
