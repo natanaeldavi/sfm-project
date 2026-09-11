@@ -220,23 +220,21 @@ ainda quiser pendurar a versão em papel.
   a planilha do SAP é importada hoje), ou calcular retrabalho automaticamente
   a partir de notas repetidas no mesmo equipamento em até 2 semanas, se o SAP
   expuser essa informação.
-- **Quem pode marcar S/Q**: só o **responsável pela SFM** do setor —
-  definido em Administração, um checkbox por usuário (só disponível para
-  operadores do turno Manhã; marcar um novo responsável desmarca
-  automaticamente o anterior do mesmo setor, sempre no máximo 1 por setor).
-  Esse responsável só marca o(s) dia(s) que a reunião de hoje cobre
-  (`calcularJanelaSfm()`, a mesma regra da seção abaixo — normalmente só
-  ontem, ou sexta+sábado+domingo numa segunda-feira), nunca dias fora
-  dessa janela. **Gestor e admin podem editar qualquer dia**, de qualquer
-  setor (usado pelo gestor pra conduzir a reunião, alternando entre os
-  quadros dos setores sem travar em nenhum). Outros operadores (não
-  responsáveis) só visualizam.
+- **Quem pode marcar S/Q**: qualquer operador do turno **Manhã** do
+  próprio setor — não há mais um responsável único designado por setor,
+  qualquer um deles pode marcar. Só marcam o(s) dia(s) que a reunião de
+  hoje cobre (`calcularJanelaSfm()`, a mesma regra da seção abaixo —
+  normalmente só ontem, ou sexta+sábado+domingo numa segunda-feira), nunca
+  dias fora dessa janela. **Gestor e admin podem editar qualquer dia**, de
+  qualquer setor (usado pelo gestor pra conduzir a reunião, alternando
+  entre os quadros dos setores sem travar em nenhum). Operadores de outros
+  turnos só visualizam.
 
 ## SFM: quem faz o quê
 
 - **Levantamento da SFM** (preencher o quadro SQDC do dia, tela "SFM" =
-  `quadro-sfm.html`): sempre feito por alguém do turno **Manhã**, o
-  responsável designado pelo admin (ver acima) — e só depois de ter
+  `quadro-sfm.html`): sempre feito por alguém do turno **Manhã** do setor
+  (qualquer operador daquele turno, ver acima) — e só depois de ter
   recebido o turno (se houver passagem `aberta` pendente dentro da janela
   de recebimento, o sistema já redireciona pra "Receber Turno" antes de
   deixar acessar a SFM).

@@ -256,13 +256,15 @@ const QUADRO_META_EFICIENCIA = 70; // %, mesma meta impressa na folha física
 
   /**
    * Quem pode marcar S/Q deste setor: admin e gestor sempre (qualquer dia);
-   * o responsável pela SFM do próprio setor só nos dias que a reunião de
-   * hoje cobre (calcularJanelaSfm, de util.js) — normalmente só ontem, ou
-   * sexta+sábado+domingo numa segunda-feira.
+   * qualquer operador do próprio setor que seja do turno Manhã (1º turno),
+   * só nos dias que a reunião de hoje cobre (calcularJanelaSfm, de
+   * util.js) — normalmente só ontem, ou sexta+sábado+domingo numa
+   * segunda-feira. Não há mais um "responsável" único designado por
+   * setor — qualquer operador do turno Manhã daquele setor pode marcar.
    */
   function podeEditarSecaoSQ(setor) {
     if (usuario.papel === "admin" || usuario.papel === "gestor") return true;
-    return usuario.papel === "operador" && usuario.setor === setor && usuario.responsavelSfm === true;
+    return usuario.papel === "operador" && usuario.setor === setor && usuario.turno === "Manhã";
   }
 
   function diaEditavel(setor, dataISO, hoje) {
@@ -285,7 +287,7 @@ const QUADRO_META_EFICIENCIA = 70; // %, mesma meta impressa na folha física
     const podeEditar = podeEditarSecaoSQ(setor);
     if (!podeEditar) {
       const aviso = quadroEl.querySelector(".quadro-nao-editavel-aviso");
-      if (aviso) aviso.textContent = "Somente leitura — só o responsável pela SFM deste setor (ou gestor/admin) pode marcar S/Q.";
+      if (aviso) aviso.textContent = "Somente leitura — só operadores do turno Manhã deste setor (ou gestor/admin) podem marcar S/Q.";
     } else if (usuario.papel === "operador") {
       const aviso = quadroEl.querySelector(".quadro-nao-editavel-aviso");
       if (aviso) aviso.textContent = "Marcação manual, liberada só para o(s) dia(s) da reunião de hoje — clique no dia para alternar: em branco → sem ocorrência (verde) → ocorrência (vermelho). Não esqueça de \"Salvar marcações\".";

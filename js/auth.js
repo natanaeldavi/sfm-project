@@ -112,19 +112,18 @@ const Auth = {
 
   /**
    * A sessão salva no login (ver Auth.login) só guarda id/nome/papel/setor,
-   * capturados uma única vez — turno e responsavelSfm (e qualquer mudança
-   * de setor feita depois pelo admin) ficariam presos no valor de quando o
-   * usuário logou. Esta função busca o registro atual em DB.dados.usuarios
-   * e atualiza esses campos no objeto `usuario` em memória, sem precisar de
+   * capturados uma única vez — turno (e qualquer mudança de setor feita
+   * depois pelo admin) ficariam presos no valor de quando o usuário logou.
+   * Esta função busca o registro atual em DB.dados.usuarios e atualiza
+   * esses campos no objeto `usuario` em memória, sem precisar de
    * logout/login. Chamar em toda página logo depois de DB.carregarAutoLoad()
-   * e antes de qualquer gate ou checagem que dependa de turno/responsavelSfm.
+   * e antes de qualquer gate ou checagem que dependa de turno.
    */
   atualizarUsuarioDoBanco(usuario) {
     if (!usuario) return usuario;
     const atual = DB.dados.usuarios.find((u) => u.id === usuario.id);
     if (atual) {
       usuario.turno = atual.turno || null;
-      usuario.responsavelSfm = atual.responsavelSfm === true;
       usuario.setor = atual.setor || null;
     }
     return usuario;

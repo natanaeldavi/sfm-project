@@ -94,9 +94,9 @@
   }
 
   /**
-   * Tabela de usuários: turno e "Responsável SFM" são editados livremente
-   * na tela (só em memória) e só viram alteração de verdade em
-   * "Salvar alterações" — sem botão de salvar por linha/campo.
+   * Tabela de usuários: setor e turno são editados livremente na tela (só
+   * em memória) e só viram alteração de verdade em "Salvar alterações" —
+   * sem botão de salvar por linha/campo.
    */
   function renderTabela() {
     const corpo = document.getElementById("corpoTabelaUsuarios");
@@ -112,40 +112,15 @@
             TURNOS.map((t) => `<option value="${t}" ${u.turno === t ? "selected" : ""}>${t}</option>`).join("") +
           `</select>`
         : "—";
-      const podeSerResponsavel = u.papel === "operador" && u.turno === "Manhã";
-      const responsavelCelula = u.papel === "operador"
-        ? `<label class="checkbox-linha" title="${podeSerResponsavel ? "" : "Só operadores do turno Manhã podem ser responsáveis pela SFM"}">` +
-            `<input type="checkbox" class="chkResponsavelSfm" ${u.responsavelSfm ? "checked" : ""} ${podeSerResponsavel ? "" : "disabled"}>` +
-          `</label>`
-        : "—";
       return `
       <tr data-id="${escaparHtml(u.id)}">
         <td>${escaparHtml(u.nome)}</td>
         <td>${escaparHtml(u.papel)}</td>
         <td>${setorCelula}</td>
         <td>${turnoCelula}</td>
-        <td>${responsavelCelula}</td>
         <td><button type="button" class="perigo btnExcluir" ${u.id === usuario.id ? "disabled title='Você não pode excluir seu próprio usuário'" : ""}>Excluir</button></td>
       </tr>`;
     }).join("");
-
-    corpo.querySelectorAll(".chkResponsavelSfm").forEach((chk) => {
-      chk.addEventListener("change", () => {
-        const tr = chk.closest("tr");
-        const id = tr.dataset.id;
-        const alvo = DB.dados.usuarios.find((u) => u.id === id);
-        if (!alvo) return;
-
-        if (chk.checked) {
-          for (const u of DB.dados.usuarios) {
-            if (u.id !== alvo.id && u.papel === "operador" && u.setor === alvo.setor) u.responsavelSfm = false;
-          }
-        }
-        alvo.responsavelSfm = chk.checked;
-        marcarUsuariosSujo();
-        renderTabela();
-      });
-    });
 
     corpo.querySelectorAll(".seletorTurnoLinha").forEach((sel) => {
       sel.addEventListener("change", () => {
@@ -154,7 +129,6 @@
         const alvo = DB.dados.usuarios.find((u) => u.id === id);
         if (!alvo) return;
         alvo.turno = sel.value || null;
-        if (alvo.turno !== "Manhã") alvo.responsavelSfm = false; // só quem é do turno Manhã pode ser responsável pela SFM
         marcarUsuariosSujo();
         renderTabela();
       });
@@ -167,7 +141,6 @@
         const alvo = DB.dados.usuarios.find((u) => u.id === id);
         if (!alvo) return;
         alvo.setor = sel.value;
-        alvo.responsavelSfm = false; // responsável é por setor — trocar de setor exige marcar de novo (evita duplicar responsável no setor novo)
         marcarUsuariosSujo();
         renderTabela();
       });
