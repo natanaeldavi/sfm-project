@@ -75,10 +75,10 @@
     "Gasolina|2026-09-10": {
       "setor": "Gasolina",
       "data": "2026-09-10",
-      "retrabalho": true,
       "falhaFornecedor": false,
       "acidente": false,
-      "quaseAcidente": false
+      "quaseAcidente": false,
+      "retrabalho": true
     }
   }
 }

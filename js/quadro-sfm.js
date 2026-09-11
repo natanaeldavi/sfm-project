@@ -35,6 +35,8 @@ const QUADRO_META_EFICIENCIA = 70; // %, mesma meta impressa na folha física
   const btnHoje = document.getElementById("btnHoje");
   const btnSalvar = document.getElementById("btnSalvar");
   const btnImprimir = document.getElementById("btnImprimir");
+  const btnSetorAnterior = document.getElementById("btnSetorAnterior");
+  const btnSetorProximo = document.getElementById("btnSetorProximo");
   const quadroEl = document.getElementById("quadro");
 
   let graficoD = null;
@@ -53,6 +55,17 @@ const QUADRO_META_EFICIENCIA = 70; // %, mesma meta impressa na folha física
     seletorSetor.innerHTML = SETORES.map((s) => `<option value="${s}">${s}</option>`).join("");
     seletorSetor.value = SETORES.includes(Auth.getSetorAtivo()) ? Auth.getSetorAtivo() : SETORES[0];
     seletorSetor.addEventListener("change", () => { avisarSeSujo(); Auth.setSetorAtivo(seletorSetor.value); renderizar(); });
+
+    const navegarSetor = (passo) => {
+      const i = SETORES.indexOf(seletorSetor.value);
+      const proximo = SETORES[(i + passo + SETORES.length) % SETORES.length];
+      avisarSeSujo();
+      seletorSetor.value = proximo;
+      Auth.setSetorAtivo(proximo);
+      renderizar();
+    };
+    btnSetorAnterior.addEventListener("click", () => navegarSetor(-1));
+    btnSetorProximo.addEventListener("click", () => navegarSetor(1));
   }
 
   function setorAtual() {
@@ -63,6 +76,17 @@ const QUADRO_META_EFICIENCIA = 70; // %, mesma meta impressa na folha física
   seletorMes.addEventListener("change", () => { avisarSeSujo(); renderizar(); });
   btnHoje.addEventListener("click", () => { avisarSeSujo(); seletorMes.value = mesAtualStr(); renderizar(); });
   btnImprimir.addEventListener("click", () => window.print());
+
+  // O tamanho do quadro na impressão é controlado só por CSS (mm fixos +
+  // flexbox em css/quadro.css), sem cálculo de escala em JS — só falta
+  // avisar os gráficos Chart.js para redesenharem no tamanho compacto do
+  // papel (e de volta ao tamanho de tela depois de imprimir).
+  function ajustarGraficosImpressao() {
+    if (graficoD) graficoD.resize();
+    if (graficoC) graficoC.resize();
+  }
+  window.addEventListener("beforeprint", ajustarGraficosImpressao);
+  window.addEventListener("afterprint", ajustarGraficosImpressao);
 
   function avisarSeSujo() {
     if (sujo) mostrarAlerta(alerta, "aviso", "Havia marcações não salvas que foram descartadas ao trocar de setor/mês.");
@@ -108,6 +132,16 @@ const QUADRO_META_EFICIENCIA = 70; // %, mesma meta impressa na folha física
     return n;
   }
 
+  /** true = tem problema (vermelho) em Safety, Quality ou Cost neste dia. */
+  function statusGeralDia(setor, dataISO) {
+    const registro = DB.buscarRegistroQuadro(setor, dataISO);
+    const problemaSQ = !!registro && (
+      registro.acidente === true || registro.quaseAcidente === true ||
+      registro.retrabalho === true || registro.falhaFornecedor === true
+    );
+    return problemaSQ || quebrasGravesDia(setor, dataISO) > 0;
+  }
+
   function diasDoMes(ano, mes) {
     const total = new Date(ano, mes, 0).getDate();
     const dias = [];
@@ -134,11 +168,19 @@ const QUADRO_META_EFICIENCIA = 70; // %, mesma meta impressa na folha física
     const dias = diasDoMes(ano, mes);
     const hoje = hojeISO();
     const nomeMes = new Date(ano, mes - 1, 1).toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+    const colunasDias = `grid-template-columns:repeat(${dias.length},1fr)`;
+    const numerosDias = `<div class="quadro-dias-numeros" style="${colunasDias}">${dias.map((_, i) => `<span>${i + 1}</span>`).join("")}</div>`;
+    const statusGeralHoje = dias.includes(hoje) ? statusGeralDia(setor, hoje) : null;
+    const statusGeralClasse = statusGeralHoje === null ? "" : statusGeralHoje ? "ocorrencia" : "ok";
 
     quadroEl.innerHTML = `
       <div class="quadro-folha">
         <div class="quadro-folha-titulo">
           <h2>${escaparHtml(setor)}</h2>
+          <div class="status-geral-titulo" title="Status Geral de hoje — vermelho se houve ocorrência em Safety, Quality ou Cost.">
+            <span class="status-geral-legenda">Status Geral</span>
+            <span class="status-geral-quadrado ${statusGeralClasse}"></span>
+          </div>
           <span class="setor-mes">Válido em ${escaparHtml(nomeMes)}</span>
         </div>
 
@@ -147,12 +189,12 @@ const QUADRO_META_EFICIENCIA = 70; // %, mesma meta impressa na folha física
           <div class="quadro-conteudo">
             <div class="quadro-item" data-campo="acidente">
               <div class="item-titulo">Acidente com/sem afastamento</div>
-              <div class="quadro-dias-scroll"><div class="quadro-dias" style="grid-template-columns:repeat(${dias.length},1fr)"></div></div>
+              <div class="quadro-dias-scroll">${numerosDias}<div class="quadro-dias" style="grid-template-columns:repeat(${dias.length},1fr)"></div></div>
               <div class="item-legenda">Vermelho: ocorrência de acidente (com ou sem afastamento).</div>
             </div>
             <div class="quadro-item" data-campo="quaseAcidente">
               <div class="item-titulo">Quase acidentes</div>
-              <div class="quadro-dias-scroll"><div class="quadro-dias" style="grid-template-columns:repeat(${dias.length},1fr)"></div></div>
+              <div class="quadro-dias-scroll">${numerosDias}<div class="quadro-dias" style="grid-template-columns:repeat(${dias.length},1fr)"></div></div>
               <div class="item-legenda">Vermelho: ocorrência imprevista que não resultou em ferimento ou dano.</div>
             </div>
             <div class="quadro-nao-editavel-aviso">Marcação manual — clique no dia para alternar: em branco &rarr; sem ocorrência (verde) &rarr; ocorrência (vermelho). Não esqueça de "Salvar marcações".</div>
@@ -164,12 +206,12 @@ const QUADRO_META_EFICIENCIA = 70; // %, mesma meta impressa na folha física
           <div class="quadro-conteudo">
             <div class="quadro-item" data-campo="retrabalho">
               <div class="item-titulo">Retrabalho da corretiva</div>
-              <div class="quadro-dias-scroll"><div class="quadro-dias" style="grid-template-columns:repeat(${dias.length},1fr)"></div></div>
+              <div class="quadro-dias-scroll">${numerosDias}<div class="quadro-dias" style="grid-template-columns:repeat(${dias.length},1fr)"></div></div>
               <div class="item-legenda">Vermelho: falha, com o mesmo efeito, em até 2 semanas após a atuação.</div>
             </div>
             <div class="quadro-item" data-campo="falhaFornecedor">
               <div class="item-titulo">Falha fornecedor</div>
-              <div class="quadro-dias-scroll"><div class="quadro-dias" style="grid-template-columns:repeat(${dias.length},1fr)"></div></div>
+              <div class="quadro-dias-scroll">${numerosDias}<div class="quadro-dias" style="grid-template-columns:repeat(${dias.length},1fr)"></div></div>
               <div class="item-legenda">Vermelho: desvio em peça/componente novo dentro da garantia, ou atraso de fornecedor.</div>
             </div>
           </div>
@@ -181,7 +223,7 @@ const QUADRO_META_EFICIENCIA = 70; // %, mesma meta impressa na folha física
             <div class="quadro-item">
               <div class="item-titulo">Controle de Corretivas Realizadas <span style="font-weight:400;color:var(--texto-suave);">(automático — bd/notas.json)</span></div>
               <div class="quadro-grafico"><canvas id="graficoD"></canvas></div>
-              <div class="quadro-tabela-scroll"><table class="quadro-tabela" id="tabelaD"></table></div>
+              <div class="quadro-tabela-scroll"><div class="quadro-resumo" id="resumoD"></div></div>
               <div class="item-legenda">Vermelho: eficiência no atendimento de corretivas abaixo da meta. <span class="rodape-meta">Meta: ${QUADRO_META_EFICIENCIA}%</span></div>
             </div>
           </div>
@@ -193,7 +235,7 @@ const QUADRO_META_EFICIENCIA = 70; // %, mesma meta impressa na folha física
             <div class="quadro-item">
               <div class="item-titulo">Controle de Quebra Graves <span style="font-weight:400;color:var(--texto-suave);">(automático — passagens de turno finalizadas)</span></div>
               <div class="quadro-grafico"><canvas id="graficoC"></canvas></div>
-              <div class="quadro-tabela-scroll"><table class="quadro-tabela" id="tabelaC"></table></div>
+              <div class="quadro-tabela-scroll"><div class="quadro-resumo" id="resumoC"></div></div>
               <div class="item-legenda">Vermelho: quebras com horas de parada acima da meta. <span class="rodape-meta">Meta: 10 horas</span></div>
             </div>
           </div>
@@ -203,7 +245,7 @@ const QUADRO_META_EFICIENCIA = 70; // %, mesma meta impressa na folha física
 
     renderDiasEditaveis(setor, dias, hoje);
     renderTabelaD(setor, ano, mes, dias);
-    renderTabelaC(setor, ano, mes, dias);
+    renderTabelaC(setor, ano, mes, dias, hoje);
   }
 
   // ---------- S / Q: grades clicáveis ----------
@@ -282,37 +324,39 @@ const QUADRO_META_EFICIENCIA = 70; // %, mesma meta impressa na folha física
     const efAcAnt = acAnt.total > 0 ? Math.round((acAnt.realizadas / acAnt.total) * 100) : null;
     const efAcAtu = totalMes.total > 0 ? Math.round((totalMes.realizadas / totalMes.total) * 100) : null;
 
-    const tabela = document.getElementById("tabelaD");
-    tabela.innerHTML = `
-      <thead>
-        <tr><th class="rotulo-linha">Dias</th><th>Ac. Mês Ant.</th>${dias.map((_, i) => `<th>${i + 1}</th>`).join("")}<th>Ac. Mês Atu.</th></tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td class="rotulo-linha">% Eficiência</td>
-          <td class="ac">${efAcAnt ?? "—"}</td>
-          ${efPorDia.map((v) => `<td class="${v !== null && v < QUADRO_META_EFICIENCIA ? "abaixo-meta" : ""}">${v ?? ""}</td>`).join("")}
-          <td class="ac">${efAcAtu ?? "—"}</td>
-        </tr>
-        <tr>
-          <td class="rotulo-linha">Nº de notas Realizadas</td>
-          <td class="ac">${acAnt.realizadas}</td>
-          ${porDia.map((s) => `<td>${s.total > 0 ? s.realizadas : ""}</td>`).join("")}
-          <td class="ac">${totalMes.realizadas}</td>
-        </tr>
-        <tr>
-          <td class="rotulo-linha">Nº de notas Abertas</td>
-          <td class="ac">${acAnt.total}</td>
-          ${porDia.map((s) => `<td>${s.total > 0 ? s.total : ""}</td>`).join("")}
-          <td class="ac">${totalMes.total}</td>
-        </tr>
-        <tr>
-          <td class="rotulo-linha">Nº de notas Pendentes</td>
-          <td class="ac">${acAnt.pendentes}</td>
-          ${porDia.map((s) => `<td>${s.total > 0 ? s.pendentes : ""}</td>`).join("")}
-          <td class="ac">${totalMes.pendentes}</td>
-        </tr>
-      </tbody>
+    const colunas = `grid-template-columns:repeat(${dias.length},1fr)`;
+    const resumo = document.getElementById("resumoD");
+    resumo.innerHTML = `
+      <div class="resumo-linha resumo-cabecalho">
+        <span class="resumo-rotulo">Dias</span>
+        <span class="resumo-ac" title="Ac. Mês Ant.">Ac.Ant.</span>
+        <div class="resumo-dias-grid" style="${colunas}">${dias.map((_, i) => `<span>${i + 1}</span>`).join("")}</div>
+        <span class="resumo-ac" title="Ac. Mês Atu.">Ac.Atu.</span>
+      </div>
+      <div class="resumo-linha">
+        <span class="resumo-rotulo">% Eficiência</span>
+        <span class="resumo-ac">${efAcAnt ?? "—"}</span>
+        <div class="resumo-dias-grid" style="${colunas}">${efPorDia.map((v) => `<span class="${v !== null && v < QUADRO_META_EFICIENCIA ? "abaixo-meta" : ""}">${v ?? ""}</span>`).join("")}</div>
+        <span class="resumo-ac">${efAcAtu ?? "—"}</span>
+      </div>
+      <div class="resumo-linha">
+        <span class="resumo-rotulo">Nº de notas Realizadas</span>
+        <span class="resumo-ac">${acAnt.realizadas}</span>
+        <div class="resumo-dias-grid" style="${colunas}">${porDia.map((s) => `<span>${s.total > 0 ? s.realizadas : ""}</span>`).join("")}</div>
+        <span class="resumo-ac">${totalMes.realizadas}</span>
+      </div>
+      <div class="resumo-linha">
+        <span class="resumo-rotulo">Nº de notas Abertas</span>
+        <span class="resumo-ac">${acAnt.total}</span>
+        <div class="resumo-dias-grid" style="${colunas}">${porDia.map((s) => `<span>${s.total > 0 ? s.total : ""}</span>`).join("")}</div>
+        <span class="resumo-ac">${totalMes.total}</span>
+      </div>
+      <div class="resumo-linha">
+        <span class="resumo-rotulo">Nº de notas Pendentes</span>
+        <span class="resumo-ac">${acAnt.pendentes}</span>
+        <div class="resumo-dias-grid" style="${colunas}">${porDia.map((s) => `<span>${s.total > 0 ? s.pendentes : ""}</span>`).join("")}</div>
+        <span class="resumo-ac">${totalMes.pendentes}</span>
+      </div>
     `;
 
     const ctx = document.getElementById("graficoD");
@@ -335,7 +379,7 @@ const QUADRO_META_EFICIENCIA = 70; // %, mesma meta impressa na folha física
 
   // ---------- C: tabela + gráfico ----------
 
-  function renderTabelaC(setor, ano, mes, dias) {
+  function renderTabelaC(setor, ano, mes, dias, hoje) {
     const diarioPorDia = dias.map((d) => quebrasGravesDia(setor, d));
     let acumulado = 0;
     const acumuladoPorDia = diarioPorDia.map((n) => (acumulado += n));
@@ -345,25 +389,30 @@ const QUADRO_META_EFICIENCIA = 70; // %, mesma meta impressa na folha física
     const acAnt = diasAnt.reduce((soma, d) => soma + quebrasGravesDia(setor, d), 0);
     const acAtu = acumuladoPorDia.length ? acumuladoPorDia[acumuladoPorDia.length - 1] : 0;
 
-    const tabela = document.getElementById("tabelaC");
-    tabela.innerHTML = `
-      <thead>
-        <tr><th class="rotulo-linha">Dias</th><th>Ac. Mês Ant.</th>${dias.map((_, i) => `<th>${i + 1}</th>`).join("")}<th>Ac. Mês Atu.</th></tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td class="rotulo-linha">Quebras graves acumuladas</td>
-          <td class="ac">${acAnt}</td>
-          ${acumuladoPorDia.map((v) => `<td>${v}</td>`).join("")}
-          <td class="ac">${acAtu}</td>
-        </tr>
-        <tr>
-          <td class="rotulo-linha">Quebras graves diário</td>
-          <td class="ac">—</td>
-          ${diarioPorDia.map((v) => `<td class="${v > 0 ? "abaixo-meta" : ""}">${v || ""}</td>`).join("")}
-          <td class="ac">${diarioPorDia.reduce((a, b) => a + b, 0)}</td>
-        </tr>
-      </tbody>
+    const colunas = `grid-template-columns:repeat(${dias.length},1fr)`;
+    const resumo = document.getElementById("resumoC");
+    resumo.innerHTML = `
+      <div class="resumo-linha resumo-cabecalho">
+        <span class="resumo-rotulo">Dias</span>
+        <span class="resumo-ac" title="Ac. Mês Ant.">Ac.Ant.</span>
+        <div class="resumo-dias-grid" style="${colunas}">${dias.map((_, i) => `<span>${i + 1}</span>`).join("")}</div>
+        <span class="resumo-ac" title="Ac. Mês Atu.">Ac.Atu.</span>
+      </div>
+      <div class="resumo-linha">
+        <span class="resumo-rotulo">Quebras graves acumuladas</span>
+        <span class="resumo-ac">${acAnt}</span>
+        <div class="resumo-dias-grid" style="${colunas}">${acumuladoPorDia.map((v, i) => `<span>${dias[i] > hoje ? "" : v}</span>`).join("")}</div>
+        <span class="resumo-ac">${acAtu}</span>
+      </div>
+      <div class="resumo-linha">
+        <span class="resumo-rotulo">Quebras graves diário</span>
+        <span class="resumo-ac">—</span>
+        <div class="resumo-dias-grid" style="${colunas}">${diarioPorDia.map((v, i) => {
+          if (dias[i] > hoje) return `<span></span>`;
+          return `<span class="${v > 0 ? "dia-ocorrencia" : "dia-ok"}">${v || ""}</span>`;
+        }).join("")}</div>
+        <span class="resumo-ac">${diarioPorDia.reduce((a, b) => a + b, 0)}</span>
+      </div>
     `;
 
     const ctx = document.getElementById("graficoC");

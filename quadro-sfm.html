@@ -19,17 +19,21 @@
 </nav>
 
 <main>
-  <h1>Quadro SFM do Setor</h1>
-  <p class="subtitulo">Mesmo modelo da folha impressa que fica exposta no quadro — S (Segurança), Q (Qualidade), D (Entrega) e C (Custo). Válido para o mês inteiro.</p>
+  <h1 class="no-print">Quadro SFM do Setor</h1>
+  <p class="subtitulo no-print">Mesmo modelo da folha impressa que fica exposta no quadro — S (Segurança), Q (Qualidade), D (Entrega) e C (Custo). Válido para o mês inteiro.</p>
 
   <div id="dbStatus" class="db-status no-print"></div>
   <div id="alerta" hidden></div>
 
   <div class="card no-print" id="cardFiltros">
     <div class="toolbar">
-      <div class="campo" style="margin:0;min-width:160px;" id="campoSetor">
+      <div class="campo" style="margin:0;min-width:220px;" id="campoSetor">
         <label for="seletorSetor">Setor</label>
-        <select id="seletorSetor"></select>
+        <div class="setor-nav">
+          <button type="button" id="btnSetorAnterior" class="seta-setor" aria-label="Setor anterior" title="Setor anterior">&larr;</button>
+          <select id="seletorSetor"></select>
+          <button type="button" id="btnSetorProximo" class="seta-setor" aria-label="Próximo setor" title="Próximo setor">&rarr;</button>
+        </div>
       </div>
       <div class="campo" style="margin:0;min-width:160px;">
         <label for="seletorMes">Mês</label>
