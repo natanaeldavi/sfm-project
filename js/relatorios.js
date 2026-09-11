@@ -18,10 +18,14 @@
 
   const filtroSetorPT = document.getElementById("filtroSetorPT");
   const filtroStatusPT = document.getElementById("filtroStatusPT");
+  const filtroDataDePT = document.getElementById("filtroDataDePT");
+  const filtroDataAtePT = document.getElementById("filtroDataAtePT");
   const corpoTabelaPT = document.getElementById("corpoTabelaPT");
   const contagemPT = document.getElementById("contagemPT");
 
   const filtroSetorEP = document.getElementById("filtroSetorEP");
+  const filtroDataDeEP = document.getElementById("filtroDataDeEP");
+  const filtroDataAteEP = document.getElementById("filtroDataAteEP");
   const corpoTabelaEP = document.getElementById("corpoTabelaEP");
   const contagemEP = document.getElementById("contagemEP");
 
@@ -38,8 +42,8 @@
   DbUI.iniciar(document.getElementById("dbStatus"));
 
   [filtroSetor, filtroDataDe, filtroDataAte, filtroTexto].forEach((el) => el.addEventListener("input", renderNotas));
-  [filtroSetorPT, filtroStatusPT].forEach((el) => el.addEventListener("change", renderPassagens));
-  filtroSetorEP.addEventListener("change", renderEventosPassagem);
+  [filtroSetorPT, filtroStatusPT, filtroDataDePT, filtroDataAtePT].forEach((el) => el.addEventListener("input", renderPassagens));
+  [filtroSetorEP, filtroDataDeEP, filtroDataAteEP].forEach((el) => el.addEventListener("input", renderEventosPassagem));
 
   function renderNotas() {
     const setor = filtroSetor.value;
@@ -79,10 +83,14 @@
   function renderPassagens() {
     const setor = filtroSetorPT.value;
     const status = filtroStatusPT.value;
+    const de = filtroDataDePT.value;
+    const ate = filtroDataAtePT.value;
 
     let lista = DB.dados.passagensTurno.slice();
     if (setor) lista = lista.filter((p) => p.setor === setor);
     if (status) lista = lista.filter((p) => p.status === status);
+    if (de) lista = lista.filter((p) => p.dataHora && formatarDataISO(new Date(p.dataHora)) >= de);
+    if (ate) lista = lista.filter((p) => p.dataHora && formatarDataISO(new Date(p.dataHora)) <= ate);
     lista.sort((a, b) => (b.dataHora || "").localeCompare(a.dataHora || ""));
 
     contagemPT.textContent = `${lista.length} passagem(ns)`;
@@ -108,9 +116,13 @@
 
   function renderEventosPassagem() {
     const setor = filtroSetorEP.value;
+    const de = filtroDataDeEP.value;
+    const ate = filtroDataAteEP.value;
 
     let eventos = DB.dados.eventosPassagem.slice();
     if (setor) eventos = eventos.filter((e) => e.setor === setor);
+    if (de) eventos = eventos.filter((e) => e.passadoEm && formatarDataISO(new Date(e.passadoEm)) >= de);
+    if (ate) eventos = eventos.filter((e) => e.passadoEm && formatarDataISO(new Date(e.passadoEm)) <= ate);
     eventos.sort((a, b) => (b.passadoEm || "").localeCompare(a.passadoEm || ""));
 
     contagemEP.textContent = `${eventos.length} evento(s)`;
