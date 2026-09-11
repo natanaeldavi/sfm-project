@@ -64,6 +64,10 @@
     }
   });
 
+  const btnSalvarUsuarios = document.getElementById("btnSalvarUsuarios");
+  const msgSalvarUsuarios = document.getElementById("msgSalvarUsuarios");
+  let usuariosSujo = false; // há mudanças de turno/responsável ainda não salvas
+
   DB.carregarAutoLoad();
   Auth.atualizarUsuarioDoBanco(usuario);
   if (Auth.aplicarGatePassagemObrigatoria(usuario)) return;
@@ -71,9 +75,29 @@
   conteudo.hidden = false;
   renderTabela();
   renderNotasAdmin();
-  DbUI.definirCallbackRecarregar(() => { renderTabela(); renderNotasAdmin(); });
+  DbUI.definirCallbackRecarregar(() => {
+    usuariosSujo = false;
+    msgSalvarUsuarios.textContent = "";
+    renderTabela();
+    renderNotasAdmin();
+  });
   DbUI.iniciar(document.getElementById("dbStatus"));
 
+  window.addEventListener("beforeunload", (ev) => {
+    if (usuariosSujo) { ev.preventDefault(); ev.returnValue = ""; }
+  });
+
+  function marcarUsuariosSujo() {
+    usuariosSujo = true;
+    msgSalvarUsuarios.textContent = "Há alterações não salvas.";
+    msgSalvarUsuarios.style.color = "var(--texto-suave)";
+  }
+
+  /**
+   * Tabela de usuários: turno e "Responsável SFM" são editados livremente
+   * na tela (só em memória) e só viram alteração de verdade em
+   * "Salvar alterações" — sem botão de salvar por linha/campo.
+   */
   function renderTabela() {
     const corpo = document.getElementById("corpoTabelaUsuarios");
     corpo.innerHTML = DB.dados.usuarios.map((u) => {
@@ -81,7 +105,7 @@
         ? `<select class="seletorTurnoLinha" style="display:inline-block;width:auto;">` +
             `<option value="">— sem turno —</option>` +
             TURNOS.map((t) => `<option value="${t}" ${u.turno === t ? "selected" : ""}>${t}</option>`).join("") +
-          `</select> <button type="button" class="secundario btnSalvarTurno" style="padding:4px 8px;">Salvar</button>`
+          `</select>`
         : "—";
       const podeSerResponsavel = u.papel === "operador" && u.turno === "Manhã";
       const responsavelCelula = u.papel === "operador"
@@ -101,7 +125,7 @@
     }).join("");
 
     corpo.querySelectorAll(".chkResponsavelSfm").forEach((chk) => {
-      chk.addEventListener("change", async () => {
+      chk.addEventListener("change", () => {
         const tr = chk.closest("tr");
         const id = tr.dataset.id;
         const alvo = DB.dados.usuarios.find((u) => u.id === id);
@@ -113,32 +137,21 @@
           }
         }
         alvo.responsavelSfm = chk.checked;
-
-        chk.disabled = true;
-        const ok = await DbUI.salvarDados(alerta);
-        if (ok) {
-          mostrarAlerta(alerta, "ok", chk.checked
-            ? `"${alvo.nome}" agora é o responsável pela SFM do setor ${alvo.setor}.`
-            : `"${alvo.nome}" não é mais responsável pela SFM.`);
-          renderTabela();
-        } else {
-          chk.disabled = false;
-        }
+        marcarUsuariosSujo();
+        renderTabela();
       });
     });
 
-    corpo.querySelectorAll(".btnSalvarTurno").forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        const tr = btn.closest("tr");
+    corpo.querySelectorAll(".seletorTurnoLinha").forEach((sel) => {
+      sel.addEventListener("change", () => {
+        const tr = sel.closest("tr");
         const id = tr.dataset.id;
         const alvo = DB.dados.usuarios.find((u) => u.id === id);
         if (!alvo) return;
-        alvo.turno = tr.querySelector(".seletorTurnoLinha").value || null;
+        alvo.turno = sel.value || null;
         if (alvo.turno !== "Manhã") alvo.responsavelSfm = false; // só quem é do turno Manhã pode ser responsável pela SFM
-        btn.disabled = true;
-        const ok = await DbUI.salvarDados(alerta);
-        btn.disabled = false;
-        if (ok) mostrarAlerta(alerta, "ok", `Turno de "${alvo.nome}" atualizado.`);
+        marcarUsuariosSujo();
+        renderTabela();
       });
     });
 
@@ -162,6 +175,17 @@
       });
     });
   }
+
+  btnSalvarUsuarios.addEventListener("click", async () => {
+    btnSalvarUsuarios.disabled = true;
+    const ok = await DbUI.salvarDados(alerta);
+    btnSalvarUsuarios.disabled = false;
+    if (ok) {
+      usuariosSujo = false;
+      msgSalvarUsuarios.textContent = "Alterações salvas.";
+      msgSalvarUsuarios.style.color = "var(--verde-ok)";
+    }
+  });
 
   form.addEventListener("submit", async (ev) => {
     ev.preventDefault();
