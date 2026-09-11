@@ -327,11 +327,23 @@ function importarPlanilhaSap(arrayBuffer) {
         const passagem = DB.dados.passagensTurno.find((p) => p.id === id);
         if (!passagem) return;
 
+        const agora = new Date();
         passagem.status = "aberta";
-        passagem.dataHora = new Date().toISOString();
+        passagem.dataHora = agora.toISOString();
         passagem.descricao = tr.querySelector(".inputDescRecebida").value.trim() || passagem.descricao;
         passagem.turno = usuario.turno || passagem.turno;
         passagem.registradoPor = usuario.nome;
+
+        const notaInfo = DB.buscarNota(passagem.nota);
+        const inicioParada = new Date(passagem.inicioParadaEm || passagem.dataHora);
+        const tempoParadoMinutos = Math.max(0, Math.round((agora - inicioParada) / 60000));
+        DB.registrarEventoPassagem(setorAtivo, usuario.turno, usuario.nome, [{
+          nota: passagem.nota,
+          ordem: notaInfo?.ordem || null,
+          equipamento: notaInfo?.equipamento || null,
+          descricao: passagem.descricao,
+          tempoParadoMinutos,
+        }]);
 
         btn.disabled = true;
         const ok = await DbUI.salvarDados(alerta);
@@ -485,14 +497,17 @@ function importarPlanilhaSap(arrayBuffer) {
     }
 
     const agora = new Date().toISOString();
+    const ordensParaEvento = [];
 
     for (const tr of linhasMarcadas) {
+      const nota = tr.dataset.nota;
+      const descricao = tr.querySelector(".inputDescricao").value.trim();
       DB.dados.passagensTurno.push({
         id: gerarId("pt"),
-        nota: tr.dataset.nota,
+        nota,
         setor: setorAtivo,
         turno: usuario.turno || null,
-        descricao: tr.querySelector(".inputDescricao").value.trim(),
+        descricao,
         dataHora: agora,
         inicioParadaEm: agora,
         status: "aberta",
@@ -503,7 +518,17 @@ function importarPlanilhaSap(arrayBuffer) {
         finalizadoPor: null,
         registradoPor: usuario.nome,
       });
+      const notaInfo = DB.buscarNota(nota);
+      ordensParaEvento.push({
+        nota,
+        ordem: notaInfo?.ordem || null,
+        equipamento: notaInfo?.equipamento || null,
+        descricao,
+        tempoParadoMinutos: 0, // acabou de começar a parar agora
+      });
     }
+
+    DB.registrarEventoPassagem(setorAtivo, usuario.turno, usuario.nome, ordensParaEvento);
 
     btnSalvarPassagem.disabled = true;
     const ok = await DbUI.salvarDados(alerta);

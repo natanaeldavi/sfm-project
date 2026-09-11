@@ -118,6 +118,31 @@ recebida --[finalizar]--> finalizada  (calcula o tempo parado)
   aparece na tabela "Top problemas do mês", no final do `quadro-sfm.html`
   (setor e mês selecionados).
 
+### Eventos de passagem de turno (log permanente)
+
+Diferente do registro de `passagensTurno` acima (que é **um só por ordem**,
+sobrescrito a cada troca de turno), `bd/dados.json` (`eventosPassagem`)
+guarda **um evento por ação de passar**, numerado sequencialmente e nunca
+apagado ou sobrescrito — histórico completo, mesmo que a ordem em si seja
+repassada várias vezes depois. Um evento é criado:
+
+- ao **salvar uma passagem** de ordens novas (uma por clique em "Salvar
+  passagem", bundle com todas as ordens marcadas daquela vez);
+- ao clicar **"Continuar parada"** em Passar Turno (cada clique é um evento
+  próprio, com 1 ordem).
+
+Cada evento guarda: número, setor, turno de origem e de destino (calculado
+automaticamente pela rotação Manhã → Tarde → Noite → Manhã, `proximoTurno()`
+em `js/util.js`), quem passou e quando, e a lista de ordens incluídas com o
+**tempo parado até aquele momento** (snapshot — não muda depois, mesmo que a
+ordem seja finalizada ou repassada de novo). Quando alguém clica "Receber
+tudo" em Receber Turno, todos os eventos ainda pendentes do setor são
+marcados com quem recebeu e quando (`DB.marcarEventosPassagemRecebidos`) —
+como o recebimento já é em lote por setor, um único clique pode fechar mais
+de um evento de uma vez, se houver mais de uma passagem aguardando. Consulta
+completa, com o detalhe de cada evento, em Relatórios → "Eventos de
+passagem de turno".
+
 ## Regra da janela da SFM (janela de datas)
 
 A SFM cobre, de terça a sexta, só o dia anterior. Como não há reunião aos
@@ -139,9 +164,10 @@ quadro-sfm.html          – folha SQDC do mês por setor, no mesmo layout da fo
 admin.html               – gestão de usuários (só admin)
 relatorios.html          – ordens e passagens de todos os setores (gestor/admin)
 
-bd/dados.json            – usuários, passagens de turno (o "banco de dados"; o campo
-                           "eficiencia" é legado de quando "não atendidas" era lançada
-                           manualmente e não é mais lido — hoje é calculado automaticamente)
+bd/dados.json            – usuários, passagens de turno, eventos de passagem de turno
+                           (o "banco de dados"; o campo "eficiencia" é legado de quando
+                           "não atendidas" era lançada manualmente e não é mais lido —
+                           hoje é calculado automaticamente)
 bd/dados.js              – espelho de dados.json, gerado automaticamente a cada salvamento
 bd/notas.json            – notas/ordens importadas do SAP (outro arquivo de banco de dados)
 bd/notas.js              – espelho de notas.json, gerado automaticamente a cada salvamento

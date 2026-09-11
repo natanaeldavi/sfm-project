@@ -79,9 +79,29 @@
       <div class="tabela-scroll">
         <table>
           <thead>
-            <tr><th>Nota</th><th>Setor</th><th>Turno</th><th>Descrição</th><th>Status</th><th>Passado por</th><th>Quando</th><th>Finalizada em</th><th>Tempo parado</th></tr>
+            <tr><th>Nota</th><th>Setor</th><th>Turno</th><th>Descrição</th><th>Status</th><th>Passado por</th><th>Passado em</th><th>Recebido por</th><th>Recebido em</th><th>Finalizada em</th><th>Tempo parado</th></tr>
           </thead>
           <tbody id="corpoTabelaPT"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Eventos de passagem de turno</h2>
+      <p class="subtitulo" style="margin-top:-6px;">Um evento por ação de passar (nova ordem ou "Continuar parada"), numerado e permanente — mostra pra qual turno foi e o tempo de parada de cada ordem no momento em que foi passada.</p>
+      <div class="toolbar">
+        <div class="campo" style="margin:0;">
+          <label for="filtroSetorEP">Setor</label>
+          <select id="filtroSetorEP"><option value="">Todos</option></select>
+        </div>
+        <span class="contagem-pill" id="contagemEP" style="margin-top:18px;"></span>
+      </div>
+      <div class="tabela-scroll">
+        <table>
+          <thead>
+            <tr><th>Nº</th><th>Setor</th><th>Turno</th><th>Passado por</th><th>Passado em</th><th>Recebido por</th><th>Recebido em</th><th>Ordens</th><th></th></tr>
+          </thead>
+          <tbody id="corpoTabelaEP"></tbody>
         </table>
       </div>
     </div>

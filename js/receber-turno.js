@@ -120,6 +120,7 @@
       p.recebidoEm = agora;
       if (!p.inicioParadaEm) p.inicioParadaEm = p.dataHora || agora; // registros antigos sem esse campo
     }
+    DB.marcarEventosPassagemRecebidos(setorAtivo, usuario.nome);
 
     btnReceberTudo.disabled = true;
     const ok = await DbUI.salvarDados(alerta);

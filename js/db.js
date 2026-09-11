@@ -41,7 +41,7 @@ const BD_IDB_STORE = "handles";
 const BD_IDB_CHAVE_DIR = "bdDirHandle";
 
 const DB = {
-  dados: { usuarios: [], passagensTurno: [], eficiencia: [], confirmacoesTurno: [] },
+  dados: { usuarios: [], passagensTurno: [], eficiencia: [], confirmacoesTurno: [], eventosPassagem: [] },
   notas: [],
   /* quadro.registros: mapa "setor|YYYY-MM-DD" -> { setor, data, acidente, quaseAcidente,
    * retrabalho, falhaFornecedor }, cada campo true/false/undefined (undefined = não marcado
@@ -91,6 +91,7 @@ const DB = {
     if (!Array.isArray(this.dados.passagensTurno)) this.dados.passagensTurno = [];
     if (!Array.isArray(this.dados.eficiencia)) this.dados.eficiencia = [];
     if (!Array.isArray(this.dados.confirmacoesTurno)) this.dados.confirmacoesTurno = [];
+    if (!Array.isArray(this.dados.eventosPassagem)) this.dados.eventosPassagem = [];
     if (!Array.isArray(this.notas)) this.notas = [];
     if (!this.quadro || typeof this.quadro !== "object") this.quadro = {};
     if (!this.quadro.registros || typeof this.quadro.registros !== "object") this.quadro.registros = {};
@@ -368,5 +369,51 @@ const DB = {
       usuario: usuarioNome,
       concluidoEm: new Date().toISOString(),
     });
+  },
+
+  // ---------- Eventos de passagem de turno (log permanente, nunca sobrescrito) ----------
+
+  /** Próximo número sequencial de evento de passagem (global, não por setor). */
+  _proximoNumeroEventoPassagem() {
+    return this.dados.eventosPassagem.reduce((max, e) => Math.max(max, e.numero || 0), 0) + 1;
+  },
+
+  /**
+   * Registra um evento de passagem de turno: quem passou, do turno pra qual
+   * turno, quando, e a lista de ordens incluídas com o tempo parado até
+   * aquele momento (snapshot — continua correto no relatório mesmo que a
+   * ordem seja repassada de novo ou finalizada depois). Chamado tanto ao
+   * passar ordens novas (passar-turno.js: "Salvar passagem") quanto ao
+   * repassar uma ordem recebida sem finalizar ("Continuar parada").
+   */
+  registrarEventoPassagem(setor, turnoOrigem, passadoPor, ordens) {
+    const evento = {
+      id: gerarId("ep"),
+      numero: this._proximoNumeroEventoPassagem(),
+      setor,
+      turnoOrigem: turnoOrigem || null,
+      turnoDestino: turnoOrigem ? proximoTurno(turnoOrigem) : null,
+      passadoPor,
+      passadoEm: new Date().toISOString(),
+      recebidoPor: null,
+      recebidoEm: null,
+      ordens,
+    };
+    this.dados.eventosPassagem.push(evento);
+    return evento;
+  },
+
+  /**
+   * Fecha (marca como recebidos) todos os eventos de passagem ainda
+   * pendentes do setor — chamado no "Receber tudo" de receber-turno.js, que
+   * sempre recebe em lote tudo que está aberto no setor de uma vez.
+   */
+  marcarEventosPassagemRecebidos(setor, recebidoPor) {
+    const agora = new Date().toISOString();
+    const pendentes = this.dados.eventosPassagem.filter((e) => e.setor === setor && !e.recebidoEm);
+    for (const e of pendentes) {
+      e.recebidoPor = recebidoPor;
+      e.recebidoEm = agora;
+    }
   },
 };

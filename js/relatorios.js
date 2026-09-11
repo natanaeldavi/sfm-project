@@ -21,7 +21,11 @@
   const corpoTabelaPT = document.getElementById("corpoTabelaPT");
   const contagemPT = document.getElementById("contagemPT");
 
-  for (const sel of [filtroSetor, filtroSetorPT]) {
+  const filtroSetorEP = document.getElementById("filtroSetorEP");
+  const corpoTabelaEP = document.getElementById("corpoTabelaEP");
+  const contagemEP = document.getElementById("contagemEP");
+
+  for (const sel of [filtroSetor, filtroSetorPT, filtroSetorEP]) {
     sel.innerHTML += SETORES.map((s) => `<option value="${s}">${s}</option>`).join("");
   }
 
@@ -29,11 +33,13 @@
   conteudo.hidden = false;
   renderNotas();
   renderPassagens();
-  DbUI.definirCallbackRecarregar(() => { renderNotas(); renderPassagens(); });
+  renderEventosPassagem();
+  DbUI.definirCallbackRecarregar(() => { renderNotas(); renderPassagens(); renderEventosPassagem(); });
   DbUI.iniciar(document.getElementById("dbStatus"));
 
   [filtroSetor, filtroDataDe, filtroDataAte, filtroTexto].forEach((el) => el.addEventListener("input", renderNotas));
   [filtroSetorPT, filtroStatusPT].forEach((el) => el.addEventListener("change", renderPassagens));
+  filtroSetorEP.addEventListener("change", renderEventosPassagem);
 
   function renderNotas() {
     const setor = filtroSetor.value;
@@ -91,8 +97,69 @@
         <td><span class="tag status-${p.status}">${p.status}</span></td>
         <td>${escaparHtml(p.registradoPor)}</td>
         <td>${p.dataHora ? new Date(p.dataHora).toLocaleString("pt-BR") : "—"}</td>
+        <td>${escaparHtml(p.recebidoPor || "—")}</td>
+        <td>${p.recebidoEm ? new Date(p.recebidoEm).toLocaleString("pt-BR") : "—"}</td>
         <td>${p.finalizadaEm ? new Date(p.finalizadaEm).toLocaleString("pt-BR") : "—"}</td>
         <td>${formatarDuracaoMinutos(p.tempoParadoMinutos)}</td>
-      </tr>`).join("") || `<tr><td colspan="9" style="text-align:center;color:var(--texto-suave);">Nenhuma passagem encontrada.</td></tr>`;
+      </tr>`).join("") || `<tr><td colspan="11" style="text-align:center;color:var(--texto-suave);">Nenhuma passagem encontrada.</td></tr>`;
+  }
+
+  // ---------- Eventos de passagem de turno (log permanente — ver DB.registrarEventoPassagem) ----------
+
+  function renderEventosPassagem() {
+    const setor = filtroSetorEP.value;
+
+    let eventos = DB.dados.eventosPassagem.slice();
+    if (setor) eventos = eventos.filter((e) => e.setor === setor);
+    eventos.sort((a, b) => (b.passadoEm || "").localeCompare(a.passadoEm || ""));
+
+    contagemEP.textContent = `${eventos.length} evento(s)`;
+    eventos = eventos.slice(0, 1000);
+
+    corpoTabelaEP.innerHTML = eventos.map((e) => `
+      <tr data-id="${escaparHtml(e.id)}">
+        <td>#${e.numero}</td>
+        <td><span class="tag setor-${e.setor}">${e.setor}</span></td>
+        <td>${escaparHtml(e.turnoOrigem || "—")} &rarr; ${escaparHtml(e.turnoDestino || "—")}</td>
+        <td>${escaparHtml(e.passadoPor)}</td>
+        <td>${e.passadoEm ? new Date(e.passadoEm).toLocaleString("pt-BR") : "—"}</td>
+        <td>${escaparHtml(e.recebidoPor || "—")}</td>
+        <td>${e.recebidoEm ? new Date(e.recebidoEm).toLocaleString("pt-BR") : "—"}</td>
+        <td>${e.ordens.length}</td>
+        <td><button type="button" class="secundario btnVerOrdensEP">Ver ordens</button></td>
+      </tr>`).join("") || `<tr><td colspan="9" style="text-align:center;color:var(--texto-suave);">Nenhum evento encontrado.</td></tr>`;
+
+    corpoTabelaEP.querySelectorAll(".btnVerOrdensEP").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const tr = btn.closest("tr");
+        const proximo = tr.nextElementSibling;
+        if (proximo && proximo.classList.contains("linha-detalhe-ep")) {
+          proximo.remove();
+          return;
+        }
+        corpoTabelaEP.querySelectorAll(".linha-detalhe-ep").forEach((el) => el.remove());
+
+        const evento = DB.dados.eventosPassagem.find((e) => e.id === tr.dataset.id);
+        if (!evento) return;
+
+        const detalhe = document.createElement("tr");
+        detalhe.className = "linha-detalhe-ep";
+        detalhe.innerHTML = `<td colspan="9">
+          <table style="margin:4px 0;">
+            <thead><tr><th>Nota</th><th>Ordem</th><th>Equipamento</th><th>Descrição</th><th>Parada até aquele momento</th></tr></thead>
+            <tbody>
+              ${evento.ordens.map((o) => `<tr>
+                <td>${escaparHtml(o.nota)}</td>
+                <td>${escaparHtml(o.ordem || "—")}</td>
+                <td>${escaparHtml(o.equipamento || "—")}</td>
+                <td>${escaparHtml(o.descricao || "—")}</td>
+                <td>${formatarDuracaoMinutos(o.tempoParadoMinutos)}</td>
+              </tr>`).join("")}
+            </tbody>
+          </table>
+        </td>`;
+        tr.after(detalhe);
+      });
+    });
   }
 })();

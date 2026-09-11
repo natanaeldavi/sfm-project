@@ -13,6 +13,12 @@ const TURNO_HORARIOS = {
 /** Duração (em minutos) da janela obrigatória de passagem (antes do fim do turno) e de recebimento (depois do início). */
 const JANELA_TURNO_MINUTOS = 40;
 
+/** Turno seguinte na rotação Manhã -> Tarde -> Noite -> Manhã — usado como turno de destino ao registrar uma passagem. */
+function proximoTurno(turno) {
+  const i = TURNOS.indexOf(turno);
+  return i === -1 ? null : TURNOS[(i + 1) % TURNOS.length];
+}
+
 /** "HH:MM" -> minutos desde a meia-noite. */
 function minutosDoDia(hhmm) {
   const [h, m] = hhmm.split(":").map(Number);
