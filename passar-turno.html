@@ -23,12 +23,6 @@
   <div id="dbStatus" class="db-status"></div>
   <div id="alerta" hidden></div>
 
-  <div class="card" id="cardConcluirPassagem" hidden>
-    <h2>Fechar passagem de turno</h2>
-    <p class="subtitulo" id="infoPassagemTurno" style="margin-bottom:10px;"></p>
-    <button type="button" id="btnConcluirPassagem" hidden>Concluir passagem de turno</button>
-  </div>
-
   <div class="card" id="cardRecebidas" hidden>
     <h2>1. Ordens que você recebeu — continuar parada ou finalizar?</h2>
     <p class="subtitulo" style="margin-bottom:10px;">Ao finalizar, o tempo de máquina parada é calculado automaticamente desde quando a ordem foi passada pela primeira vez.</p>
@@ -97,6 +91,7 @@
 
   <div class="card" id="cardSalvar" hidden>
     <h2>4. Registrar passagem de turno</h2>
+    <p class="subtitulo" style="margin-bottom:10px;">Marque acima as ordens que estão sendo passadas. Se não houver nenhuma pra passar, pode salvar assim mesmo — o sistema confirma antes.</p>
     <p class="subtitulo" id="turnoInfo" style="margin-bottom:10px;"></p>
     <button type="button" id="btnSalvarPassagem">Salvar passagem de turno</button>
     <span id="msgSalvar" style="margin-left:10px;font-size:12px;"></span>

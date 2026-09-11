@@ -97,9 +97,10 @@ recebida --[finalizar]--> finalizada  (calcula o tempo parado)
 - **Janela obrigatória de passagem**: nos últimos 40 minutos do fim do
   próprio turno, o operador é obrigatoriamente redirecionado para "Passar
   Turno" e não consegue acessar mais nada do sistema até clicar em
-  **"Concluir passagem de turno"** (botão que aparece nessa tela para todo
-  operador com turno definido) — mesmo que não tenha nenhuma ordem pra
-  passar, precisa concluir pra ser liberado. A conclusão fica registrada em
+  **"Salvar passagem de turno"** (botão único da tela — não existe mais um
+  botão separado só pra "concluir") — mesmo que não tenha nenhuma ordem pra
+  passar: nesse caso o botão pede confirmação ("não há nada pra passar
+  neste turno?") antes de liberar. A conclusão fica registrada em
   `bd/dados.json` (`confirmacoesTurno`) e vale só para aquele turno/dia —
   no turno seguinte a trava volta a valer.
 - **Ao passar turno de novo**: a tela de Passar Turno mostra primeiro as

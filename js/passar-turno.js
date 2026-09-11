@@ -200,56 +200,7 @@ function importarPlanilhaSap(arrayBuffer) {
     mostrarAlerta(alerta, "aviso", "Nenhum setor selecionado. Volte ao menu e escolha um setor.");
   }
 
-  const cardConcluirPassagem = document.getElementById("cardConcluirPassagem");
-  const infoPassagemTurno = document.getElementById("infoPassagemTurno");
-  const btnConcluirPassagem = document.getElementById("btnConcluirPassagem");
   const subbar = document.getElementById("subbar");
-
-  function renderConcluirPassagem() {
-    if (usuario.papel !== "operador" || !usuario.turno) {
-      cardConcluirPassagem.hidden = true;
-      return;
-    }
-
-    cardConcluirPassagem.hidden = false;
-    const data = dataDoTurnoAtual(usuario.turno);
-    const concluida = DB.passagemTurnoConcluida(usuario.setor, usuario.turno, data);
-    const obrigatorio = Auth.dentroJanelaPassagemObrigatoria(usuario);
-
-    if (concluida) {
-      const registro = DB.dados.confirmacoesTurno.find(
-        (c) => c.tipo === "passagem" && c.setor === usuario.setor && c.turno === usuario.turno && c.data === data
-      );
-      const hora = registro ? new Date(registro.concluidoEm).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : "";
-      infoPassagemTurno.textContent = `Passagem do turno ${usuario.turno} de hoje já concluída${hora ? " às " + hora : ""}.`;
-      btnConcluirPassagem.hidden = true;
-      subbar.style.pointerEvents = "";
-      subbar.style.opacity = "";
-    } else if (obrigatorio) {
-      const j = janelaPassarTurno(usuario.turno);
-      const horaFim = `${String(Math.floor(j.fim / 60)).padStart(2, "0")}:${String(j.fim % 60).padStart(2, "0")}`;
-      infoPassagemTurno.innerHTML = `<strong>Horário obrigatório de passagem de turno (até ${horaFim}).</strong> Conclua a passagem antes de acessar o resto do sistema — o menu e as outras páginas ficam bloqueados até então.`;
-      btnConcluirPassagem.hidden = false;
-      subbar.style.pointerEvents = "none";
-      subbar.style.opacity = "0.4";
-    } else {
-      infoPassagemTurno.textContent = `Turno ${usuario.turno}: clique abaixo para concluir a passagem de hoje quando terminar.`;
-      btnConcluirPassagem.hidden = false;
-      subbar.style.pointerEvents = "";
-      subbar.style.opacity = "";
-    }
-  }
-
-  btnConcluirPassagem.addEventListener("click", async () => {
-    const data = dataDoTurnoAtual(usuario.turno);
-    DB.confirmarPassagemTurno(usuario.nome, usuario.setor, usuario.turno, data);
-    btnConcluirPassagem.disabled = true;
-    const ok = await DbUI.salvarDados(alerta);
-    btnConcluirPassagem.disabled = false;
-    if (ok) renderConcluirPassagem();
-  });
-
-  renderConcluirPassagem();
 
   const cardRecebidas = document.getElementById("cardRecebidas");
   const corpoRecebidas = document.getElementById("corpoRecebidas");
@@ -266,10 +217,48 @@ function importarPlanilhaSap(arrayBuffer) {
   const msgSalvar = document.getElementById("msgSalvar");
   const turnoInfo = document.getElementById("turnoInfo");
 
-  turnoInfo.textContent = usuario.turno
-    ? `Turno: ${usuario.turno}`
-    : "Turno não definido para o seu usuário — peça para o admin configurar em Administração.";
+  /**
+   * Status da passagem de turno de hoje, mostrado acima do botão único
+   * "Salvar passagem de turno" — substitui o antigo botão separado
+   * "Concluir passagem de turno": agora salvar (mesmo sem ordens marcadas,
+   * com confirmação) já conclui a passagem do dia.
+   */
+  function renderInfoTurno() {
+    if (!usuario.turno) {
+      turnoInfo.textContent = "Turno não definido para o seu usuário — peça para o admin configurar em Administração.";
+      return;
+    }
+    if (usuario.papel !== "operador") {
+      turnoInfo.textContent = `Turno: ${usuario.turno}`;
+      return;
+    }
 
+    const data = dataDoTurnoAtual(usuario.turno);
+    const concluida = DB.passagemTurnoConcluida(usuario.setor, usuario.turno, data);
+    const obrigatorio = Auth.dentroJanelaPassagemObrigatoria(usuario);
+
+    if (concluida) {
+      const registro = DB.dados.confirmacoesTurno.find(
+        (c) => c.tipo === "passagem" && c.setor === usuario.setor && c.turno === usuario.turno && c.data === data
+      );
+      const hora = registro ? new Date(registro.concluidoEm).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : "";
+      turnoInfo.textContent = `Turno ${usuario.turno} — passagem de hoje já concluída${hora ? " às " + hora : ""}. Salvar de novo atualiza a passagem normalmente.`;
+      subbar.style.pointerEvents = "";
+      subbar.style.opacity = "";
+    } else if (obrigatorio) {
+      const j = janelaPassarTurno(usuario.turno);
+      const horaFim = `${String(Math.floor(j.fim / 60)).padStart(2, "0")}:${String(j.fim % 60).padStart(2, "0")}`;
+      turnoInfo.innerHTML = `<strong>Horário obrigatório de passagem de turno (até ${horaFim}).</strong> Clique em "Salvar passagem de turno" abaixo antes de acessar o resto do sistema — mesmo que não tenha nenhuma ordem pra passar.`;
+      subbar.style.pointerEvents = "none";
+      subbar.style.opacity = "0.4";
+    } else {
+      turnoInfo.textContent = `Turno: ${usuario.turno} — clique em "Salvar passagem de turno" quando terminar, mesmo sem ordens pra passar.`;
+      subbar.style.pointerEvents = "";
+      subbar.style.opacity = "";
+    }
+  }
+
+  renderInfoTurno();
   cardTabela.hidden = false;
   cardSalvar.hidden = false;
   renderTudo();
@@ -485,15 +474,15 @@ function importarPlanilhaSap(arrayBuffer) {
     const linhasMarcadas = Array.from(corpoTabela.querySelectorAll("tr")).filter((tr) => tr.querySelector(".chkOrdem").checked);
 
     if (linhasMarcadas.length === 0) {
-      msgSalvar.textContent = "Marque ao menos uma ordem para passar.";
-      msgSalvar.style.color = "var(--vermelho-alerta)";
-      return;
-    }
-    const semDescricao = linhasMarcadas.some((tr) => !tr.querySelector(".inputDescricao").value.trim());
-    if (semDescricao) {
-      msgSalvar.textContent = "Preencha a descrição de todas as ordens marcadas.";
-      msgSalvar.style.color = "var(--vermelho-alerta)";
-      return;
+      const confirmou = confirm(`Você não marcou nenhuma ordem para passar do setor ${setorAtivo}. Confirma que não há nada para passar neste turno?`);
+      if (!confirmou) return;
+    } else {
+      const semDescricao = linhasMarcadas.some((tr) => !tr.querySelector(".inputDescricao").value.trim());
+      if (semDescricao) {
+        msgSalvar.textContent = "Preencha a descrição de todas as ordens marcadas.";
+        msgSalvar.style.color = "var(--vermelho-alerta)";
+        return;
+      }
     }
 
     const agora = new Date().toISOString();
@@ -528,16 +517,30 @@ function importarPlanilhaSap(arrayBuffer) {
       });
     }
 
-    DB.registrarEventoPassagem(setorAtivo, usuario.turno, usuario.nome, ordensParaEvento);
+    if (ordensParaEvento.length > 0) {
+      DB.registrarEventoPassagem(setorAtivo, usuario.turno, usuario.nome, ordensParaEvento);
+    }
+
+    // Salvar (com ou sem ordens, já confirmado acima) conclui a passagem de
+    // turno do dia — substitui o antigo botão separado "Concluir passagem
+    // de turno". Só se aplica a operador com turno definido (mesma regra
+    // de antes); admin/gestor não têm essa trava.
+    if (usuario.papel === "operador" && usuario.turno) {
+      const data = dataDoTurnoAtual(usuario.turno);
+      DB.confirmarPassagemTurno(usuario.nome, usuario.setor, usuario.turno, data);
+    }
 
     btnSalvarPassagem.disabled = true;
     const ok = await DbUI.salvarDados(alerta);
     btnSalvarPassagem.disabled = false;
 
     if (ok) {
-      msgSalvar.textContent = `${linhasMarcadas.length} ordem(ns) registrada(s) na passagem de turno.`;
+      msgSalvar.textContent = linhasMarcadas.length > 0
+        ? `${linhasMarcadas.length} ordem(ns) registrada(s) na passagem de turno.`
+        : "Passagem de turno concluída sem ordens pendentes.";
       msgSalvar.style.color = "var(--verde-ok)";
       renderTudo();
+      renderInfoTurno();
     }
   });
 })();

@@ -184,9 +184,9 @@ const Auth = {
   /**
    * O operador está dentro da janela obrigatória de passagem (os últimos 40
    * min do fim do próprio turno) E ainda não concluiu a passagem desse
-   * turno hoje (ver DB.confirmarPassagemTurno, botão "Concluir passagem de
-   * turno" em passar-turno.html)? Precisa que DB.carregarAutoLoad() já
-   * tenha sido chamado antes.
+   * turno hoje (ver DB.confirmarPassagemTurno, chamado ao clicar "Salvar
+   * passagem de turno" em passar-turno.html, com ou sem ordens marcadas)?
+   * Precisa que DB.carregarAutoLoad() já tenha sido chamado antes.
    */
   dentroJanelaPassagemObrigatoria(usuario) {
     if (!usuario || usuario.papel !== "operador" || !usuario.turno) return false;
