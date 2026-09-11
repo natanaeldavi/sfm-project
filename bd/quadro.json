@@ -79,6 +79,14 @@
       "acidente": false,
       "quaseAcidente": false,
       "retrabalho": true
+    },
+    "Gasolina|2026-09-11": {
+      "setor": "Gasolina",
+      "data": "2026-09-11",
+      "acidente": false,
+      "quaseAcidente": false,
+      "retrabalho": true,
+      "falhaFornecedor": false
     }
   }
 }
