@@ -70,14 +70,13 @@
         <td>${escaparHtml(n.nota)}</td>
         <td>${escaparHtml(n.ordem || "—")}</td>
         <td><span class="tag setor-${n.setor}">${n.setor}</span></td>
-        <td><span class="tag area-${n.area}">${n.area}</span></td>
         <td>${escaparHtml(n.equipamento || "—")}</td>
         <td>${escaparHtml(n.textoBreve || "—")}</td>
         <td>${escaparHtml(n.statusUsuario || n.statusSistema || "—")}</td>
         <td>${formatarDataBR(n.dataEntrada)}</td>
         <td>${escaparHtml(n.horaEntrada || "—")}</td>
         <td>${formatarDataBR(n.dataFim)}</td>
-      </tr>`).join("") || `<tr><td colspan="10" style="text-align:center;color:var(--texto-suave);">Nenhuma nota encontrada.</td></tr>`;
+      </tr>`).join("") || `<tr><td colspan="9" style="text-align:center;color:var(--texto-suave);">Nenhuma nota encontrada.</td></tr>`;
   }
 
   function renderPassagens() {

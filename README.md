@@ -179,7 +179,7 @@ bd/quadro.js             – espelho de quadro.json, gerado automaticamente a ca
 
 css/style.css             – estilo compartilhado
 css/quadro.css            – estilo específico da folha SQDC (quadro-sfm.html)
-js/util.js                – classificação de setor/área, datas, formatação
+js/util.js                – classificação de setor, datas, formatação
 js/auth.js                – hash de senha (PBKDF2) e sessão
 js/db.js                  – leitura automática e escrita (File System Access API) de bd/
 js/db-ui.js                – barra de status + vínculo da pasta bd (reaproveitada em cada página)
@@ -263,9 +263,6 @@ manualmente, edite o `.json` e depois abra o sistema uma vez com a pasta
   - `USPIS-CEL` + número 003–019 → Gasolina
   - `USPIS-CEL` + número 021–038 → Diesel
   - qualquer outro local → Biela
-- **Área**, a partir de `CenTrab respon.`: `MUPMEC` → Mecânica,
-  `MUPELE` → Elétrica, outro valor → Outros.
-
 ## Sobre a escolha de setor no menu
 
 Operadores têm setor fixo (o próprio) e não escolhem. Admin/gestor escolhem
@@ -276,20 +273,22 @@ dentro do próprio `quadro-sfm.html` (setas ao lado do seletor de setor).
 ## Colunas usadas na importação da planilha do SAP
 
 A data usada como referência para o cálculo de "Atendidas"/"Não atendidas"
-(D do quadro SQDC) vem da coluna **"Dt.
-referência"** (aceita variações como "Data referência"/"Data de
-referência" e, em planilhas mais antigas, "Data de entrada" ou "Data da
-nota" — nessa ordem de prioridade). O horário vem de uma coluna separada,
-**"HoraInícioAvar."** (aceita variações como "Hora início avaria"/"Hora de
-início da avaria"); se essa coluna não existir, tenta "Hora da nota" e,
-por último, um horário embutido na própria célula de data.
+(D do quadro SQDC) vem da coluna **"Data da nota"** — é a data real de
+abertura da nota no SAP. "Dt.referência" (aceita variações como "Data
+referência"/"Data de referência") muda depois que a nota é criada (ex.:
+quando a ordem é de fato gerada/tratada), então só entra como alternativa
+em planilhas antigas que não tragam "Data da nota"; "Data de entrada" é a
+última alternativa. O horário acompanha a mesma coluna, **"Hora da
+nota"**; se essa coluna não existir, tenta "HoraInícioAvar." (aceita
+variações como "Hora início avaria"/"Hora de início da avaria") e, por
+último, um horário embutido na própria célula de data.
 
 As outras colunas continuam: `Ordem`, `Nota`, `Status sistema` (também usado
 para calcular "Atendidas"/"Não atendidas" — ver acima), `Status usuário`,
-`Tipo de ordem`, `Cen.p/cen.trab.` (aceita também "CenTrab respon."; define
-a Área — Mecânica/Elétrica/Outros), `Equipamento`, `Loc.instalação` (define
-o Setor), `Descrição` (aceita também "Texto breve"), `Data-base iníc.`,
-`Data-base fim`, `Centro custo`, `Criado por`.
+`Tipo de ordem`, `Cen.p/cen.trab.` (aceita também "CenTrab respon."),
+`Equipamento`, `Loc.instalação` (define o Setor), `Descrição` (aceita
+também "Texto breve"), `Data-base iníc.`, `Data-base fim`, `Centro custo`,
+`Criado por`.
 
 **Se o D do quadro SQDC não mostrar nada pra um período que você sabe que tem
 ordem**, o motivo quase sempre é a data de referência vindo vazia. Ao

@@ -210,9 +210,6 @@ tbody tr:hover { background: #FAFBFC; }
 .tag.setor-Diesel { background: #DCE6F0; color: #234A6E; }
 .tag.setor-Controle { background: #E3E0F0; color: #4A3A80; }
 .tag.setor-Biela { background: #E1EEE3; color: #2E6B45; }
-.tag.area-Mecânica { background: #EDE4D8; color: #6B4E2E; }
-.tag.area-Elétrica { background: #FDECEA; color: #A13A2A; }
-.tag.area-Outros { background: #E9EBED; color: #5A6672; }
 .tag.status-aberta { background: #FFF3CD; color: #8A6608; }
 .tag.status-recebida { background: #DCE6F0; color: #234A6E; }
 .tag.status-finalizada { background: #DCEFE1; color: #256B3E; }

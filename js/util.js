@@ -117,20 +117,6 @@ function classificarSetor(locInstalacao) {
   return "Biela";
 }
 
-/**
- * Classifica a área a partir da coluna "CenTrab respon." do SAP.
- *  - MUPMEC -> Mecânica
- *  - MUPELE -> Elétrica
- *  - outro  -> Outros
- */
-function classificarArea(cenTrabRespon) {
-  const c = (cenTrabRespon || "").toString().toUpperCase().trim();
-  if (!c) return "Outros";
-  if (c.includes("MUPMEC")) return "Mecânica";
-  if (c.includes("MUPELE")) return "Elétrica";
-  return "Outros";
-}
-
 /** Converte um valor de célula do SAP (Date, serial Excel ou string dd.mm.aaaa) para "YYYY-MM-DD". */
 function paraDataISO(valor) {
   if (valor === null || valor === undefined || valor === "") return null;

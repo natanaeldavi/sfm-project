@@ -22,11 +22,11 @@ const MAPA_CABECALHOS_SAP = {
   datareferencia: "dataReferencia",
   dtreferencia: "dataReferencia",
   datadeentrada: "dataDeEntradaLegado",
-  // "Data da nota"/"Hora da nota": data/hora de abertura da nota no SAP —
-  // usadas só como último recurso, se nem "Dt.referência" nem "Data de
-  // entrada"/"Hora início avaria" existirem na planilha.
-  datadanota: "dataDaNotaLegado",
-  horadanota: "horaDaNotaLegado",
+  // "Data da nota"/"Hora da nota": data/hora real de abertura da nota no
+  // SAP — usadas com prioridade (ver importarPlanilhaSap), já que
+  // "Dt.referência" muda depois que a nota é criada.
+  datadanota: "dataDaNota",
+  horadanota: "horaDaNota",
 };
 
 /**
@@ -143,15 +143,17 @@ function importarPlanilhaSap(arrayBuffer) {
     const numNota = strOuNull(extrair(linha, "nota"));
     if (!numNota) continue;
 
-    // Data de referência: prioriza "Data referência"/"Dt.referência"; se a
-    // planilha não tiver essa coluna, usa "Data de entrada" (nome usado em
-    // outros exports) e, por último, "Data da nota" (data de abertura da
-    // nota no SAP) como alternativas.
-    const dataRefBruta = extrair(linha, "dataReferencia") ?? extrair(linha, "dataDeEntradaLegado") ?? extrair(linha, "dataDaNotaLegado");
-    // Horário: prioriza a coluna separada "Hora início avaria"; se não
-    // existir, tenta "Hora da nota" e, por último, um horário embutido na
-    // própria data de referência.
-    const horaBruta = extrair(linha, "horaInicioAvaria") ?? extrair(linha, "horaDaNotaLegado");
+    // Data de referência: usa "Data da nota" como data de abertura real da
+    // nota — "Dt.referência" muda depois que a nota é criada (ex.: quando a
+    // ordem é de fato gerada/tratada), então sub-contava o dia real de
+    // abertura no D do quadro SQDC. "Dt.referência"/"Data de entrada" só
+    // entram como alternativa em planilhas antigas que não tenham "Data da
+    // nota".
+    const dataRefBruta = extrair(linha, "dataDaNota") ?? extrair(linha, "dataReferencia") ?? extrair(linha, "dataDeEntradaLegado");
+    // Horário: acompanha a mesma coluna usada acima como data ("Hora da
+    // nota" junto de "Data da nota") — "Hora início avaria" só entra como
+    // alternativa se a planilha não tiver "Hora da nota".
+    const horaBruta = extrair(linha, "horaDaNota") ?? extrair(linha, "horaInicioAvaria");
 
     const nota = {
       nota: numNota,
@@ -172,7 +174,6 @@ function importarPlanilhaSap(arrayBuffer) {
       atualizadoEm: new Date().toISOString(),
     };
     nota.setor = classificarSetor(nota.loc);
-    nota.area = classificarArea(nota.centrab);
     mapaNotas.set(nota.nota, nota);
   }
 
@@ -389,14 +390,14 @@ function importarPlanilhaSap(arrayBuffer) {
       resumoImportacao.hidden = false;
       let aviso = `<div class="alerta ok">Planilha lida: ${notasImportadas.length} notas encontradas — ${inseridas} novas gravadas, ${atualizadas} já existiam e foram atualizadas (nunca duplica, é sempre uma linha por nota).</div>`;
 
-      const dataReconhecida = camposReconhecidos.includes("dataReferencia") || camposReconhecidos.includes("dataDeEntradaLegado") || camposReconhecidos.includes("dataDaNotaLegado");
+      const dataReconhecida = camposReconhecidos.includes("dataReferencia") || camposReconhecidos.includes("dataDeEntradaLegado") || camposReconhecidos.includes("dataDaNota");
       const semDataEntrada = notasImportadas.filter((n) => !n.dataEntrada).length;
       if (notasImportadas.length > 0 && !dataReconhecida) {
         aviso += `<div class="alerta erro"><strong>A coluna de data de referência não foi encontrada na planilha.</strong> Sem ela, o D (Controle de Corretivas Realizadas) do quadro SQDC não mostra nenhuma ordem, percentual ou informação — ele filtra tudo por essa data. Abra o diagnóstico abaixo, veja a lista de "Colunas encontradas na planilha" e confira se alguma delas é a data de referência (ex.: "Data referência", "Data de referência" ou "Data de entrada"); se o nome for diferente do esperado, avise para ajustar o reconhecimento e reimporte a planilha (reimportar corrige as notas já gravadas, sem duplicar).</div>`;
       } else if (notasImportadas.length > 0 && semDataEntrada > 0) {
         aviso += `<div class="alerta aviso">${semDataEntrada} de ${notasImportadas.length} notas vieram sem data de referência preenchida na própria célula — essas não vão aparecer no D do quadro SQDC (as demais aparecem normalmente).</div>`;
       }
-      const horaReconhecida = camposReconhecidos.includes("horaInicioAvaria") || camposReconhecidos.includes("horaDaNotaLegado");
+      const horaReconhecida = camposReconhecidos.includes("horaInicioAvaria") || camposReconhecidos.includes("horaDaNota");
       const semHora = notasImportadas.filter((n) => !n.horaEntrada).length;
       if (notasImportadas.length > 0 && !horaReconhecida && semHora === notasImportadas.length) {
         aviso += `<div class="alerta aviso">Nenhuma nota veio com horário — confira se a coluna "Hora início avaria" foi reconhecida (cabeçalhos abaixo).</div>`;
@@ -455,7 +456,6 @@ function importarPlanilhaSap(arrayBuffer) {
           <td>${escaparHtml(n.textoBreve || "—")}</td>
           <td>${escaparHtml(n.equipamento || "—")}</td>
           <td><span class="tag setor-${n.setor}">${n.setor}</span></td>
-          <td><span class="tag area-${n.area}">${n.area}</span></td>
           <td>${escaparHtml(status)}</td>
           <td>${formatarDataBR(n.dataEntrada)}${n.horaEntrada ? " " + escaparHtml(n.horaEntrada) : ""}</td>
           <td><input type="text" class="inputDescricao" placeholder="Descrição breve" disabled style="min-width:180px;"></td>
