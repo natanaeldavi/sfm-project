@@ -85,6 +85,20 @@
       </table>
     </div>
   </div>
+
+  <!-- Só aparece na impressão/PDF, como folha 2 (ver renderTop3Impressao em js/quadro-sfm.js). -->
+  <div id="folhaTop3" hidden>
+    <div class="quadro-folha">
+      <div class="quadro-folha-titulo">
+        <h2>Top 3 Problemas do Mês</h2>
+        <span class="setor-mes" id="top3SetorMes"></span>
+      </div>
+      <table class="top3-tabela">
+        <thead><tr><th>#</th><th>Equipamento</th><th>Descrição</th><th>Tempo parado</th><th>Finalizada em</th></tr></thead>
+        <tbody id="corpoTop3Impressao"></tbody>
+      </table>
+    </div>
+  </div>
 </main>
 
 <script src="bd/dados.js"></script>

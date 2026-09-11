@@ -282,4 +282,22 @@
     print-color-adjust: exact !important;
     color-adjust: exact !important;
   }
+
+  /* Folha 2: Top 3 Problemas do mês (ver #folhaTop3 em quadro-sfm.html e
+   * renderTop3Impressao em js/quadro-sfm.js). Ao contrário de #quadro, não
+   * precisa de posicionamento absoluto em mm — o conteúdo é curto (só 3
+   * linhas), então basta forçar quebra de página e deixar a altura natural. */
+  #folhaTop3 {
+    display: block !important;
+    visibility: visible;
+    page-break-before: always;
+  }
+  #folhaTop3 * { visibility: visible; }
+  #folhaTop3 .quadro-folha { height: auto; display: block; }
+  #folhaTop3 .top3-tabela { width: 100%; border-collapse: collapse; font-size: 11px; }
+  #folhaTop3 .top3-tabela th, #folhaTop3 .top3-tabela td {
+    border: 1px solid #999;
+    padding: 2mm;
+    text-align: left;
+  }
 }

@@ -245,7 +245,7 @@ const QUADRO_META_EFICIENCIA = 70; // %, mesma meta impressa na folha física
     renderDiasEditaveis(setor, dias, hoje);
     renderTabelaD(setor, ano, mes, dias);
     renderTabelaC(setor, ano, mes, dias, hoje);
-    renderTopProblemas(setor, dias);
+    renderTopProblemas(setor, dias, nomeMes);
   }
 
   // ---------- S / Q: grades clicáveis ----------
@@ -432,7 +432,7 @@ const QUADRO_META_EFICIENCIA = 70; // %, mesma meta impressa na folha física
 
   // ---------- Top problemas: máquinas com >=10h de parada, finalizadas no mês do setor atual ----------
 
-  function renderTopProblemas(setor, dias) {
+  function renderTopProblemas(setor, dias, nomeMes) {
     const diasSet = new Set(dias);
     const problemas = DB.dados.passagensTurno.filter((p) =>
       p.setor === setor &&
@@ -453,6 +453,27 @@ const QUADRO_META_EFICIENCIA = 70; // %, mesma meta impressa na folha física
           </tr>`;
         }).join("")
       : `<tr><td colspan="4" style="text-align:center;color:var(--texto-suave);">Nenhuma máquina passou de 10h parada neste mês.</td></tr>`;
+
+    renderTop3Impressao(setor, nomeMes, problemas);
+  }
+
+  /** Folha 2 da impressão (#folhaTop3, ver quadro-sfm.html): só os 3 piores, já que é pra caber numa folha só. */
+  function renderTop3Impressao(setor, nomeMes, problemas) {
+    document.getElementById("top3SetorMes").textContent = `${setor} — ${nomeMes}`;
+    const top3 = problemas.slice(0, 3);
+    const corpo = document.getElementById("corpoTop3Impressao");
+    corpo.innerHTML = top3.length
+      ? top3.map((p, i) => {
+          const nota = DB.buscarNota(p.nota);
+          return `<tr>
+            <td>${i + 1}</td>
+            <td>${escaparHtml(nota?.equipamento || "—")}</td>
+            <td>${escaparHtml(p.descricao)}</td>
+            <td><strong>${formatarDuracaoMinutos(p.tempoParadoMinutos)}</strong></td>
+            <td>${new Date(p.finalizadaEm).toLocaleString("pt-BR")}</td>
+          </tr>`;
+        }).join("")
+      : `<tr><td colspan="5" style="text-align:center;color:var(--texto-suave);">Nenhuma máquina passou de 10h parada neste mês.</td></tr>`;
   }
 
   window.addEventListener("beforeunload", (ev) => {
