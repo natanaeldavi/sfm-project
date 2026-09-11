@@ -15,7 +15,7 @@ const MAPA_CABECALHOS_SAP = {
   databasefim: "dataFim",
   centrocusto: "centroCusto",
   criadopor: "criadoPor",
-  // data de referência (usada como data-base pro painel de SFM) — nomes
+  // data de referência (usada como data-base pro D do quadro SQDC) — nomes
   // exatos mais comuns, incluindo a abreviação real do SAP ("Dt." em vez
   // de "Data"); outras variações são pegas por palavras-chave em
   // encontrarColunaPorPalavras().
@@ -391,9 +391,9 @@ function importarPlanilhaSap(arrayBuffer) {
       const dataReconhecida = camposReconhecidos.includes("dataReferencia") || camposReconhecidos.includes("dataDeEntradaLegado") || camposReconhecidos.includes("dataDaNotaLegado");
       const semDataEntrada = notasImportadas.filter((n) => !n.dataEntrada).length;
       if (notasImportadas.length > 0 && !dataReconhecida) {
-        aviso += `<div class="alerta erro"><strong>A coluna de data de referência não foi encontrada na planilha.</strong> Sem ela, o painel de SFM não mostra nenhuma ordem, percentual ou informação — ele filtra tudo por essa data. Abra o diagnóstico abaixo, veja a lista de "Colunas encontradas na planilha" e confira se alguma delas é a data de referência (ex.: "Data referência", "Data de referência" ou "Data de entrada"); se o nome for diferente do esperado, avise para ajustar o reconhecimento e reimporte a planilha (reimportar corrige as notas já gravadas, sem duplicar).</div>`;
+        aviso += `<div class="alerta erro"><strong>A coluna de data de referência não foi encontrada na planilha.</strong> Sem ela, o D (Controle de Corretivas Realizadas) do quadro SQDC não mostra nenhuma ordem, percentual ou informação — ele filtra tudo por essa data. Abra o diagnóstico abaixo, veja a lista de "Colunas encontradas na planilha" e confira se alguma delas é a data de referência (ex.: "Data referência", "Data de referência" ou "Data de entrada"); se o nome for diferente do esperado, avise para ajustar o reconhecimento e reimporte a planilha (reimportar corrige as notas já gravadas, sem duplicar).</div>`;
       } else if (notasImportadas.length > 0 && semDataEntrada > 0) {
-        aviso += `<div class="alerta aviso">${semDataEntrada} de ${notasImportadas.length} notas vieram sem data de referência preenchida na própria célula — essas não vão aparecer no painel de SFM (as demais aparecem normalmente).</div>`;
+        aviso += `<div class="alerta aviso">${semDataEntrada} de ${notasImportadas.length} notas vieram sem data de referência preenchida na própria célula — essas não vão aparecer no D do quadro SQDC (as demais aparecem normalmente).</div>`;
       }
       const horaReconhecida = camposReconhecidos.includes("horaInicioAvaria") || camposReconhecidos.includes("horaDaNotaLegado");
       const semHora = notasImportadas.filter((n) => !n.horaEntrada).length;

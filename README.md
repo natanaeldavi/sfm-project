@@ -14,7 +14,7 @@ pasta `bd/` na pasta de rede.
 2. Cada pessoa acessa abrindo `login.html` direto no Chrome ou Edge (duplo
    clique, ou "Abrir com..."). Não precisa instalar nada nem ter internet,
    e **não precisa vincular nem escolher nenhum arquivo pra começar** — o
-   login e todas as telas de consulta (painel de SFM, receber turno,
+   login e todas as telas de consulta (quadro SFM, receber turno,
    relatórios) já leem os dados de `bd/` sozinhos, automaticamente.
 3. Só na primeira vez que alguém **salvar** alguma coisa (importar uma
    planilha, criar um usuário, passar turno, finalizar uma passagem), o
@@ -114,7 +114,9 @@ recebida --[finalizar]--> finalizada  (calcula o tempo parado)
   finalização vem preenchido com "agora" mas pode ser alterado (para o caso
   de a máquina ter voltado a funcionar antes).
 - **Mais de 10h parada**: ao finalizar, se o tempo parado passar de 10h, a
-  ordem conta como quebra grave no **C** do quadro SQDC (ver seção abaixo).
+  ordem conta como quebra grave no **C** do quadro SQDC (ver seção abaixo) e
+  aparece na tabela "Top problemas do mês", no final do `quadro-sfm.html`
+  (setor e mês selecionados).
 
 ## Regra da janela da SFM (janela de datas)
 
@@ -169,12 +171,11 @@ a versão em papel.
 
 - **D e C são automáticos**, sem nenhum lançamento manual:
   - **D — Controle de Corretivas Realizadas**: "Realizadas"/"Abertas"/"Pendentes"
-    usam a mesma classificação de "Atendida/Não atendida" já usada no painel de
-    SFM (coluna "Status sistema" da planilha do SAP), agrupada por "Dt.
-    referência". Meta: 70%.
+    usam a classificação de "Atendida/Não atendida" pelo campo "Status sistema"
+    da planilha do SAP, agrupada por "Dt. referência". Meta: 70%.
   - **C — Controle de Quebra Graves**: conta como quebra grave toda máquina
     finalizada em "Receber/Passar Turno" com 10h ou mais de parada — a mesma
-    regra que já alimenta o card "Top problemas" do painel de SFM.
+    regra que alimenta a tabela "Top problemas do mês" no final desta página.
 - **S e Q ainda não têm fonte automática** (não há hoje nenhuma planilha ou
   sistema de segurança/qualidade integrado), então cada dia é marcado à mão
   clicando na célula (cicla: em branco → sem ocorrência, verde → ocorrência,
@@ -234,14 +235,15 @@ manualmente, edite o `.json` e depois abra o sistema uma vez com a pasta
 
 ## Sobre a escolha de setor no menu
 
-Operadores têm setor fixo (o próprio) e não escolhem. Admin/gestor
-escolhem um setor específico para Passar/Receber Turno, ou "Todos" para o
-painel de SFM (que sempre mostra a comparação entre todos os setores — é o
-quadro da reunião).
+Operadores têm setor fixo (o próprio) e não escolhem. Admin/gestor escolhem
+um setor específico no menu (usado por Passar/Receber Turno e pelo
+`quadro-sfm.html`) e podem trocar de setor a qualquer momento, inclusive
+dentro do próprio `quadro-sfm.html` (setas ao lado do seletor de setor).
 
 ## Colunas usadas na importação da planilha do SAP
 
-A data usada como referência pelo painel de SFM vem da coluna **"Dt.
+A data usada como referência para o cálculo de "Atendidas"/"Não atendidas"
+(D do quadro SQDC) vem da coluna **"Dt.
 referência"** (aceita variações como "Data referência"/"Data de
 referência" e, em planilhas mais antigas, "Data de entrada" ou "Data da
 nota" — nessa ordem de prioridade). O horário vem de uma coluna separada,
@@ -256,7 +258,7 @@ a Área — Mecânica/Elétrica/Outros), `Equipamento`, `Loc.instalação` (defi
 o Setor), `Descrição` (aceita também "Texto breve"), `Data-base iníc.`,
 `Data-base fim`, `Centro custo`, `Criado por`.
 
-**Se o painel de SFM não mostrar nada pra um período que você sabe que tem
+**Se o D do quadro SQDC não mostrar nada pra um período que você sabe que tem
 ordem**, o motivo quase sempre é a data de referência vindo vazia. Ao
 importar, se nenhuma nota da planilha tiver essa data reconhecida, aparece
 um aviso na tela — e tem um link "Ver cabeçalhos lidos da planilha

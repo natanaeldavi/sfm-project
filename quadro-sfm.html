@@ -64,16 +64,26 @@
         </tr>
         <tr>
           <td><strong>D — Controle de Corretivas Realizadas</strong></td>
-          <td>Automático, a partir de <code>bd/notas.json</code> (mesma lógica do painel de SFM): "Realizadas" = notas atendidas, "Abertas" = total de notas do dia, "Pendentes" = notas não atendidas, todas pela data de referência (Dt. referência) da planilha do SAP.</td>
+          <td>Automático, a partir de <code>bd/notas.json</code> ("Status sistema" da planilha do SAP): "Realizadas" = notas atendidas, "Abertas" = total de notas do dia, "Pendentes" = notas não atendidas, todas pela data de referência (Dt. referência) da planilha do SAP.</td>
           <td>Se o setor tratar "Realizadas/Abertas/Pendentes" de um jeito diferente de "Atendidas/Total/Não atendidas" (ex.: usando data de fechamento da ordem em vez da data de referência), dá pra ajustar a fórmula — precisa dizer qual coluna do SAP deve valer.</td>
         </tr>
         <tr>
           <td><strong>C — Controle de Quebra Graves</strong></td>
-          <td>Automático, a partir das passagens de turno finalizadas em <code>bd/dados.json</code>: conta como quebra grave toda máquina que ficou parada 10h ou mais (mesma meta usada no "Top problemas" do painel de SFM).</td>
+          <td>Automático, a partir das passagens de turno finalizadas em <code>bd/dados.json</code>: conta como quebra grave toda máquina que ficou parada 10h ou mais (mesma meta usada no "Top problemas do mês", no final desta página).</td>
           <td>Se a definição de "quebra grave" do setor for outra (não só tempo parado — ex.: só quando gera custo de peça, ou outro limite de horas), é só ajustar a meta/regra.</td>
         </tr>
       </tbody>
     </table>
+  </div>
+
+  <div class="card no-print" id="cardTopProblemas">
+    <h2>Top problemas do mês (parada acima de 10h)</h2>
+    <div class="tabela-scroll" style="max-height:260px;">
+      <table>
+        <thead><tr><th>Equipamento</th><th>Descrição</th><th>Tempo parado</th><th>Finalizada em</th></tr></thead>
+        <tbody id="corpoTopProblemas"></tbody>
+      </table>
+    </div>
   </div>
 </main>
 

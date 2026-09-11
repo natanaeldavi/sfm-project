@@ -245,6 +245,7 @@ const QUADRO_META_EFICIENCIA = 70; // %, mesma meta impressa na folha física
     renderDiasEditaveis(setor, dias, hoje);
     renderTabelaD(setor, ano, mes, dias);
     renderTabelaC(setor, ano, mes, dias, hoje);
+    renderTopProblemas(setor, dias);
   }
 
   // ---------- S / Q: grades clicáveis ----------
@@ -427,6 +428,31 @@ const QUADRO_META_EFICIENCIA = 70; // %, mesma meta impressa na folha física
         scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
       },
     });
+  }
+
+  // ---------- Top problemas: máquinas com >=10h de parada, finalizadas no mês do setor atual ----------
+
+  function renderTopProblemas(setor, dias) {
+    const diasSet = new Set(dias);
+    const problemas = DB.dados.passagensTurno.filter((p) =>
+      p.setor === setor &&
+      p.status === "finalizada" &&
+      p.tempoParadoMinutos >= LIMITE_PARADA_MINUTOS &&
+      p.finalizadaEm && diasSet.has(formatarDataISO(new Date(p.finalizadaEm)))
+    ).sort((a, b) => b.tempoParadoMinutos - a.tempoParadoMinutos);
+
+    const corpo = document.getElementById("corpoTopProblemas");
+    corpo.innerHTML = problemas.length
+      ? problemas.map((p) => {
+          const nota = DB.buscarNota(p.nota);
+          return `<tr>
+            <td>${escaparHtml(nota?.equipamento || "—")}</td>
+            <td>${escaparHtml(p.descricao)}</td>
+            <td><strong>${formatarDuracaoMinutos(p.tempoParadoMinutos)}</strong></td>
+            <td>${new Date(p.finalizadaEm).toLocaleString("pt-BR")}</td>
+          </tr>`;
+        }).join("")
+      : `<tr><td colspan="4" style="text-align:center;color:var(--texto-suave);">Nenhuma máquina passou de 10h parada neste mês.</td></tr>`;
   }
 
   window.addEventListener("beforeunload", (ev) => {
