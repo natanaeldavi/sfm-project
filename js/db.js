@@ -59,8 +59,19 @@ const DB = {
     return typeof window.showDirectoryPicker === "function";
   },
 
+  /** Pede armazenamento persistente ao navegador: reduz a chance de o Chrome
+   * revogar sozinho a permissão da pasta "bd" (e limpar o IndexedDB onde o
+   * handle fica salvo) por falta de uso ou pressão de espaço em disco.
+   * Não substitui rodar via servidor local — só ajuda dentro do file://. */
+  pedirArmazenamentoPersistente() {
+    if (navigator.storage && navigator.storage.persist) {
+      navigator.storage.persist().catch(() => {});
+    }
+  },
+
   /** Lê os dados carregados via <script src="bd/dados.js"> / <script src="bd/notas.js">. Síncrono, sem nenhuma permissão. */
   carregarAutoLoad() {
+    this.pedirArmazenamentoPersistente();
     if (window.__SFM_DADOS__) {
       this.dados = window.__SFM_DADOS__;
       this.autoLoadOk = true;
