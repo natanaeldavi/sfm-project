@@ -33,9 +33,12 @@
   const campoDefeito = document.getElementById("campoDefeito");
   const campoMaquina = document.getElementById("campoMaquina");
   const campoCelula = document.getElementById("campoCelula");
+  const campoHoraDefeito = document.getElementById("campoHoraDefeito");
   const campoDescricao = document.getElementById("campoDescricao");
   const btnAdicionarOrdem = document.getElementById("btnAdicionarOrdem");
   const msgNovaOrdem = document.getElementById("msgNovaOrdem");
+
+  campoHoraDefeito.value = paraDatetimeLocal(new Date());
 
   const cardTabela = document.getElementById("cardTabela");
   const cardSalvar = document.getElementById("cardSalvar");
@@ -204,18 +207,27 @@
     const maquina = campoMaquina.value.trim();
     const celula = campoCelula.value.trim();
     const descricao = campoDescricao.value.trim();
+    const horaDefeitoValor = campoHoraDefeito.value;
 
-    if (!defeito || !maquina || !descricao) {
-      msgNovaOrdem.textContent = "Preencha ao menos Defeito, Máquina e Descrição.";
+    if (!defeito || !maquina || !descricao || !horaDefeitoValor) {
+      msgNovaOrdem.textContent = "Preencha ao menos Defeito, Máquina, Horário do defeito e Descrição.";
       msgNovaOrdem.style.color = "var(--vermelho-alerta)";
       return;
     }
 
-    pendentes.push({ defeito, maquina, celula, descricao });
+    const horaDefeito = new Date(horaDefeitoValor);
+    if (horaDefeito > new Date()) {
+      msgNovaOrdem.textContent = "O horário do defeito não pode estar no futuro.";
+      msgNovaOrdem.style.color = "var(--vermelho-alerta)";
+      return;
+    }
+
+    pendentes.push({ defeito, maquina, celula, descricao, inicioParadaEm: horaDefeito.toISOString() });
     campoDefeito.value = "";
     campoMaquina.value = "";
     campoCelula.value = "";
     campoDescricao.value = "";
+    campoHoraDefeito.value = paraDatetimeLocal(new Date());
     campoDefeito.focus();
     msgNovaOrdem.textContent = "";
     renderTabelaPendentes();
@@ -230,10 +242,11 @@
           <td>${escaparHtml(p.defeito)}</td>
           <td>${escaparHtml(p.maquina)}</td>
           <td>${escaparHtml(p.celula || "—")}</td>
+          <td>${new Date(p.inicioParadaEm).toLocaleString("pt-BR")}</td>
           <td>${escaparHtml(p.descricao)}</td>
           <td><button type="button" class="secundario btnRemoverPendente">Remover</button></td>
         </tr>`).join("")
-      : `<tr><td colspan="5" style="text-align:center;color:var(--texto-suave);">Nenhuma ordem adicionada ainda.</td></tr>`;
+      : `<tr><td colspan="6" style="text-align:center;color:var(--texto-suave);">Nenhuma ordem adicionada ainda.</td></tr>`;
 
     corpoTabela.querySelectorAll(".btnRemoverPendente").forEach((btn) => {
       btn.addEventListener("click", () => {
@@ -252,7 +265,8 @@
       if (!confirmou) return;
     }
 
-    const agora = new Date().toISOString();
+    const agoraDate = new Date();
+    const agora = agoraDate.toISOString();
     const ordensParaEvento = [];
 
     for (const p of pendentes) {
@@ -265,7 +279,7 @@
         celula: p.celula || null,
         descricao: p.descricao,
         dataHora: agora,
-        inicioParadaEm: agora,
+        inicioParadaEm: p.inicioParadaEm,
         status: "aberta",
         recebidoPor: null,
         recebidoEm: null,
@@ -274,12 +288,16 @@
         finalizadoPor: null,
         registradoPor: usuario.nome,
       });
+      // Tempo parado até o momento de passar, calculado a partir do
+      // horário real do defeito (não de agora) — a máquina pode já estar
+      // parada há um tempo quando a ordem é cadastrada.
+      const tempoParadoMinutos = Math.max(0, Math.round((agoraDate - new Date(p.inicioParadaEm)) / 60000));
       ordensParaEvento.push({
         defeito: p.defeito,
         maquina: p.maquina,
         celula: p.celula || null,
         descricao: p.descricao,
-        tempoParadoMinutos: 0, // acabou de começar a parar agora
+        tempoParadoMinutos,
       });
     }
 
