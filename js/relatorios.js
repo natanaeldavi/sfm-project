@@ -97,7 +97,9 @@
 
     corpoTabelaPT.innerHTML = lista.map((p) => `
       <tr>
-        <td>${escaparHtml(p.nota)}</td>
+        <td>${escaparHtml(p.defeito || "—")}</td>
+        <td>${escaparHtml(p.maquina || "—")}</td>
+        <td>${escaparHtml(p.celula || "—")}</td>
         <td><span class="tag setor-${p.setor}">${p.setor}</span></td>
         <td>${escaparHtml(p.turno)}</td>
         <td>${escaparHtml(p.descricao)}</td>
@@ -108,7 +110,7 @@
         <td>${p.recebidoEm ? new Date(p.recebidoEm).toLocaleString("pt-BR") : "—"}</td>
         <td>${p.finalizadaEm ? new Date(p.finalizadaEm).toLocaleString("pt-BR") : "—"}</td>
         <td>${formatarDuracaoMinutos(p.tempoParadoMinutos)}</td>
-      </tr>`).join("") || `<tr><td colspan="11" style="text-align:center;color:var(--texto-suave);">Nenhuma passagem encontrada.</td></tr>`;
+      </tr>`).join("") || `<tr><td colspan="13" style="text-align:center;color:var(--texto-suave);">Nenhuma passagem encontrada.</td></tr>`;
   }
 
   // ---------- Eventos de passagem de turno (log permanente — ver DB.registrarEventoPassagem) ----------
@@ -157,12 +159,12 @@
         detalhe.className = "linha-detalhe-ep";
         detalhe.innerHTML = `<td colspan="9">
           <table style="margin:4px 0;">
-            <thead><tr><th>Nota</th><th>Ordem</th><th>Equipamento</th><th>Descrição</th><th>Parada até aquele momento</th></tr></thead>
+            <thead><tr><th>Defeito</th><th>Máquina</th><th>Célula</th><th>Descrição</th><th>Parada até aquele momento</th></tr></thead>
             <tbody>
               ${evento.ordens.map((o) => `<tr>
-                <td>${escaparHtml(o.nota)}</td>
-                <td>${escaparHtml(o.ordem || "—")}</td>
-                <td>${escaparHtml(o.equipamento || "—")}</td>
+                <td>${escaparHtml(o.defeito || "—")}</td>
+                <td>${escaparHtml(o.maquina || "—")}</td>
+                <td>${escaparHtml(o.celula || "—")}</td>
                 <td>${escaparHtml(o.descricao || "—")}</td>
                 <td>${formatarDuracaoMinutos(o.tempoParadoMinutos)}</td>
               </tr>`).join("")}

@@ -54,7 +54,7 @@
     btnReceberTudo.hidden = abertas.length === 0;
 
     if (abertas.length === 0) {
-      corpoTabela.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--texto-suave);">Nenhuma passagem de turno aguardando recebimento.</td></tr>`;
+      corpoTabela.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--texto-suave);">Nenhuma passagem de turno aguardando recebimento.</td></tr>`;
       mostrarAlerta(alerta, "ok", `Não há nenhuma ordem aguardando recebimento no setor ${setorAtivo} no momento.`);
       return;
     }
@@ -66,14 +66,12 @@
     }
 
     corpoTabela.innerHTML = abertas.map((p) => {
-      const nota = DB.buscarNota(p.nota);
       const quando = p.dataHora ? new Date(p.dataHora).toLocaleString("pt-BR") : "—";
       return `
         <tr>
-          <td>${escaparHtml(p.nota)}</td>
-          <td>${escaparHtml(nota?.ordem || "—")}</td>
-          <td>${escaparHtml(nota?.equipamento || "—")}</td>
-          <td>${escaparHtml(nota?.textoBreve || "—")}</td>
+          <td>${escaparHtml(p.defeito || "—")}</td>
+          <td>${escaparHtml(p.maquina || "—")}</td>
+          <td>${escaparHtml(p.celula || "—")}</td>
           <td>${escaparHtml(p.descricao)}</td>
           <td>${escaparHtml(p.turno)}</td>
           <td>${escaparHtml(p.registradoPor)}</td>
@@ -93,20 +91,18 @@
 
     corpoAndamento.innerHTML = emAndamento.length
       ? emAndamento.map((p) => {
-          const nota = DB.buscarNota(p.nota);
           const quando = p.recebidoEm ? new Date(p.recebidoEm).toLocaleString("pt-BR") : "—";
           return `
             <tr>
-              <td>${escaparHtml(p.nota)}</td>
-              <td>${escaparHtml(nota?.ordem || "—")}</td>
-              <td>${escaparHtml(nota?.equipamento || "—")}</td>
-              <td>${escaparHtml(nota?.textoBreve || "—")}</td>
+              <td>${escaparHtml(p.defeito || "—")}</td>
+              <td>${escaparHtml(p.maquina || "—")}</td>
+              <td>${escaparHtml(p.celula || "—")}</td>
               <td>${escaparHtml(p.descricao)}</td>
               <td>${escaparHtml(p.recebidoPor || "—")}</td>
               <td>${quando}</td>
             </tr>`;
         }).join("")
-      : `<tr><td colspan="7" style="text-align:center;color:var(--texto-suave);">Nada em acompanhamento no momento.</td></tr>`;
+      : `<tr><td colspan="6" style="text-align:center;color:var(--texto-suave);">Nada em acompanhamento no momento.</td></tr>`;
   }
 
   btnReceberTudo.addEventListener("click", async () => {

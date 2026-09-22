@@ -18,7 +18,7 @@
 
 <main>
   <h1>Passar Turno</h1>
-  <p class="subtitulo">Importe a planilha do SAP e marque as ordens do seu setor que estão sendo passadas para o próximo turno.</p>
+  <p class="subtitulo">Vers&atilde;o piloto: cadastre manualmente as ordens do seu setor que est&atilde;o sendo passadas para o pr&oacute;ximo turno &mdash; sem depender da importa&ccedil;&atilde;o autom&aacute;tica do SAP, que continua sendo feita uma vez por dia na tela SFM.</p>
 
   <div id="dbStatus" class="db-status"></div>
   <div id="alerta" hidden></div>
@@ -30,9 +30,9 @@
       <table>
         <thead>
           <tr>
-            <th>Nota</th>
-            <th>Ordem</th>
-            <th>Equipamento</th>
+            <th>Defeito</th>
+            <th>Máquina</th>
+            <th>Célula</th>
             <th>Parada desde</th>
             <th>Descrição</th>
             <th style="min-width:280px;">Ação</th>
@@ -43,28 +43,34 @@
     </div>
   </div>
 
-  <div class="card" id="cardImportar">
-    <h2>2. Importar planilha do SAP (.xlsx)</h2>
+  <div class="card" id="cardNovaOrdem">
+    <h2>2. Nova ordem para passar (preenchimento manual)</h2>
+    <p class="subtitulo" style="margin-bottom:10px;">Não precisa de número de ordem/nota nem código de máquina — só os dados abaixo, pra identificar a parada até a SFM importar a planilha do SAP.</p>
     <div class="linha-campos">
-      <div class="campo" style="flex:2;">
-        <label for="inputXlsx">Arquivo exportado do SAP</label>
-        <input type="file" id="inputXlsx" accept=".xlsx,.xls">
+      <div class="campo">
+        <label for="campoDefeito">Defeito</label>
+        <input type="text" id="campoDefeito" placeholder="Ex.: vazamento hidráulico">
       </div>
+      <div class="campo">
+        <label for="campoMaquina">Máquina</label>
+        <input type="text" id="campoMaquina" placeholder="Ex.: prensa 3">
+      </div>
+      <div class="campo">
+        <label for="campoCelula">Célula</label>
+        <input type="text" id="campoCelula" placeholder="Ex.: célula 2">
+      </div>
+      <div class="campo" style="flex:2;">
+        <label for="campoDescricao">Descrição</label>
+        <input type="text" id="campoDescricao" placeholder="Descrição breve da ocorrência">
+      </div>
+      <button type="button" id="btnAdicionarOrdem" style="margin-top:18px;">Adicionar à lista</button>
     </div>
-    <div id="resumoImportacao" hidden></div>
+    <p class="rodape-nota" id="msgNovaOrdem" style="text-align:left;"></p>
   </div>
 
   <div class="card" id="cardTabela" hidden>
-    <h2>3. Novas ordens do setor para passar</h2>
+    <h2>3. Ordens do setor a passar neste turno</h2>
     <div class="toolbar">
-      <div class="campo" style="margin:0;min-width:220px;">
-        <label for="buscaTexto">Buscar</label>
-        <input type="text" id="buscaTexto" placeholder="Nota, ordem, texto, equipamento...">
-      </div>
-      <label class="checkbox-linha" style="margin-top:18px;">
-        <input type="checkbox" id="chkTodosSetores">
-        Mostrar todos os setores
-      </label>
       <div class="espaco"></div>
       <span class="contagem-pill" id="contagemLinhas"></span>
     </div>
@@ -72,15 +78,11 @@
       <table>
         <thead>
           <tr>
+            <th>Defeito</th>
+            <th>Máquina</th>
+            <th>Célula</th>
+            <th>Descrição</th>
             <th></th>
-            <th>Nota</th>
-            <th>Ordem</th>
-            <th>Texto breve</th>
-            <th>Equipamento</th>
-            <th>Setor</th>
-            <th>Status</th>
-            <th>Entrada</th>
-            <th>Descrição da passagem</th>
           </tr>
         </thead>
         <tbody id="corpoTabela"></tbody>
@@ -90,14 +92,13 @@
 
   <div class="card" id="cardSalvar" hidden>
     <h2>4. Registrar passagem de turno</h2>
-    <p class="subtitulo" style="margin-bottom:10px;">Marque acima as ordens que estão sendo passadas. Se não houver nenhuma pra passar, pode salvar assim mesmo — o sistema confirma antes.</p>
+    <p class="subtitulo" style="margin-bottom:10px;">Adicione acima as ordens que estão sendo passadas. Se não houver nenhuma pra passar, pode salvar assim mesmo — o sistema confirma antes.</p>
     <p class="subtitulo" id="turnoInfo" style="margin-bottom:10px;"></p>
     <button type="button" id="btnSalvarPassagem">Salvar passagem de turno</button>
     <span id="msgSalvar" style="margin-left:10px;font-size:12px;"></span>
   </div>
 </main>
 
-<script src="js/xlsx.full.min.js"></script>
 <script src="js/util.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/db.js"></script>

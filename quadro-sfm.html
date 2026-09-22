@@ -24,6 +24,18 @@
   <div id="dbStatus" class="db-status no-print"></div>
   <div id="alerta" hidden></div>
 
+  <div class="card no-print" id="cardImportar">
+    <h2>Importar planilha do SAP (.xlsx)</h2>
+    <p class="subtitulo" style="margin-bottom:10px;">Versão piloto: a planilha é importada aqui, uma vez por dia na hora da SFM — alimenta as notas usadas no D (Corretivas) e nos Relatórios. Durante o turno, as ordens são passadas manualmente em Passar Turno.</p>
+    <div class="linha-campos">
+      <div class="campo" style="flex:2;">
+        <label for="inputXlsx">Arquivo exportado do SAP</label>
+        <input type="file" id="inputXlsx" accept=".xlsx,.xls">
+      </div>
+    </div>
+    <div id="resumoImportacao" hidden></div>
+  </div>
+
   <div class="card no-print" id="cardFiltros">
     <div class="toolbar">
       <div class="campo" style="margin:0;min-width:220px;" id="campoSetor">
@@ -80,7 +92,7 @@
     <h2>Top problemas do dia (parada acima de 10h)</h2>
     <div class="tabela-scroll" style="max-height:260px;">
       <table>
-        <thead><tr><th>Equipamento</th><th>Descrição</th><th>Tempo parado</th><th>Finalizada em</th></tr></thead>
+        <thead><tr><th>Máquina</th><th>Descrição</th><th>Tempo parado</th><th>Finalizada em</th></tr></thead>
         <tbody id="corpoTopProblemas"></tbody>
       </table>
     </div>
@@ -94,13 +106,14 @@
         <span class="setor-mes" id="top3SetorMes"></span>
       </div>
       <table class="top3-tabela">
-        <thead><tr><th>#</th><th>Equipamento</th><th>Descrição</th><th>Tempo parado</th><th>Finalizada em</th></tr></thead>
+        <thead><tr><th>#</th><th>Máquina</th><th>Descrição</th><th>Tempo parado</th><th>Finalizada em</th></tr></thead>
         <tbody id="corpoTop3Impressao"></tbody>
       </table>
     </div>
   </div>
 </main>
 
+<script src="js/xlsx.full.min.js"></script>
 <script src="js/chart.umd.min.js"></script>
 <script src="js/util.js"></script>
 <script src="js/auth.js"></script>
