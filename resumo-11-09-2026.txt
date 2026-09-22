@@ -1,0 +1,71 @@
+RESUMO DAS ATUALIZAÇÕES DO SISTEMA SFM - 11/09/2026
+=====================================================
+
+Em uma frase: o sistema ficou mais simples de operar no dia a dia (menos
+botões, menos confusão) e passou a guardar um histórico permanente de
+cada passagem de turno - coisa que antes se perdia a cada troca.
+
+
+1. PASSAGEM DE TURNO - mais simples de passar, e agora com histórico
+---------------------------------------------------------------------
+- Um botão só pra fechar o turno. "Salvar passagem de turno" agora cobre
+  os dois casos - com ordens pra passar, ou sem nenhuma (nesse caso, pede
+  uma confirmação antes de liberar o operador).
+  Antes: existiam dois botões quase com o mesmo nome ("Concluir passagem"
+  e "Salvar passagem"), e dava pra esquecer um dos dois.
+
+- Toda passagem agora fica registrada pra sempre, com número sequencial,
+  turno de origem e destino, quem passou, quem recebeu, quando cada coisa
+  aconteceu, e quanto tempo cada máquina já estava parada naquele
+  momento - dá pra auditar depois, em Relatórios.
+  Antes: só existia o estado mais recente de cada ordem; o histórico de
+  repasses anteriores se perdia.
+
+- Relatórios de gestão agora deixam filtrar as passagens de turno por
+  período (data de/até), tanto na lista de ordens quanto na lista de
+  eventos.
+
+
+2. QUADRO SFM - dá pra ver o quadro como ele estava em qualquer dia
+---------------------------------------------------------------------
+- Seletor de dia, não só de mês. Escolhendo uma data passada, o quadro
+  inteiro (Safety, Quality, Delivery, Cost) volta a mostrar exatamente o
+  que estava marcado até aquele dia - nada de dias posteriores aparecendo
+  antes da hora.
+
+- Top problemas do dia (máquinas paradas mais de 10h) segue essa mesma
+  data selecionada, tanto na tela quanto numa segunda folha ao imprimir
+  o quadro.
+
+- Removida a exigência de um "responsável SFM" fixo por setor. Qualquer
+  operador do turno da manhã do setor já pode preencher o quadro do dia -
+  não precisa mais o admin escolher uma pessoa específica em
+  Administração.
+  Antes: só uma pessoa marcada como responsável (por setor) conseguia
+  preencher, e precisava ser reatribuída manualmente se essa pessoa
+  trocasse de turno ou setor.
+
+
+3. ADMINISTRAÇÃO - editar usuário ficou mais rápido
+---------------------------------------------------------------------
+- Setor e turno agora se editam direto na tabela e são salvos todos
+  juntos com um único clique em "Salvar alterações", com aviso se você
+  tentar sair da página com mudanças pendentes.
+  Antes: turno tinha um botão de salvar por linha, e trocar o setor de um
+  operador não era possível depois de criado.
+
+
+4. FAXINA - limpeza do que não era mais usado
+---------------------------------------------------------------------
+- Removida a aba "Painel da Reunião", que não estava mais em uso - a
+  informação que só existia lá (comparação de paradas longas entre
+  setores) já foi incorporada à aba SFM.
+
+- Menos pedidos de permissão do navegador pra acessar a pasta de dados da
+  rede, com um ajuste técnico que reduz a chance do Chrome esquecer o
+  vínculo sozinho.
+
+
+---------------------------------------------------------------------
+Tudo testado e já enviado ao repositório (main), sincronizado com o
+GitHub. Nenhuma pendência em aberto.

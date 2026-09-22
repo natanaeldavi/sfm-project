@@ -184,12 +184,12 @@ function importarPlanilhaSap(arrayBuffer) {
   };
 }
 
-(function () {
+(async function () {
   const usuario = Auth.exigirLogin();
   if (!usuario) return;
   Auth.garantirSetorOperador(usuario);
 
-  DB.carregarAutoLoad();
+  await DB.carregarAutoLoad();
   Auth.atualizarUsuarioDoBanco(usuario);
   if (Auth.aplicarGateRecebimento(usuario)) return;
 

@@ -1,2 +1,6 @@
 claude.exe
 *.zip
+app-python/build/
+app-python/dist/
+app-python/__pycache__/
+app-python/*.spec

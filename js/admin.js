@@ -1,6 +1,6 @@
 /* SFM — admin.html (somente papel admin) */
 
-(function () {
+(async function () {
   const usuario = Auth.exigirPapel(["admin"]);
   if (!usuario) return;
   montarTopbar(document.getElementById("topbar"), usuario, "Administração");
@@ -68,7 +68,7 @@
   const msgSalvarUsuarios = document.getElementById("msgSalvarUsuarios");
   let usuariosSujo = false; // há mudanças de turno/responsável ainda não salvas
 
-  DB.carregarAutoLoad();
+  await DB.carregarAutoLoad();
   Auth.atualizarUsuarioDoBanco(usuario);
   if (Auth.aplicarGatePassagemObrigatoria(usuario)) return;
   if (Auth.aplicarGateRecebimento(usuario)) return;

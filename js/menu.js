@@ -5,7 +5,7 @@
   if (!usuario) return;
   Auth.garantirSetorOperador(usuario);
 
-  DB.carregarAutoLoad();
+  await DB.carregarAutoLoad();
   Auth.atualizarUsuarioDoBanco(usuario);
   if (Auth.aplicarGatePassagemObrigatoria(usuario)) return;
   if (Auth.aplicarGateRecebimento(usuario)) return;

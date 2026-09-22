@@ -7,7 +7,7 @@
  * tempo parado) acontece depois, na tela de Passar Turno.
  */
 
-(function () {
+(async function () {
   const usuario = Auth.exigirLogin();
   if (!usuario) return;
   Auth.garantirSetorOperador(usuario);
@@ -29,7 +29,7 @@
   const corpoAndamento = document.getElementById("corpoAndamento");
   const contagemAndamento = document.getElementById("contagemAndamento");
 
-  DB.carregarAutoLoad();
+  await DB.carregarAutoLoad();
   Auth.atualizarUsuarioDoBanco(usuario);
   if (Auth.aplicarGatePassagemObrigatoria(usuario)) return;
   cardLista.hidden = false;

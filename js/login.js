@@ -1,7 +1,7 @@
 /* SFM — login.html */
 
-(function () {
-  DB.carregarAutoLoad();
+(async function () {
+  await DB.carregarAutoLoad();
 
   // Se já estiver logado, vai direto pro destino certo (menu ou recebimento pendente).
   const jaLogado = Auth.getUsuario();
@@ -17,12 +17,8 @@
 
   if (!DB.autoLoadOk) {
     mostrarAlerta(alertaLogin, "erro",
-      'Não encontrei "bd/dados.js". Confirme que a pasta "bd" está na mesma pasta que o login.html.');
+      "Não foi possível carregar os dados do servidor local. Confirme que o SFM.exe está rodando.");
   }
-  // Login não salva nada (a sessão fica só no navegador) — não checa nem
-  // pede permissão da pasta "bd" aqui. Isso evita confirmar acesso à pasta
-  // de rede antes mesmo de entrar no sistema; a checagem/pedido de permissão
-  // só acontece nas telas que realmente salvam algo.
 
   form.addEventListener("submit", async (ev) => {
     ev.preventDefault();

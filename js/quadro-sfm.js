@@ -24,12 +24,12 @@
 
 const QUADRO_META_EFICIENCIA = 70; // %, mesma meta impressa na folha física
 
-(function () {
+(async function () {
   const usuario = Auth.exigirLogin();
   if (!usuario) return;
   Auth.garantirSetorOperador(usuario);
 
-  DB.carregarAutoLoad();
+  await DB.carregarAutoLoad();
   Auth.atualizarUsuarioDoBanco(usuario);
   if (Auth.aplicarGatePassagemObrigatoria(usuario)) return;
   if (Auth.aplicarGateRecebimento(usuario)) return;

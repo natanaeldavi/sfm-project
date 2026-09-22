@@ -1,6 +1,6 @@
 /* SFM — relatorios.html (papéis gestor e admin) */
 
-(function () {
+(async function () {
   const usuario = Auth.exigirPapel(["gestor", "admin"]);
   if (!usuario) return;
   montarTopbar(document.getElementById("topbar"), usuario, "Relatórios");
@@ -33,7 +33,7 @@
     sel.innerHTML += SETORES.map((s) => `<option value="${s}">${s}</option>`).join("");
   }
 
-  DB.carregarAutoLoad();
+  await DB.carregarAutoLoad();
   conteudo.hidden = false;
   renderNotas();
   renderPassagens();
