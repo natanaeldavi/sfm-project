@@ -228,7 +228,7 @@ function importarPlanilhaSap(arrayBuffer) {
   if (!usuario) return;
   Auth.garantirSetorOperador(usuario);
 
-  await DB.carregarAutoLoad();
+  await DB.carregarAutoLoad({ notas: true, quadro: true });
   Auth.atualizarUsuarioDoBanco(usuario);
   if (Auth.aplicarGatePassagemObrigatoria(usuario)) return;
   if (Auth.aplicarGateRecebimento(usuario)) return;
@@ -544,26 +544,41 @@ function importarPlanilhaSap(arrayBuffer) {
     return (nota.statusSistema || "").toUpperCase().includes("MSPN");
   }
 
+  // Índices por dia (dataISO -> stats), construídos 1x por renderizar() pelo
+  // setor exibido — statsCorretivasDia/quebrasGravesDia são chamadas ~60x
+  // por render (mês atual + mês anterior, D e C), e DB.notas só cresce (nunca
+  // é podado), então escanear a lista inteira a cada chamada fica caro à
+  // medida que o histórico aumenta. Ver construirIndicesDC.
+  let notasIndexAtual = null;
+  let quebrasIndexAtual = null;
+
+  function construirIndicesDC(setor) {
+    notasIndexAtual = new Map();
+    for (const n of DB.notas) {
+      if (n.setor !== setor || !n.dataEntrada) continue;
+      let s = notasIndexAtual.get(n.dataEntrada);
+      if (!s) { s = { total: 0, realizadas: 0, pendentes: 0 }; notasIndexAtual.set(n.dataEntrada, s); }
+      s.total++;
+      if (notaNaoAtendida(n)) s.pendentes++; else s.realizadas++;
+    }
+
+    quebrasIndexAtual = new Map();
+    for (const p of DB.dados.passagensTurno) {
+      if (p.setor !== setor || p.status !== "finalizada" || !p.finalizadaEm) continue;
+      if (p.tempoParadoMinutos < LIMITE_PARADA_MINUTOS) continue;
+      const dia = formatarDataISO(new Date(p.finalizadaEm));
+      quebrasIndexAtual.set(dia, (quebrasIndexAtual.get(dia) || 0) + 1);
+    }
+  }
+
   /** Realizadas = atendidas, Abertas = total de notas com Dt. referência = dia, Pendentes = não atendidas. */
   function statsCorretivasDia(setor, dataISO) {
-    let total = 0, realizadas = 0, pendentes = 0;
-    for (const n of DB.notas) {
-      if (n.setor !== setor || n.dataEntrada !== dataISO) continue;
-      total++;
-      if (notaNaoAtendida(n)) pendentes++; else realizadas++;
-    }
-    return { total, realizadas, pendentes };
+    return notasIndexAtual?.get(dataISO) || { total: 0, realizadas: 0, pendentes: 0 };
   }
 
   /** Nº de máquinas que passaram de 10h de parada e foram finalizadas neste dia. */
   function quebrasGravesDia(setor, dataISO) {
-    let n = 0;
-    for (const p of DB.dados.passagensTurno) {
-      if (p.setor !== setor || p.status !== "finalizada" || !p.finalizadaEm) continue;
-      if (formatarDataISO(new Date(p.finalizadaEm)) !== dataISO) continue;
-      if (p.tempoParadoMinutos >= LIMITE_PARADA_MINUTOS) n++;
-    }
-    return n;
+    return quebrasIndexAtual?.get(dataISO) || 0;
   }
 
   /** true = tem problema (vermelho) em Safety, Quality ou Cost neste dia. */
@@ -594,6 +609,7 @@ function importarPlanilhaSap(arrayBuffer) {
     sujo = false;
     const setor = setorAtual();
     if (!setor) { quadroEl.innerHTML = ""; return; }
+    construirIndicesDC(setor);
 
     const diaSelecionado = seletorDia.value;
     const [anoStr, mesStr] = diaSelecionado.split("-");

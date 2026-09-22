@@ -9,6 +9,14 @@
  * /api/dados, /api/notas, /api/quadro — o servidor lê/escreve esses arquivos
  * como arquivos comuns do sistema, então não pede nenhuma permissão de pasta
  * ao navegador.
+ *
+ * bd/notas.json só cresce (acumula toda nota já importada do SAP, nunca é
+ * podado) — num setor com bastante movimento ele fica bem maior que os
+ * outros dois arquivos, e como bd/ normalmente é uma pasta de rede, ler
+ * esse arquivo tem um custo real (round-trip de rede a cada leitura). Por
+ * isso carregarAutoLoad só busca notas.json/quadro.json nas páginas que
+ * realmente usam DB.notas/DB.quadro (Admin, Quadro SFM, Relatórios) — o
+ * restante (login, menu, passar/receber turno) carrega só dados.json.
  */
 
 const DB = {
@@ -36,17 +44,25 @@ const DB = {
     if (!resp.ok) throw new Error(`Falha ao salvar ${chave}`);
   },
 
-  /** Carrega os três bancos do servidor local. Chamar (com await) no início de cada página. */
-  async carregarAutoLoad() {
+  _ultimasOpcoesCarga: {},
+
+  /**
+   * Carrega bd/dados.json (sempre) e, sob pedido, bd/notas.json e/ou
+   * bd/quadro.json — chamar (com await) no início de cada página, passando
+   * { notas: true } e/ou { quadro: true } só se a página realmente usa
+   * DB.notas/DB.quadro. Ver nota sobre notas.json no topo do arquivo.
+   */
+  async carregarAutoLoad(opcoes = {}) {
+    this._ultimasOpcoesCarga = opcoes;
     try {
-      const [dados, notas, quadro] = await Promise.all([
-        this._buscar("dados"),
-        this._buscar("notas"),
-        this._buscar("quadro"),
-      ]);
-      this.dados = dados;
-      this.notas = notas;
-      this.quadro = quadro;
+      const promessas = { dados: this._buscar("dados") };
+      if (opcoes.notas) promessas.notas = this._buscar("notas");
+      if (opcoes.quadro) promessas.quadro = this._buscar("quadro");
+
+      const chaves = Object.keys(promessas);
+      const resultados = await Promise.all(chaves.map((k) => promessas[k]));
+      chaves.forEach((k, i) => { this[k] = resultados[i]; });
+
       this.autoLoadOk = true;
     } catch {
       this.autoLoadOk = false;
@@ -78,9 +94,9 @@ const DB = {
     await this._salvar("quadro", this.quadro);
   },
 
-  /** Recarrega os três bancos do servidor, descartando alterações locais não salvas. */
+  /** Recarrega os bancos do servidor (os mesmos da última chamada a carregarAutoLoad), descartando alterações locais não salvas. */
   async recarregarDoDisco() {
-    await this.carregarAutoLoad();
+    await this.carregarAutoLoad(this._ultimasOpcoesCarga);
   },
 
   // ---------- Consultas auxiliares ----------

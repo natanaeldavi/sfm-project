@@ -68,7 +68,7 @@
   const msgSalvarUsuarios = document.getElementById("msgSalvarUsuarios");
   let usuariosSujo = false; // há mudanças de turno/responsável ainda não salvas
 
-  await DB.carregarAutoLoad();
+  await DB.carregarAutoLoad({ notas: true });
   Auth.atualizarUsuarioDoBanco(usuario);
   if (Auth.aplicarGatePassagemObrigatoria(usuario)) return;
   if (Auth.aplicarGateRecebimento(usuario)) return;

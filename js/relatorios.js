@@ -33,7 +33,7 @@
     sel.innerHTML += SETORES.map((s) => `<option value="${s}">${s}</option>`).join("");
   }
 
-  await DB.carregarAutoLoad();
+  await DB.carregarAutoLoad({ notas: true });
   conteudo.hidden = false;
   renderNotas();
   renderPassagens();
