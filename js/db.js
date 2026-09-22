@@ -152,6 +152,27 @@ const DB = {
     );
   },
 
+  /** Já existe confirmação de SFM (assistente por etapas) concluída para esse setor, no dia de hoje (data da reunião, não dos dias cobertos)? */
+  sfmConcluidaHoje(setor, data) {
+    return this.dados.confirmacoesTurno.some(
+      (c) => c.tipo === "sfm" && c.setor === setor && c.data === data
+    );
+  },
+
+  /** Registra a conclusão da SFM de hoje (idempotente — não duplica se já existir a mesma chave). */
+  confirmarSfm(usuarioNome, setor, data) {
+    if (this.sfmConcluidaHoje(setor, data)) return;
+    this.dados.confirmacoesTurno.push({
+      id: gerarId("ct"),
+      setor,
+      turno: null,
+      data,
+      tipo: "sfm",
+      usuario: usuarioNome,
+      concluidoEm: new Date().toISOString(),
+    });
+  },
+
   /** Registra a conclusão da passagem de turno (idempotente — não duplica se já existir a mesma chave). */
   confirmarPassagemTurno(usuarioNome, setor, turno, data) {
     if (this.passagemTurnoConcluida(setor, turno, data)) return;

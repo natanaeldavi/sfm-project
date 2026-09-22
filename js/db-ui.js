@@ -57,6 +57,7 @@ const DbUI = {
   },
 
   _renderSemConexao() {
+    this._container.hidden = false;
     this._container.className = "db-status";
     this._container.innerHTML = `<span class="ponto"></span><span>
       Não foi possível carregar os dados do servidor local. Confirme que o SFM.exe está rodando.
@@ -68,13 +69,11 @@ const DbUI = {
     });
   },
 
+  /** Conectado: não mostra nada — só a mensagem de erro (sem conexão) precisa de destaque. */
   _renderConectado() {
-    this._container.className = "db-status conectado";
-    this._container.innerHTML = `<span class="ponto"></span><span>Conectado ao servidor local.</span> <button type="button" class="secundario" id="btnRecarregarBd">Recarregar</button>`;
-    this._container.querySelector("#btnRecarregarBd").addEventListener("click", async () => {
-      await this.comCarregando(() => DB.recarregarDoDisco());
-      if (this._aoRecarregar) this._aoRecarregar();
-    });
+    this._container.className = "db-status";
+    this._container.innerHTML = "";
+    this._container.hidden = true;
   },
 
   async salvarDados(alertaContainer) {

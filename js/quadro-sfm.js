@@ -24,6 +24,19 @@
 
 const QUADRO_META_EFICIENCIA = 70; // %, mesma meta impressa na folha física
 
+/**
+ * Itens do assistente por etapas de preenchimento da SFM (turno Manhã) —
+ * mesma ordem/rótulos da grade S/Q. Quando a resposta é "Sim", o
+ * assistente pede Defeito/Máquina/Célula/Descrição (mesmos campos do
+ * cadastro manual de Passar Turno) antes de avançar.
+ */
+const WIZARD_CAMPOS = [
+  { campo: "acidente", pergunta: "Houve acidente com ou sem afastamento?", legenda: "Considere qualquer acidente, com ou sem afastamento, ocorrido no setor." },
+  { campo: "quaseAcidente", pergunta: "Houve quase acidente?", legenda: "Ocorrência imprevista que não resultou em ferimento ou dano, mas poderia ter resultado." },
+  { campo: "retrabalho", pergunta: "Houve retrabalho de corretiva?", legenda: "Falha, com o mesmo efeito, em até 2 semanas após a atuação." },
+  { campo: "falhaFornecedor", pergunta: "Houve falha de fornecedor?", legenda: "Desvio em peça/componente novo dentro da garantia, ou atraso de fornecedor." },
+];
+
 // ---------- Importação da planilha do SAP (versão piloto: uma vez por dia, na SFM) ----------
 
 const MAPA_CABECALHOS_SAP = {
@@ -236,6 +249,31 @@ function importarPlanilhaSap(arrayBuffer) {
   const inputXlsx = document.getElementById("inputXlsx");
   const resumoImportacao = document.getElementById("resumoImportacao");
 
+  const cardFiltros = document.getElementById("cardFiltros");
+  const cardComoAlimentar = document.getElementById("cardComoAlimentar");
+  const cardTopProblemas = document.getElementById("cardTopProblemas");
+
+  const cardWizardPrompt = document.getElementById("cardWizardPrompt");
+  const wizardPromptTexto = document.getElementById("wizardPromptTexto");
+  const btnIniciarWizard = document.getElementById("btnIniciarWizard");
+  const btnAdiarWizard = document.getElementById("btnAdiarWizard");
+  const cardWizard = document.getElementById("cardWizard");
+  const wizardTitulo = document.getElementById("wizardTitulo");
+  const wizardProgresso = document.getElementById("wizardProgresso");
+  const wizardPergunta = document.getElementById("wizardPergunta");
+  const wizardLegenda = document.getElementById("wizardLegenda");
+  const wizardBotoesSimNao = document.getElementById("wizardBotoesSimNao");
+  const wizardBtnNao = document.getElementById("wizardBtnNao");
+  const wizardBtnSim = document.getElementById("wizardBtnSim");
+  const wizardDetalhe = document.getElementById("wizardDetalhe");
+  const wizardDefeito = document.getElementById("wizardDefeito");
+  const wizardMaquina = document.getElementById("wizardMaquina");
+  const wizardCelula = document.getElementById("wizardCelula");
+  const wizardDescricao = document.getElementById("wizardDescricao");
+  const wizardMsgDetalhe = document.getElementById("wizardMsgDetalhe");
+  const wizardBtnConfirmarDetalhe = document.getElementById("wizardBtnConfirmarDetalhe");
+  const wizardBtnVoltar = document.getElementById("wizardBtnVoltar");
+
   let graficoD = null;
   let graficoC = null;
   let sujo = false; // há marcações de S/Q ainda não salvas
@@ -335,7 +373,169 @@ function importarPlanilhaSap(arrayBuffer) {
     }
   });
 
-  DbUI.definirCallbackRecarregar(() => renderizar());
+  // ---------- Assistente por etapas de preenchimento da SFM (turno Manhã) ----------
+
+  let wizardDias = [];
+  let wizardIndice = 0;
+  let wizardRespostas = {}; // chave "dataISO|campo" -> { valor: true/false, detalhe: {defeito,maquina,celula,descricao}|null }
+
+  /** Só o turno Manhã do setor preenche a SFM pelo assistente, um dia sem reunião (sáb/dom) não tem o que preencher. */
+  function elegivelParaWizardHoje() {
+    return usuario.papel === "operador" && usuario.turno === "Manhã" &&
+      !!calcularJanelaSfm() && !DB.sfmConcluidaHoje(usuario.setor, hojeISO());
+  }
+
+  function textoDiasCobertos(dias) {
+    const formatados = dias.map(formatarDataBR);
+    if (formatados.length <= 1) return formatados[0] || "";
+    return formatados.slice(0, -1).join(", ") + " e " + formatados[formatados.length - 1];
+  }
+
+  /** Ponto de entrada: decide se mostra o convite do assistente ou o quadro normal. Chamado no início e sempre que os dados são recarregados. */
+  function atualizarFluxoPrincipal() {
+    if (elegivelParaWizardHoje()) {
+      mostrarPromptWizard();
+    } else {
+      mostrarBoardNormal();
+    }
+  }
+
+  function mostrarBoardNormal() {
+    cardWizardPrompt.hidden = true;
+    cardWizard.hidden = true;
+    cardFiltros.hidden = false;
+    quadroEl.hidden = false;
+    cardComoAlimentar.hidden = false;
+    cardTopProblemas.hidden = false;
+    renderizar();
+  }
+
+  function mostrarPromptWizard() {
+    cardFiltros.hidden = true;
+    quadroEl.hidden = true;
+    cardComoAlimentar.hidden = true;
+    cardTopProblemas.hidden = true;
+    cardWizard.hidden = true;
+
+    const dias = calcularJanelaSfm();
+    wizardPromptTexto.textContent = `Ainda não foi preenchida a SFM de hoje do setor ${usuario.setor}, referente a ${textoDiasCobertos(dias)}.`;
+    cardWizardPrompt.hidden = false;
+  }
+
+  btnAdiarWizard.addEventListener("click", () => mostrarBoardNormal());
+  btnIniciarWizard.addEventListener("click", () => iniciarWizard());
+
+  function iniciarWizard() {
+    wizardDias = calcularJanelaSfm() || [];
+    wizardIndice = 0;
+    wizardRespostas = {};
+
+    // Pré-preenche com o que já existir salvo (ex.: admin já tinha marcado algo, ou o operador voltou ao assistente depois de sair no meio).
+    for (const dia of wizardDias) {
+      const registro = DB.buscarRegistroQuadro(usuario.setor, dia);
+      if (!registro) continue;
+      for (const { campo } of WIZARD_CAMPOS) {
+        if (registro[campo] === undefined) continue;
+        wizardRespostas[`${dia}|${campo}`] = { valor: registro[campo], detalhe: registro[`${campo}Detalhe`] || null };
+      }
+    }
+
+    cardWizardPrompt.hidden = true;
+    cardWizard.hidden = false;
+    renderWizardStep();
+  }
+
+  function totalWizardSteps() {
+    return wizardDias.length * WIZARD_CAMPOS.length;
+  }
+
+  function wizardStepAtual() {
+    const diaIdx = Math.floor(wizardIndice / WIZARD_CAMPOS.length);
+    const campoIdx = wizardIndice % WIZARD_CAMPOS.length;
+    return { dia: wizardDias[diaIdx], diaIdx, campoInfo: WIZARD_CAMPOS[campoIdx], campoIdx };
+  }
+
+  function renderWizardStep() {
+    const { dia, diaIdx, campoInfo, campoIdx } = wizardStepAtual();
+
+    wizardTitulo.textContent = `SFM — ${usuario.setor}`;
+    wizardProgresso.textContent = wizardDias.length > 1
+      ? `Dia ${diaIdx + 1} de ${wizardDias.length} — Item ${campoIdx + 1} de ${WIZARD_CAMPOS.length}`
+      : `Item ${campoIdx + 1} de ${WIZARD_CAMPOS.length}`;
+    wizardPergunta.textContent = `${campoInfo.pergunta} (${formatarDataBR(dia)})`;
+    wizardLegenda.textContent = campoInfo.legenda;
+
+    wizardBotoesSimNao.hidden = false;
+    wizardDetalhe.hidden = true;
+    wizardMsgDetalhe.textContent = "";
+
+    const resposta = wizardRespostas[`${dia}|${campoInfo.campo}`];
+    const detalhe = resposta && resposta.valor === true ? resposta.detalhe : null;
+    wizardDefeito.value = detalhe?.defeito || "";
+    wizardMaquina.value = detalhe?.maquina || "";
+    wizardCelula.value = detalhe?.celula || "";
+    wizardDescricao.value = detalhe?.descricao || "";
+
+    wizardBtnVoltar.hidden = wizardIndice === 0;
+  }
+
+  wizardBtnNao.addEventListener("click", () => {
+    const { dia, campoInfo } = wizardStepAtual();
+    wizardRespostas[`${dia}|${campoInfo.campo}`] = { valor: false, detalhe: null };
+    avancarWizard();
+  });
+
+  wizardBtnSim.addEventListener("click", () => {
+    wizardBotoesSimNao.hidden = true;
+    wizardDetalhe.hidden = false;
+    wizardDefeito.focus();
+  });
+
+  wizardBtnConfirmarDetalhe.addEventListener("click", () => {
+    const defeito = wizardDefeito.value.trim();
+    const maquina = wizardMaquina.value.trim();
+    const celula = wizardCelula.value.trim();
+    const descricao = wizardDescricao.value.trim();
+
+    if (!defeito || !maquina || !descricao) {
+      wizardMsgDetalhe.textContent = "Preencha ao menos Defeito, Máquina e Descrição.";
+      wizardMsgDetalhe.style.color = "var(--vermelho-alerta)";
+      return;
+    }
+
+    const { dia, campoInfo } = wizardStepAtual();
+    wizardRespostas[`${dia}|${campoInfo.campo}`] = { valor: true, detalhe: { defeito, maquina, celula, descricao } };
+    avancarWizard();
+  });
+
+  wizardBtnVoltar.addEventListener("click", () => {
+    if (wizardIndice === 0) return;
+    wizardIndice--;
+    renderWizardStep();
+  });
+
+  function avancarWizard() {
+    wizardIndice++;
+    if (wizardIndice >= totalWizardSteps()) finalizarWizard();
+    else renderWizardStep();
+  }
+
+  async function finalizarWizard() {
+    for (const [chave, resposta] of Object.entries(wizardRespostas)) {
+      const [dia, campo] = chave.split("|");
+      DB.definirRegistroQuadro(usuario.setor, dia, campo, resposta.valor);
+      DB.definirRegistroQuadro(usuario.setor, dia, `${campo}Detalhe`, resposta.valor ? resposta.detalhe : null);
+    }
+    DB.confirmarSfm(usuario.nome, usuario.setor, hojeISO());
+
+    const okQuadro = await DbUI.salvarQuadro(alerta);
+    const okDados = await DbUI.salvarDados(alerta);
+    if (okQuadro && okDados) mostrarAlerta(alerta, "ok", "SFM de hoje registrada com sucesso.");
+
+    mostrarBoardNormal();
+  }
+
+  DbUI.definirCallbackRecarregar(() => atualizarFluxoPrincipal());
   DbUI.iniciar(document.getElementById("dbStatus"));
 
   // ---------- Cálculos automáticos (D e C) ----------
@@ -486,24 +686,18 @@ function importarPlanilhaSap(arrayBuffer) {
   // ---------- S / Q: grades clicáveis ----------
 
   /**
-   * Quem pode marcar S/Q deste setor: admin e gestor sempre (qualquer dia);
-   * qualquer operador do próprio setor que seja do turno Manhã (1º turno),
-   * só nos dias que a reunião de hoje cobre (calcularJanelaSfm, de
-   * util.js) — normalmente só ontem, ou sexta+sábado+domingo numa
-   * segunda-feira. Não há mais um "responsável" único designado por
-   * setor — qualquer operador do turno Manhã daquele setor pode marcar.
+   * Quem pode editar a grade S/Q diretamente (clique na célula): só admin
+   * e gestor, em qualquer setor/dia — edição livre, fora do fluxo guiado.
+   * O turno Manhã preenche pelo assistente por etapas (ver
+   * elegivelParaWizardHoje/iniciarWizard), não mais clicando na grade.
    */
   function podeEditarSecaoSQ(setor) {
-    if (usuario.papel === "admin" || usuario.papel === "gestor") return true;
-    return usuario.papel === "operador" && usuario.setor === setor && usuario.turno === "Manhã";
+    return usuario.papel === "admin" || usuario.papel === "gestor";
   }
 
   function diaEditavel(setor, dataISO, hoje) {
     if (dataISO > hoje) return false;
-    if (!podeEditarSecaoSQ(setor)) return false;
-    if (usuario.papel !== "operador") return true;
-    const janela = calcularJanelaSfm() || [];
-    return janela.includes(dataISO);
+    return podeEditarSecaoSQ(setor);
   }
 
   /**
@@ -516,12 +710,11 @@ function importarPlanilhaSap(arrayBuffer) {
    */
   function renderDiasEditaveis(setor, dias, hoje, diaSelecionado) {
     const podeEditar = podeEditarSecaoSQ(setor);
-    if (!podeEditar) {
-      const aviso = quadroEl.querySelector(".quadro-nao-editavel-aviso");
-      if (aviso) aviso.textContent = "Somente leitura — só operadores do turno Manhã deste setor (ou gestor/admin) podem marcar S/Q.";
-    } else if (usuario.papel === "operador") {
-      const aviso = quadroEl.querySelector(".quadro-nao-editavel-aviso");
-      if (aviso) aviso.textContent = "Marcação manual, liberada só para o(s) dia(s) da reunião de hoje — clique no dia para alternar: em branco → sem ocorrência (verde) → ocorrência (vermelho). Não esqueça de \"Salvar marcações\".";
+    const aviso = quadroEl.querySelector(".quadro-nao-editavel-aviso");
+    if (aviso) {
+      aviso.textContent = podeEditar
+        ? "Edição direta (admin/gestor) — clique no dia para alternar: em branco → sem ocorrência (verde) → ocorrência (vermelho). Não esqueça de \"Salvar marcações\"."
+        : "Somente leitura — a SFM é preenchida pelo turno Manhã do setor, pelo assistente por etapas, na hora da reunião.";
     }
 
     for (const item of quadroEl.querySelectorAll(".quadro-item[data-campo]")) {
@@ -726,5 +919,5 @@ function importarPlanilhaSap(arrayBuffer) {
     if (sujo) { ev.preventDefault(); ev.returnValue = ""; }
   });
 
-  renderizar();
+  atualizarFluxoPrincipal();
 })();
