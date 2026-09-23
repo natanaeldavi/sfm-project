@@ -2,6 +2,7 @@
   "usuarios": [
     {
       "id": "u-admin",
+      "codigo": "admin",
       "nome": "admin",
       "senhaHash": "WgLoZMvFq4rGIdSFwPd9e+8WtJw0rIysOvlsb0SoFcI=",
       "senhaSalt": "KN2TlKcQzI8IUONAOOxNuw==",
@@ -10,6 +11,7 @@
     },
     {
       "id": "u-gestor",
+      "codigo": "gestor",
       "nome": "gestor",
       "senhaHash": "T6uOue+D0EWwK03h2ByJz0NyM2VqljoX5IHigBqh60w=",
       "senhaSalt": "gpiFvrLghH79fmdJBoi6tQ==",
@@ -18,6 +20,7 @@
     },
     {
       "id": "u-user1",
+      "codigo": "user1",
       "nome": "user1",
       "senhaHash": "T5Y34fcyyy+UfMvYSxfBiRocT7u1lHDCZiiZwtiZeJM=",
       "senhaSalt": "ir1hR6TR4oAsAi0xtgbtvg==",
@@ -28,6 +31,7 @@
     },
     {
       "id": "u-user2",
+      "codigo": "user2",
       "nome": "user2",
       "senhaHash": "HudZNCrmAGQYpj1mE19dVes6HHR7XhO53dKJmeW6hmk=",
       "senhaSalt": "m1y/ugTnH0j+7IiXFBX8dw==",
@@ -37,6 +41,7 @@
     },
     {
       "id": "u-user3",
+      "codigo": "user3",
       "nome": "user3",
       "senhaHash": "25A8LRn0ZXHQOwaaWJc+sKnK39cTPXiIXPi9AgjjshA=",
       "senhaSalt": "SBHsKpVAHiNr/zzmkVZhTg==",
@@ -46,6 +51,7 @@
     },
     {
       "id": "u-23ebfba2-06ae-4334-8c44-c0904d22018e",
+      "codigo": "user4",
       "nome": "user4",
       "senhaHash": "vV9pMI3wH0YwGRm65WiB+15yVrzgh12aDoYJOvN1KFs=",
       "senhaSalt": "iRXmJV0GO4TRQgDvQJjnsg==",
@@ -56,6 +62,7 @@
     },
     {
       "id": "u-db49ef96-9c3c-4fba-8297-fea242a4ea79",
+      "codigo": "gasolina",
       "nome": "gasolina",
       "senhaHash": "ljaEI6IaHScRjjqgH8r2k6/MZ62NNpWmfiWqtOTMYg4=",
       "senhaSalt": "0ggV1YyiWTfusIy6aLr7MQ==",

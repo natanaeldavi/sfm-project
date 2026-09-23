@@ -21,7 +21,7 @@ Isso usa a `bd/` e os html/css/js de `../` (a raiz do projeto) diretamente — s
 
 ```
 pip install -r requirements.txt
-pyinstaller --onefile --name SFM --add-data "../css;css" --add-data "../js;js" --add-data "../login.html;." --add-data "../menu.html;." --add-data "../admin.html;." --add-data "../passar-turno.html;." --add-data "../quadro-sfm.html;." --add-data "../receber-turno.html;." --add-data "../relatorios.html;." main.py
+pyinstaller --onefile --noconsole --name SFM --add-data "../css;css" --add-data "../js;js" --add-data "../login.html;." --add-data "../menu.html;." --add-data "../admin.html;." --add-data "../passar-turno.html;." --add-data "../quadro-sfm.html;." --add-data "../receber-turno.html;." --add-data "../relatorios.html;." main.py
 ```
 
 O resultado fica em `dist/SFM.exe`. Esse único arquivo já contém o html/css/js empacotados.

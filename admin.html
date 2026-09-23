@@ -28,7 +28,11 @@
       <form id="formNovoUsuario">
         <div class="linha-campos">
           <div class="campo">
-            <label for="campoNome">Nome de usuário</label>
+            <label for="campoCodigo">Código (matrícula)</label>
+            <input type="text" id="campoCodigo" required>
+          </div>
+          <div class="campo">
+            <label for="campoNome">Nome</label>
             <input type="text" id="campoNome" required>
           </div>
           <div class="campo">
@@ -48,25 +52,18 @@
             <select id="campoTurno"></select>
           </div>
         </div>
-        <div class="linha-campos">
-          <div class="campo">
-            <label for="campoSenha">Senha</label>
-            <input type="password" id="campoSenha" required>
-          </div>
-          <div class="campo">
-            <label for="campoConfirmar">Confirmar senha</label>
-            <input type="password" id="campoConfirmar" required>
-          </div>
-        </div>
         <button type="submit">Criar usuário</button>
       </form>
+      <p class="rodape-nota" style="text-align:left;margin-top:8px;">
+        Não é preciso definir senha aqui — a pessoa cria a própria senha no primeiro login, usando o código.
+      </p>
     </div>
 
     <div class="card">
       <h2>Usuários cadastrados</h2>
       <div class="tabela-scroll">
         <table>
-          <thead><tr><th>Nome</th><th>Papel</th><th>Setor</th><th>Turno</th><th></th></tr></thead>
+          <thead><tr><th>Código</th><th>Nome</th><th>Papel</th><th>Setor</th><th>Turno</th><th>Senha</th><th></th></tr></thead>
           <tbody id="corpoTabelaUsuarios"></tbody>
         </table>
       </div>

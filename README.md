@@ -32,21 +32,37 @@ pasta `bd/` na pasta de rede.
 
 ## Contas de teste (já vêm no `bd/dados.json`)
 
-| usuário | senha | papel | setor |
-|---|---|---|---|
-| admin | admin | admin | — |
-| gestor | gestor | gestor | — |
-| user1 | user1 | operador | Gasolina |
-| user2 | user2 | operador | Diesel |
-| user3 | user3 | operador | Controle |
-| user4 | user4 | operador | Biela |
+O login é feito pelo **código** (a matrícula/número pessoal da pessoa na
+empresa) — o campo "senha" só aparece depois do código ser reconhecido. Nas
+contas de teste, o código já vem igual ao nome:
 
-**Troque essas senhas (ou crie usuários novos e apague estes) antes de usar
-de verdade** — são só para teste. Use a tela de Administração (login como
-`admin`) para gerenciar usuários. Nenhum usuário (nem os de teste, nem os
-que você já tinha criado) vem com **turno** definido — configure o turno de
-cada operador em Administração antes de usar o fluxo de passar/receber
-turno, senão as passagens ficam sem turno registrado.
+| código | papel | setor |
+|---|---|---|
+| admin | admin | — |
+| gestor | gestor | — |
+| user1 | operador | Gasolina |
+| user2 | operador | Diesel |
+| user3 | operador | Controle |
+| user4 | operador | Biela |
+
+As senhas dessas contas de teste continuam as mesmas de antes (igual ao
+código/nome, ex.: `admin`/`admin`). **Troque essas senhas (ou crie usuários
+novos e apague estes) antes de usar de verdade** — são só para teste. Use a
+tela de Administração (login como `admin`) para gerenciar usuários. Nenhum
+usuário (nem os de teste, nem os que você já tinha criado) vem com **turno**
+definido — configure o turno de cada operador em Administração antes de usar
+o fluxo de passar/receber turno, senão as passagens ficam sem turno
+registrado.
+
+### Cadastro de usuário novo e primeiro acesso
+
+Em Administração, ao criar um usuário você informa **código** (a matrícula
+da pessoa) e **nome** — sem definir senha. No primeiro login, a pessoa
+digita o código, e como ainda não tem senha, o sistema pede pra ela criar
+uma senha do próprio gosto ali mesmo (fica salva já criptografada, igual a
+qualquer outra). Se alguém esquecer a senha, o admin pode clicar em
+"Redefinir senha" na tabela de usuários — na próxima vez que a pessoa logar
+com o código dela, o sistema pede pra criar uma senha nova.
 
 ## Avisos importantes
 

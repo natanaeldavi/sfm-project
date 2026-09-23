@@ -101,9 +101,10 @@ const DB = {
 
   // ---------- Consultas auxiliares ----------
 
-  buscarUsuarioPorNome(nome) {
-    const alvo = (nome || "").trim().toLowerCase();
-    return this.dados.usuarios.find((u) => u.nome.trim().toLowerCase() === alvo) || null;
+  /** Código pessoal = identificador de login (único), diferente do nome (só exibição). */
+  buscarUsuarioPorCodigo(codigo) {
+    const alvo = (codigo || "").trim().toLowerCase();
+    return this.dados.usuarios.find((u) => (u.codigo || "").trim().toLowerCase() === alvo) || null;
   },
 
   buscarNota(numeroNota) {

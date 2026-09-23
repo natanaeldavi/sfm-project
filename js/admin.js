@@ -112,13 +112,21 @@
             TURNOS.map((t) => `<option value="${t}" ${u.turno === t ? "selected" : ""}>${t}</option>`).join("") +
           `</select>`
         : "—";
+      const senhaCelula = u.senhaHash
+        ? `Definida`
+        : `<span style="color:var(--texto-suave)">Pendente (1º acesso)</span>`;
       return `
       <tr data-id="${escaparHtml(u.id)}">
+        <td>${escaparHtml(u.codigo)}</td>
         <td>${escaparHtml(u.nome)}</td>
         <td>${escaparHtml(u.papel)}</td>
         <td>${setorCelula}</td>
         <td>${turnoCelula}</td>
-        <td><button type="button" class="perigo btnExcluir" ${u.id === usuario.id ? "disabled title='Você não pode excluir seu próprio usuário'" : ""}>Excluir</button></td>
+        <td>${senhaCelula}</td>
+        <td>
+          <button type="button" class="secundario btnRedefinirSenha" ${u.senhaHash ? "" : "disabled"}>Redefinir senha</button>
+          <button type="button" class="perigo btnExcluir" ${u.id === usuario.id ? "disabled title='Você não pode excluir seu próprio usuário'" : ""}>Excluir</button>
+        </td>
       </tr>`;
     }).join("");
 
@@ -143,6 +151,28 @@
         alvo.setor = sel.value;
         marcarUsuariosSujo();
         renderTabela();
+      });
+    });
+
+    corpo.querySelectorAll(".btnRedefinirSenha").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const tr = btn.closest("tr");
+        const id = tr.dataset.id;
+        const alvo = DB.dados.usuarios.find((u) => u.id === id);
+        if (!alvo) return;
+
+        if (!confirm(`Redefinir a senha de "${alvo.nome}"? A pessoa vai precisar criar uma nova senha no próximo login, usando o código dela.`)) return;
+
+        alvo.senhaHash = null;
+        alvo.senhaSalt = null;
+        btn.disabled = true;
+        const ok = await DbUI.salvarDados(alerta);
+        if (ok) {
+          mostrarAlerta(alerta, "ok", `Senha de "${alvo.nome}" redefinida.`);
+          renderTabela();
+        } else {
+          btn.disabled = false;
+        }
       });
     });
 
@@ -182,20 +212,17 @@
     ev.preventDefault();
     limparAlerta(alerta);
 
+    const codigo = document.getElementById("campoCodigo").value.trim();
     const nome = document.getElementById("campoNome").value.trim();
     const papel = campoPapel.value;
     const setor = papel === "operador" ? campoSetor.value : null;
     const turno = papel === "operador" ? campoTurno.value : null;
-    const senha = document.getElementById("campoSenha").value;
-    const confirmar = document.getElementById("campoConfirmar").value;
 
-    if (!nome) { mostrarAlerta(alerta, "erro", "Informe o nome de usuário."); return; }
-    if (DB.buscarUsuarioPorNome(nome)) { mostrarAlerta(alerta, "erro", "Já existe um usuário com esse nome."); return; }
-    if (senha.length < 3) { mostrarAlerta(alerta, "erro", "A senha deve ter ao menos 3 caracteres."); return; }
-    if (senha !== confirmar) { mostrarAlerta(alerta, "erro", "As senhas não conferem."); return; }
+    if (!codigo) { mostrarAlerta(alerta, "erro", "Informe o código (matrícula)."); return; }
+    if (!nome) { mostrarAlerta(alerta, "erro", "Informe o nome."); return; }
+    if (DB.buscarUsuarioPorCodigo(codigo)) { mostrarAlerta(alerta, "erro", "Já existe um usuário com esse código."); return; }
 
-    const { senhaHash, senhaSalt } = await gerarHashSenha(senha);
-    DB.dados.usuarios.push({ id: gerarId("u"), nome, senhaHash, senhaSalt, papel, setor, turno });
+    DB.dados.usuarios.push({ id: gerarId("u"), codigo, nome, senhaHash: null, senhaSalt: null, papel, setor, turno });
 
     const ok = await DbUI.salvarDados(alerta);
     if (ok) {

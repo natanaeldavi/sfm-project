@@ -15,15 +15,30 @@
     <div id="alertaLogin" hidden></div>
 
     <form id="formLogin">
-      <div class="campo">
-        <label for="campoNome">Usuário</label>
-        <input type="text" id="campoNome" autocomplete="username" required>
+      <div class="campo" id="campoCodigoWrap">
+        <label for="campoCodigo">Código</label>
+        <input type="text" id="campoCodigo" autocomplete="username" required>
       </div>
-      <div class="campo">
+
+      <div class="campo" id="campoSenhaWrap" hidden>
         <label for="campoSenha">Senha</label>
-        <input type="password" id="campoSenha" autocomplete="current-password" required>
+        <input type="password" id="campoSenha" autocomplete="current-password">
       </div>
+
+      <div id="blocoPrimeiroAcesso" hidden>
+        <p class="subtitulo" style="margin-top:0;">Primeiro acesso — crie sua senha.</p>
+        <div class="campo">
+          <label for="campoNovaSenha">Nova senha</label>
+          <input type="password" id="campoNovaSenha" autocomplete="new-password">
+        </div>
+        <div class="campo">
+          <label for="campoConfirmarSenha">Confirmar nova senha</label>
+          <input type="password" id="campoConfirmarSenha" autocomplete="new-password">
+        </div>
+      </div>
+
       <button type="submit" id="btnEntrar" style="width:100%;">Entrar</button>
+      <button type="button" id="btnTrocarCodigo" class="secundario" style="width:100%;margin-top:8px;" hidden>&larr; Trocar código</button>
     </form>
 
     <p class="rodape-nota">Autenticação local, sem servidor — apenas para organizar o uso do sistema.</p>
