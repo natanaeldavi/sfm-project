@@ -32,11 +32,11 @@ pasta `bd/` na pasta de rede.
 
 ## Contas de teste (já vêm no `bd/dados.json`)
 
-O login é feito pelo **código** (a matrícula/número pessoal da pessoa na
-empresa) — o campo "senha" só aparece depois do código ser reconhecido. Nas
-contas de teste, o código já vem igual ao nome:
+O login é feito pelo **número pessoal** (a matrícula da pessoa na
+empresa) — o campo "senha" só aparece depois do número pessoal ser reconhecido. Nas
+contas de teste, o número pessoal já vem igual ao nome:
 
-| código | papel | setor |
+| número pessoal | papel | setor |
 |---|---|---|
 | admin | admin | — |
 | gestor | gestor | — |
@@ -46,7 +46,7 @@ contas de teste, o código já vem igual ao nome:
 | user4 | operador | Biela |
 
 As senhas dessas contas de teste continuam as mesmas de antes (igual ao
-código/nome, ex.: `admin`/`admin`). **Troque essas senhas (ou crie usuários
+número pessoal/nome, ex.: `admin`/`admin`). **Troque essas senhas (ou crie usuários
 novos e apague estes) antes de usar de verdade** — são só para teste. Use a
 tela de Administração (login como `admin`) para gerenciar usuários. Nenhum
 usuário (nem os de teste, nem os que você já tinha criado) vem com **turno**
@@ -56,13 +56,13 @@ registrado.
 
 ### Cadastro de usuário novo e primeiro acesso
 
-Em Administração, ao criar um usuário você informa **código** (a matrícula
+Em Administração, ao criar um usuário você informa **número pessoal** (a matrícula
 da pessoa) e **nome** — sem definir senha. No primeiro login, a pessoa
-digita o código, e como ainda não tem senha, o sistema pede pra ela criar
+digita o número pessoal, e como ainda não tem senha, o sistema pede pra ela criar
 uma senha do próprio gosto ali mesmo (fica salva já criptografada, igual a
 qualquer outra). Se alguém esquecer a senha, o admin pode clicar em
 "Redefinir senha" na tabela de usuários — na próxima vez que a pessoa logar
-com o código dela, o sistema pede pra criar uma senha nova.
+com o número pessoal dela, o sistema pede pra criar uma senha nova.
 
 ## Avisos importantes
 

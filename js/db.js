@@ -101,7 +101,7 @@ const DB = {
 
   // ---------- Consultas auxiliares ----------
 
-  /** Código pessoal = identificador de login (único), diferente do nome (só exibição). */
+  /** Número pessoal = identificador de login (único), diferente do nome (só exibição). */
   buscarUsuarioPorCodigo(codigo) {
     const alvo = (codigo || "").trim().toLowerCase();
     return this.dados.usuarios.find((u) => (u.codigo || "").trim().toLowerCase() === alvo) || null;

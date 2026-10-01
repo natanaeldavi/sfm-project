@@ -28,7 +28,7 @@
       <form id="formNovoUsuario">
         <div class="linha-campos">
           <div class="campo">
-            <label for="campoCodigo">Código (matrícula)</label>
+            <label for="campoCodigo">Número pessoal</label>
             <input type="text" id="campoCodigo" required>
           </div>
           <div class="campo">
@@ -55,7 +55,7 @@
         <button type="submit">Criar usuário</button>
       </form>
       <p class="rodape-nota" style="text-align:left;margin-top:8px;">
-        Não é preciso definir senha aqui — a pessoa cria a própria senha no primeiro login, usando o código.
+        Não é preciso definir senha aqui — a pessoa cria a própria senha no primeiro login, usando o número pessoal.
       </p>
     </div>
 
@@ -63,7 +63,7 @@
       <h2>Usuários cadastrados</h2>
       <div class="tabela-scroll">
         <table>
-          <thead><tr><th>Código</th><th>Nome</th><th>Papel</th><th>Setor</th><th>Turno</th><th>Senha</th><th></th></tr></thead>
+          <thead><tr><th>Número pessoal</th><th>Nome</th><th>Papel</th><th>Setor</th><th>Turno</th><th>Senha</th><th></th></tr></thead>
           <tbody id="corpoTabelaUsuarios"></tbody>
         </table>
       </div>

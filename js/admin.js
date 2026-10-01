@@ -161,7 +161,7 @@
         const alvo = DB.dados.usuarios.find((u) => u.id === id);
         if (!alvo) return;
 
-        if (!confirm(`Redefinir a senha de "${alvo.nome}"? A pessoa vai precisar criar uma nova senha no próximo login, usando o código dela.`)) return;
+        if (!confirm(`Redefinir a senha de "${alvo.nome}"? A pessoa vai precisar criar uma nova senha no próximo login, usando o número pessoal dela.`)) return;
 
         alvo.senhaHash = null;
         alvo.senhaSalt = null;
@@ -218,9 +218,9 @@
     const setor = papel === "operador" ? campoSetor.value : null;
     const turno = papel === "operador" ? campoTurno.value : null;
 
-    if (!codigo) { mostrarAlerta(alerta, "erro", "Informe o código (matrícula)."); return; }
+    if (!codigo) { mostrarAlerta(alerta, "erro", "Informe o número pessoal."); return; }
     if (!nome) { mostrarAlerta(alerta, "erro", "Informe o nome."); return; }
-    if (DB.buscarUsuarioPorCodigo(codigo)) { mostrarAlerta(alerta, "erro", "Já existe um usuário com esse código."); return; }
+    if (DB.buscarUsuarioPorCodigo(codigo)) { mostrarAlerta(alerta, "erro", "Já existe um usuário com esse número pessoal."); return; }
 
     DB.dados.usuarios.push({ id: gerarId("u"), codigo, nome, senhaHash: null, senhaSalt: null, papel, setor, turno });
 

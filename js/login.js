@@ -64,7 +64,7 @@
       const codigo = campoCodigo.value.trim();
       const usuario = DB.buscarUsuarioPorCodigo(codigo);
       if (!usuario) {
-        mostrarAlerta(alertaLogin, "erro", "Código inválido.");
+        mostrarAlerta(alertaLogin, "erro", "Número pessoal inválido.");
         return;
       }
 
@@ -97,7 +97,7 @@
       btnEntrar.textContent = "Entrar";
 
       if (!ok) {
-        mostrarAlerta(alertaLogin, "erro", "Código ou senha inválidos.");
+        mostrarAlerta(alertaLogin, "erro", "Número pessoal ou senha inválidos.");
         return;
       }
 
