@@ -26,15 +26,19 @@ const QUADRO_META_EFICIENCIA = 70; // %, mesma meta impressa na folha física
 
 /**
  * Itens do assistente por etapas de preenchimento da SFM (turno Manhã) —
- * mesma ordem/rótulos da grade S/Q. Quando a resposta é "Sim", o
- * assistente pede Defeito/Máquina/Célula/Descrição (mesmos campos do
- * cadastro manual de Passar Turno) antes de avançar.
+ * mesma ordem/rótulos da grade S/Q, mais o Top 3 Problemas no final. Passos
+ * `tipo: "simNao"` (padrão) perguntam Sim/Não e, se "Sim", pedem
+ * Defeito/Máquina/Célula/Descrição (mesmos campos do cadastro manual de
+ * Passar Turno) antes de avançar. O passo `tipo: "top3"` é tratado à parte
+ * (ver renderWizardStep/renderWizardTop3) — monta até 3 entradas no formato
+ * D/I/C/Ca/S da folha impressa (ver modelo/modelo-problemas.jpeg).
  */
 const WIZARD_CAMPOS = [
-  { campo: "acidente", pergunta: "Houve acidente com ou sem afastamento?", legenda: "Considere qualquer acidente, com ou sem afastamento, ocorrido no setor." },
-  { campo: "quaseAcidente", pergunta: "Houve quase acidente?", legenda: "Ocorrência imprevista que não resultou em ferimento ou dano, mas poderia ter resultado." },
-  { campo: "retrabalho", pergunta: "Houve retrabalho de corretiva?", legenda: "Falha, com o mesmo efeito, em até 2 semanas após a atuação." },
-  { campo: "falhaFornecedor", pergunta: "Houve falha de fornecedor?", legenda: "Desvio em peça/componente novo dentro da garantia, ou atraso de fornecedor." },
+  { campo: "acidente", tipo: "simNao", pergunta: "Houve acidente com ou sem afastamento?", legenda: "Considere qualquer acidente, com ou sem afastamento, ocorrido no setor." },
+  { campo: "quaseAcidente", tipo: "simNao", pergunta: "Houve quase acidente?", legenda: "Ocorrência imprevista que não resultou em ferimento ou dano, mas poderia ter resultado." },
+  { campo: "retrabalho", tipo: "simNao", pergunta: "Houve retrabalho de corretiva?", legenda: "Falha, com o mesmo efeito, em até 2 semanas após a atuação." },
+  { campo: "falhaFornecedor", tipo: "simNao", pergunta: "Houve falha de fornecedor?", legenda: "Desvio em peça/componente novo dentro da garantia, ou atraso de fornecedor." },
+  { campo: "topProblemas", tipo: "top3", pergunta: "Quais foram os Top 3 problemas do dia?", legenda: "Registre até 3 problemas no formato D/I/C/Ca/S da folha impressa. Use uma sugestão de quebra grave (10h+ parada) para pré-preencher, ou adicione manualmente — se não houve nenhum problema relevante, pode avançar sem adicionar nada." },
 ];
 
 // ---------- Importação da planilha do SAP (versão piloto: uma vez por dia, na SFM) ----------
@@ -47,6 +51,7 @@ const MAPA_CABECALHOS_SAP = {
   tipodeordem: "tipoOrdem",
   centrabrespon: "centrab",
   equipamento: "equipamento",
+  denominacao: "nomeEquipamento",
   locinstalacao: "loc",
   textobreve: "textoBreve",
   descricao: "textoBreve", // export real do SAP usa "Descrição" no lugar de "Texto breve"
@@ -98,6 +103,7 @@ const PALAVRAS_FALLBACK_SAP = {
   statusUsuario: ["status", "usuario"],
   tipoOrdem: ["tipo", "ordem"],
   centrab: ["centrab"],
+  nomeEquipamento: ["denominacao"],
   loc: ["instalacao"],
   textoBreve: ["texto", "breve"],
   dataInicio: ["data", "inic"],
@@ -202,6 +208,7 @@ function importarPlanilhaSap(arrayBuffer) {
       tipoOrdem: strOuNull(extrair(linha, "tipoOrdem")),
       centrab: strOuNull(extrair(linha, "centrab")),
       equipamento: strOuNull(extrair(linha, "equipamento")),
+      nomeEquipamento: strOuNull(extrair(linha, "nomeEquipamento")),
       loc: strOuNull(extrair(linha, "loc")),
       textoBreve: strOuNull(extrair(linha, "textoBreve")),
       dataInicio: paraDataISO(extrair(linha, "dataInicio")),
@@ -266,12 +273,20 @@ function importarPlanilhaSap(arrayBuffer) {
   const wizardBtnNao = document.getElementById("wizardBtnNao");
   const wizardBtnSim = document.getElementById("wizardBtnSim");
   const wizardDetalhe = document.getElementById("wizardDetalhe");
+  const wizardSugestoesRetrabalho = document.getElementById("wizardSugestoesRetrabalho");
   const wizardDefeito = document.getElementById("wizardDefeito");
   const wizardMaquina = document.getElementById("wizardMaquina");
   const wizardCelula = document.getElementById("wizardCelula");
   const wizardDescricao = document.getElementById("wizardDescricao");
   const wizardMsgDetalhe = document.getElementById("wizardMsgDetalhe");
   const wizardBtnConfirmarDetalhe = document.getElementById("wizardBtnConfirmarDetalhe");
+  const wizardTop3 = document.getElementById("wizardTop3");
+  const wizardTop3Continuacao = document.getElementById("wizardTop3Continuacao");
+  const wizardTop3Sugestoes = document.getElementById("wizardTop3Sugestoes");
+  const wizardTop3Lista = document.getElementById("wizardTop3Lista");
+  const wizardBtnTop3Adicionar = document.getElementById("wizardBtnTop3Adicionar");
+  const wizardMsgTop3 = document.getElementById("wizardMsgTop3");
+  const wizardBtnConfirmarTop3 = document.getElementById("wizardBtnConfirmarTop3");
   const wizardBtnVoltar = document.getElementById("wizardBtnVoltar");
 
   let graficoD = null;
@@ -344,7 +359,13 @@ function importarPlanilhaSap(arrayBuffer) {
     return usuario.papel === "operador" ? usuario.setor : seletorSetor.value;
   }
 
-  seletorDia.value = hojeISO();
+  // Se o operador já concluiu a SFM de hoje, abre direto no último dia que ela cobriu
+  // (normalmente "ontem" — ver calcularJanelaSfm) em vez de "hoje", onde a SFM recém-preenchida
+  // não aparece (nada foi marcado pra hoje, só pro(s) dia(s) da janela).
+  const janelaSfmHoje = usuario.papel === "operador" ? calcularJanelaSfm() : null;
+  seletorDia.value = (janelaSfmHoje && DB.sfmConcluidaHoje(usuario.setor, hojeISO()))
+    ? janelaSfmHoje[janelaSfmHoje.length - 1]
+    : hojeISO();
   seletorDia.addEventListener("change", () => { avisarSeSujo(); renderizar(); });
   btnHoje.addEventListener("click", () => { avisarSeSujo(); seletorDia.value = hojeISO(); renderizar(); });
   btnImprimir.addEventListener("click", () => window.print());
@@ -377,7 +398,8 @@ function importarPlanilhaSap(arrayBuffer) {
 
   let wizardDias = [];
   let wizardIndice = 0;
-  let wizardRespostas = {}; // chave "dataISO|campo" -> { valor: true/false, detalhe: {defeito,maquina,celula,descricao}|null }
+  let wizardRespostas = {}; // chave "dataISO|campo" -> { valor: true/false, detalhe: {defeito,maquina,celula,descricao}|null } (simNao) ou { valor: [entradasTop3] } (top3)
+  let wizardTop3Entradas = []; // entradas do passo "top3" sendo editado no momento (até 3)
 
   /** Só o turno Manhã do setor preenche a SFM pelo assistente, um dia sem reunião (sáb/dom) não tem o que preencher. */
   function elegivelParaWizardHoje() {
@@ -465,19 +487,351 @@ function importarPlanilhaSap(arrayBuffer) {
     wizardPergunta.textContent = `${campoInfo.pergunta} (${formatarDataBR(dia)})`;
     wizardLegenda.textContent = campoInfo.legenda;
 
-    wizardBotoesSimNao.hidden = false;
-    wizardDetalhe.hidden = true;
-    wizardMsgDetalhe.textContent = "";
-
     const resposta = wizardRespostas[`${dia}|${campoInfo.campo}`];
-    const detalhe = resposta && resposta.valor === true ? resposta.detalhe : null;
-    wizardDefeito.value = detalhe?.defeito || "";
-    wizardMaquina.value = detalhe?.maquina || "";
-    wizardCelula.value = detalhe?.celula || "";
-    wizardDescricao.value = detalhe?.descricao || "";
+
+    if (campoInfo.tipo === "top3") {
+      wizardBotoesSimNao.hidden = true;
+      wizardDetalhe.hidden = true;
+      wizardTop3.hidden = false;
+      wizardMsgTop3.textContent = "";
+      wizardTop3Entradas = resposta && Array.isArray(resposta.valor)
+        ? resposta.valor.map((e) => ({ ...entradaTop3Vazia(), ...e, checks: { ...entradaTop3Vazia().checks, ...e.checks } }))
+        : [];
+      renderWizardTop3(dia);
+    } else {
+      wizardTop3.hidden = true;
+      wizardBotoesSimNao.hidden = false;
+      wizardDetalhe.hidden = true;
+      wizardMsgDetalhe.textContent = "";
+
+      const detalhe = resposta && resposta.valor === true ? resposta.detalhe : null;
+      wizardDefeito.value = detalhe?.defeito || "";
+      wizardMaquina.value = detalhe?.maquina || "";
+      wizardCelula.value = detalhe?.celula || "";
+      wizardDescricao.value = detalhe?.descricao || "";
+
+      wizardSugestoesRetrabalho.innerHTML = "";
+      if (campoInfo.campo === "retrabalho") renderSugestoesRetrabalho(dia);
+    }
 
     wizardBtnVoltar.hidden = wizardIndice === 0;
   }
+
+  // ---------- Sugestões: retrabalho (máquinas com mais de 1 ordem aberta no dia) ----------
+
+  function candidatosRetrabalho(dia) {
+    const porEquipamento = new Map();
+    for (const n of DB.notas) {
+      if (n.setor !== usuario.setor || n.dataEntrada !== dia || !n.equipamento) continue;
+      let grupo = porEquipamento.get(n.equipamento);
+      if (!grupo) { grupo = { equipamento: n.equipamento, nomeEquipamento: n.nomeEquipamento || null, notas: [] }; porEquipamento.set(n.equipamento, grupo); }
+      grupo.notas.push(n);
+      if (!grupo.nomeEquipamento && n.nomeEquipamento) grupo.nomeEquipamento = n.nomeEquipamento;
+    }
+    return Array.from(porEquipamento.values()).filter((g) => g.notas.length > 1);
+  }
+
+  function renderSugestoesRetrabalho(dia) {
+    const candidatos = candidatosRetrabalho(dia);
+    if (candidatos.length === 0) { wizardSugestoesRetrabalho.innerHTML = ""; return; }
+    wizardSugestoesRetrabalho.innerHTML = `
+      <div class="wizard-sugestoes">
+        <span class="wizard-sugestao-titulo">Equipamentos com mais de 1 ordem aberta hoje (possível retrabalho) — clique para ver as ordens:</span>
+        ${candidatos.map((c, i) => `<button type="button" class="wizard-chip-sugestao" data-i="${i}">${escaparHtml(c.nomeEquipamento || c.equipamento)} — ${c.notas.length} ordens</button>`).join("")}
+      </div>
+      <div id="wizardRetrabalhoDetalhe"></div>`;
+    const painelDetalhe = wizardSugestoesRetrabalho.querySelector("#wizardRetrabalhoDetalhe");
+    // Só mostra as ordens como referência — não preenche Defeito/Máquina/Célula/Descrição
+    // sozinho, o operador descreve o retrabalho com as próprias palavras, olhando essa referência.
+    wizardSugestoesRetrabalho.querySelectorAll(".wizard-chip-sugestao").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const c = candidatos[Number(btn.dataset.i)];
+        painelDetalhe.innerHTML = `
+          <div class="tabela-scroll" style="margin-top:8px;max-height:200px;">
+            <table>
+              <thead><tr><th>Nota</th><th>Ordem</th><th>Data</th><th>Horário</th><th>Local / Célula</th><th>Máquina</th><th>Descrição</th></tr></thead>
+              <tbody>
+                ${c.notas.map((n) => `<tr>
+                  <td>${escaparHtml(n.nota)}</td>
+                  <td>${escaparHtml(n.ordem || "—")}</td>
+                  <td>${formatarDataBR(n.dataEntrada)}</td>
+                  <td>${escaparHtml(n.horaEntrada || "—")}</td>
+                  <td>${escaparHtml(n.loc || "—")}</td>
+                  <td>${escaparHtml(n.nomeEquipamento || n.equipamento || "—")}</td>
+                  <td>${escaparHtml(n.textoBreve || "—")}</td>
+                </tr>`).join("")}
+              </tbody>
+            </table>
+          </div>`;
+      });
+    });
+  }
+
+  // ---------- Top 3 Problemas (D/I/C/Ca/S) ----------
+
+  function candidatosQuebraGrave(dia) {
+    return DB.dados.passagensTurno.filter((p) =>
+      p.setor === usuario.setor && p.status === "finalizada" &&
+      p.tempoParadoMinutos >= LIMITE_PARADA_MINUTOS &&
+      p.finalizadaEm && formatarDataISO(new Date(p.finalizadaEm)) === dia
+    );
+  }
+
+  /** TOP1/TOP2/TOP3 são mutuamente exclusivos (ver TOP3_RANKS) — definem o rótulo mostrado à
+   * esquerda da grade (ver rotuloRankTop3). Os demais são checkboxes independentes de escalonamento. */
+  const TOP3_RANKS = [
+    { chave: "top1", rotulo: "TOP 1" },
+    { chave: "top2", rotulo: "TOP 2" },
+    { chave: "top3", rotulo: "TOP 3" },
+  ];
+  const TOP3_CHECKS = [
+    { chave: "goSee", rotulo: "GO & SEE" },
+    { chave: "pdcaA3", rotulo: "PDCA A3" },
+    { chave: "planoAcao", rotulo: "Plano de ação" },
+    { chave: "feedback", rotulo: "Feedback" },
+  ];
+
+  /** Rótulo da esquerda da grade — reflete qual de TOP1/TOP2/TOP3 está marcado no rodapé, não a posição na lista. */
+  function rotuloRankTop3(checks) {
+    const marcado = TOP3_RANKS.find(({ chave }) => checks?.[chave]);
+    return marcado ? marcado.rotulo : "TOP ?";
+  }
+
+  /** Marca por padrão o rank (TOP1/2/3) correspondente à posição em que a entrada está sendo adicionada agora — só um ponto de partida, o operador pode trocar depois. */
+  function checksComRankPadrao(indice) {
+    const checks = entradaTop3Vazia().checks;
+    checks[TOP3_RANKS[indice]?.chave || "top1"] = true;
+    return checks;
+  }
+
+  function entradaTop3Vazia() {
+    return {
+      id: gerarId("top3"),
+      dia: 1, // 1º/2º/3º do ciclo D/I -> C/Ca -> S — selecionável pelo operador, usado pra sugerir continuidade no dia seguinte
+      celula: null, maquina: null, ordem: null, horario: null, descricao: null,
+      efeito: null, mttr: null, contencao: null, causaRaiz: null, solucao: null,
+      ajuda: null, responsavel: null,
+      checks: { top1: false, top2: false, top3: false, goSee: false, pdcaA3: false, planoAcao: false, feedback: false },
+      origemPassagemId: null,
+    };
+  }
+
+  /** Lê o Top 3 de um dia: se ainda estiver sendo preenchido nesta mesma sessão do assistente
+   * (ex.: janela de fim de semana com vários dias seguidos), usa o que está em memória — senão
+   * cai pro que já foi salvo em bd/quadro.json. */
+  function topProblemasDoDia(setor, diaISO) {
+    const resposta = wizardRespostas[`${diaISO}|topProblemas`];
+    if (resposta && Array.isArray(resposta.valor)) return resposta.valor;
+    const registro = DB.buscarRegistroQuadro(setor, diaISO);
+    return Array.isArray(registro?.topProblemas) ? registro.topProblemas : [];
+  }
+
+  /** Problemas do dia anterior ainda não concluídos (dia < 3º) — candidatos a "dar continuidade" hoje. */
+  function candidatosContinuacaoTop3(dia) {
+    const diaAnterior = somarDiasISO(dia, -1);
+    return topProblemasDoDia(usuario.setor, diaAnterior).filter((e) => (e.dia || 1) < 3);
+  }
+
+  function renderContinuacaoTop3(dia) {
+    const candidatos = candidatosContinuacaoTop3(dia).filter((e) => !wizardTop3Entradas.some((x) => x.id === e.id));
+    wizardTop3Continuacao.innerHTML = candidatos.length
+      ? `<div class="wizard-sugestoes">
+          <span class="wizard-sugestao-titulo">Problemas em aberto de ontem — dar continuidade?</span>
+          ${candidatos.map((e) => `<button type="button" class="wizard-chip-sugestao" data-id="${e.id}">${escaparHtml(e.maquina || e.descricao || "Problema sem máquina")} — estava no ${e.dia || 1}º dia</button>`).join("")}
+        </div>`
+      : "";
+    wizardTop3Continuacao.querySelectorAll(".wizard-chip-sugestao").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (wizardTop3Entradas.length >= 3) {
+          wizardMsgTop3.textContent = "Já tem 3 problemas adicionados — remova um para continuar este.";
+          wizardMsgTop3.style.color = "var(--vermelho-alerta)";
+          return;
+        }
+        const candidato = candidatos.find((c) => c.id === btn.dataset.id);
+        wizardTop3Entradas.push({
+          ...entradaTop3Vazia(),
+          ...candidato,
+          checks: { ...entradaTop3Vazia().checks, ...candidato.checks },
+          dia: Math.min((candidato.dia || 1) + 1, 3),
+        });
+        wizardMsgTop3.textContent = "";
+        renderWizardTop3(dia);
+      });
+    });
+  }
+
+  /** Monta a grade de edição de uma entrada do Top 3, no mesmo layout D/I/C/Ca/S da folha impressa (ver modelo/problemas.html). */
+  function campoTop3Html(e, i) {
+    const v = (x) => escaparHtml(x || "");
+    const checks = e.checks || {};
+    return `
+      <div class="top3-folha">
+        <table class="top3-tabela">
+          <colgroup><col style="width:52px"><col style="width:34px"><col style="width:34px"><col><col style="width:64px"><col style="width:120px"></colgroup>
+          <tbody>
+            <tr>
+              <td class="top3-top" rowspan="5">${rotuloRankTop3(checks)}<button type="button" class="btn-remover-top3" data-i="${i}" title="Remover este problema">✕</button></td>
+              <td class="top3-dia" rowspan="2"><label><input type="radio" name="top3-dia-${i}" data-campo="dia" data-i="${i}" value="1" ${(e.dia || 1) === 1 ? "checked" : ""}> 1º</label></td>
+              <td class="top3-let">D:</td>
+              <td>
+                <div class="top3-lbl">O que? Quando? Onde?</div>
+                <div class="top3-sub-grid">
+                  <div><div class="top3-lbl">Célula</div><input type="text" data-campo="celula" data-i="${i}" value="${v(e.celula)}"></div>
+                  <div><div class="top3-lbl">Máquina</div><input type="text" data-campo="maquina" data-i="${i}" value="${v(e.maquina)}"></div>
+                  <div><div class="top3-lbl">Ordem</div><input type="text" data-campo="ordem" data-i="${i}" value="${v(e.ordem)}"></div>
+                  <div><div class="top3-lbl">Horário</div><input type="text" data-campo="horario" data-i="${i}" value="${v(e.horario)}" placeholder="hh:mm"></div>
+                  <div><div class="top3-lbl">Descrição do problema</div><input type="text" data-campo="descricao" data-i="${i}" value="${v(e.descricao)}"></div>
+                </div>
+              </td>
+              <td class="top3-ajuda" rowspan="5">
+                <div class="top3-lbl">Ajuda</div>
+                <label><input type="radio" name="top3-ajuda-${i}" data-campo="ajuda" data-i="${i}" value="sim" ${e.ajuda === true ? "checked" : ""}> Sim</label>
+                <label><input type="radio" name="top3-ajuda-${i}" data-campo="ajuda" data-i="${i}" value="nao" ${e.ajuda === false ? "checked" : ""}> Não</label>
+              </td>
+              <td rowspan="5"><div class="top3-lbl">Resp.</div><input type="text" data-campo="responsavel" data-i="${i}" value="${v(e.responsavel)}" placeholder="Responsável"></td>
+            </tr>
+            <tr>
+              <td class="top3-let">I:</td>
+              <td>
+                <div class="top3-lbl">Quais os efeitos do problema? Quanto?</div>
+                <textarea data-campo="efeito" data-i="${i}">${v(e.efeito)}</textarea>
+                <div class="top3-lbl">Tempo de reparo = MTTR =</div>
+                <input type="text" data-campo="mttr" data-i="${i}" value="${v(e.mttr)}">
+              </td>
+            </tr>
+            <tr>
+              <td class="top3-dia" rowspan="2"><label><input type="radio" name="top3-dia-${i}" data-campo="dia" data-i="${i}" value="2" ${(e.dia || 1) === 2 ? "checked" : ""}> 2º</label></td>
+              <td class="top3-let">C:</td>
+              <td>
+                <div class="top3-lbl">Ações imediatas para eliminar ou reduzir o impacto. O que foi feito para reestabelecer o equipamento?</div>
+                <textarea data-campo="contencao" data-i="${i}">${v(e.contencao)}</textarea>
+              </td>
+            </tr>
+            <tr>
+              <td class="top3-let">Ca:</td>
+              <td>
+                <div class="top3-lbl">Por que o problema aconteceu? 5 porquês</div>
+                <textarea data-campo="causaRaiz" data-i="${i}">${v(e.causaRaiz)}</textarea>
+              </td>
+            </tr>
+            <tr>
+              <td class="top3-dia"><label><input type="radio" name="top3-dia-${i}" data-campo="dia" data-i="${i}" value="3" ${(e.dia || 1) === 3 ? "checked" : ""}> 3º</label></td>
+              <td class="top3-let">S:</td>
+              <td>
+                <div class="top3-lbl">Ações para eliminar a causa raiz. Ações para evitar que o equipamento quebre novamente pelo mesmo motivo. Tem abrangência?</div>
+                <textarea data-campo="solucao" data-i="${i}">${v(e.solucao)}</textarea>
+              </td>
+            </tr>
+            <tr class="top3-rodape">
+              <td colspan="6">
+                ${TOP3_RANKS.map(({ chave, rotulo }) => `<label><input type="radio" name="top3-rank-${i}" data-campo="rank:${chave}" data-i="${i}" ${checks[chave] ? "checked" : ""}> ${rotulo}</label>`).join("")}
+                ${TOP3_CHECKS.map(({ chave, rotulo }) => `<label><input type="checkbox" data-campo="check:${chave}" data-i="${i}" ${checks[chave] ? "checked" : ""}> ${rotulo}</label>`).join("")}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>`;
+  }
+
+  /** Lê um clique/alteração num campo de uma entrada do Top 3 e atualiza wizardTop3Entradas — delegado no container (ver wizardTop3Lista abaixo), já que o conteúdo é inteiramente recriado a cada renderWizardTop3. */
+  function aplicarMudancaTop3(ev) {
+    const campo = ev.target.dataset.campo;
+    if (!campo) return;
+    const i = Number(ev.target.dataset.i);
+    const entrada = wizardTop3Entradas[i];
+    if (!entrada) return;
+    if (campo === "ajuda") { entrada.ajuda = ev.target.value === "sim"; return; }
+    if (campo === "dia") { entrada.dia = Number(ev.target.value); return; }
+    if (campo.startsWith("rank:")) {
+      // TOP1/TOP2/TOP3 são mutuamente exclusivos — marcar um desmarca os outros dois. Refaz a
+      // grade pra atualizar o rótulo "TOP n" à esquerda, que agora segue essa marcação.
+      for (const { chave } of TOP3_RANKS) entrada.checks[chave] = false;
+      entrada.checks[campo.slice(5)] = true;
+      renderWizardTop3(wizardStepAtual().dia);
+      return;
+    }
+    if (campo.startsWith("check:")) { entrada.checks[campo.slice(6)] = ev.target.checked; return; }
+    entrada[campo] = ev.target.value;
+  }
+
+  function renderWizardTop3(dia) {
+    renderContinuacaoTop3(dia);
+
+    const candidatos = candidatosQuebraGrave(dia).filter((p) => !wizardTop3Entradas.some((e) => e.origemPassagemId === p.id));
+
+    wizardTop3Sugestoes.innerHTML = candidatos.length
+      ? `<div class="wizard-sugestoes">
+          <span class="wizard-sugestao-titulo">Quebras graves do dia (10h+ parada) — use para pré-preencher um Top 3:</span>
+          ${candidatos.map((p) => `<button type="button" class="wizard-chip-sugestao" data-id="${p.id}">${escaparHtml(p.maquina || "—")} — ${formatarDuracaoMinutos(p.tempoParadoMinutos)}</button>`).join("")}
+        </div>`
+      : "";
+    wizardTop3Sugestoes.querySelectorAll(".wizard-chip-sugestao").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (wizardTop3Entradas.length >= 3) {
+          wizardMsgTop3.textContent = "Já tem 3 problemas adicionados — remova um para usar essa sugestão.";
+          wizardMsgTop3.style.color = "var(--vermelho-alerta)";
+          return;
+        }
+        const p = candidatos.find((c) => c.id === btn.dataset.id);
+        wizardTop3Entradas.push({
+          ...entradaTop3Vazia(),
+          checks: checksComRankPadrao(wizardTop3Entradas.length),
+          celula: p.celula || null,
+          maquina: p.maquina || null,
+          horario: p.inicioParadaEm ? new Date(p.inicioParadaEm).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : null,
+          descricao: p.defeito ? `${p.defeito} — ${p.descricao}` : p.descricao,
+          efeito: `Máquina parada ${formatarDuracaoMinutos(p.tempoParadoMinutos)}`,
+          mttr: formatarDuracaoMinutos(p.tempoParadoMinutos),
+          origemPassagemId: p.id,
+        });
+        wizardMsgTop3.textContent = "";
+        renderWizardTop3(dia);
+      });
+    });
+
+    wizardTop3Lista.innerHTML = wizardTop3Entradas.length
+      ? wizardTop3Entradas.map((e, i) => campoTop3Html(e, i)).join("")
+      : `<p class="rodape-nota" style="text-align:left;">Nenhum problema adicionado ainda.</p>`;
+
+    wizardBtnTop3Adicionar.disabled = wizardTop3Entradas.length >= 3;
+  }
+
+  // Delegado uma única vez no container (não a cada render, que recria todo o conteúdo) —
+  // evita o bug de listeners duplicados que gerava entradas fantasma (ver histórico).
+  wizardTop3Lista.addEventListener("input", aplicarMudancaTop3);
+  wizardTop3Lista.addEventListener("change", aplicarMudancaTop3);
+  wizardTop3Lista.addEventListener("click", (ev) => {
+    const btn = ev.target.closest(".btn-remover-top3");
+    if (!btn) return;
+    wizardTop3Entradas.splice(Number(btn.dataset.i), 1);
+    renderWizardTop3(wizardStepAtual().dia);
+  });
+
+  wizardBtnTop3Adicionar.addEventListener("click", () => {
+    if (wizardTop3Entradas.length >= 3) return;
+    // Sem rank pré-marcado (diferente da sugestão de quebra grave, que já vem com conteúdo real) —
+    // uma entrada totalmente em branco não deve "parecer preenchida" só pelo rank, ver entradaTop3Preenchida.
+    wizardTop3Entradas.push(entradaTop3Vazia());
+    wizardMsgTop3.textContent = "";
+    renderWizardTop3(wizardStepAtual().dia);
+  });
+
+  /** Uma entrada "em branco" (criada por "+ Adicionar manualmente" e esquecida sem preencher, ou sobrando de uma sugestão removida) não deve ser salva como Top 3.
+   * O rank (TOP1/2/3) sozinho não conta — ele vem pré-marcado por padrão em sugestões (ver checksComRankPadrao), então um rank marcado sem mais nada ainda é "em branco". */
+  function entradaTop3Preenchida(e) {
+    const camposTexto = ["celula", "maquina", "ordem", "horario", "descricao", "efeito", "mttr", "contencao", "causaRaiz", "solucao", "responsavel"];
+    if (camposTexto.some((campo) => e[campo])) return true;
+    if (e.ajuda === true || e.ajuda === false) return true;
+    if (e.checks && TOP3_CHECKS.some(({ chave }) => e.checks[chave])) return true;
+    return false;
+  }
+
+  wizardBtnConfirmarTop3.addEventListener("click", () => {
+    const { dia, campoInfo } = wizardStepAtual();
+    const entradas = wizardTop3Entradas.map((e) => ({ ...e })).filter(entradaTop3Preenchida);
+    wizardRespostas[`${dia}|${campoInfo.campo}`] = { valor: entradas };
+    avancarWizard();
+  });
 
   wizardBtnNao.addEventListener("click", () => {
     const { dia, campoInfo } = wizardStepAtual();
@@ -523,8 +877,13 @@ function importarPlanilhaSap(arrayBuffer) {
   async function finalizarWizard() {
     for (const [chave, resposta] of Object.entries(wizardRespostas)) {
       const [dia, campo] = chave.split("|");
-      DB.definirRegistroQuadro(usuario.setor, dia, campo, resposta.valor);
-      DB.definirRegistroQuadro(usuario.setor, dia, `${campo}Detalhe`, resposta.valor ? resposta.detalhe : null);
+      const info = WIZARD_CAMPOS.find((c) => c.campo === campo);
+      if (info && info.tipo === "top3") {
+        DB.definirRegistroQuadro(usuario.setor, dia, campo, resposta.valor || []);
+      } else {
+        DB.definirRegistroQuadro(usuario.setor, dia, campo, resposta.valor);
+        DB.definirRegistroQuadro(usuario.setor, dia, `${campo}Detalhe`, resposta.valor ? resposta.detalhe : null);
+      }
     }
     DB.confirmarSfm(usuario.nome, usuario.setor, hojeISO());
 
@@ -532,6 +891,9 @@ function importarPlanilhaSap(arrayBuffer) {
     const okDados = await DbUI.salvarDados(alerta);
     if (okQuadro && okDados) mostrarAlerta(alerta, "ok", "SFM de hoje registrada com sucesso.");
 
+    // Mostra direto o dia que acabou de ser preenchido (normalmente "ontem", não hoje —
+    // ver calcularJanelaSfm) em vez de deixar o seletor em "hoje", onde nada apareceria.
+    if (wizardDias.length) seletorDia.value = wizardDias[wizardDias.length - 1];
     mostrarBoardNormal();
   }
 
@@ -889,46 +1251,108 @@ function importarPlanilhaSap(arrayBuffer) {
   }
 
   // ---------- Top problemas: máquinas com >=10h de parada, finalizadas no dia selecionado do setor atual ----------
+  // (não é mais exibido como tabela própria na tela — só alimenta a impressão/PDF e as
+  // sugestões do assistente da SFM; o que aparece na tela é só o Top 3 preenchido, ver abaixo.)
 
   function renderTopProblemas(setor, diaSelecionado) {
-    const problemas = DB.dados.passagensTurno.filter((p) =>
-      p.setor === setor &&
-      p.status === "finalizada" &&
-      p.tempoParadoMinutos >= LIMITE_PARADA_MINUTOS &&
-      p.finalizadaEm && formatarDataISO(new Date(p.finalizadaEm)) === diaSelecionado
-    ).sort((a, b) => b.tempoParadoMinutos - a.tempoParadoMinutos);
-
-    const corpo = document.getElementById("corpoTopProblemas");
-    corpo.innerHTML = problemas.length
-      ? problemas.map((p) => {
-          return `<tr>
-            <td>${escaparHtml(p.maquina || "—")}</td>
-            <td>${escaparHtml(p.descricao)}</td>
-            <td><strong>${formatarDuracaoMinutos(p.tempoParadoMinutos)}</strong></td>
-            <td>${new Date(p.finalizadaEm).toLocaleString("pt-BR")}</td>
-          </tr>`;
-        }).join("")
-      : `<tr><td colspan="4" style="text-align:center;color:var(--texto-suave);">Nenhuma máquina passou de 10h parada neste dia.</td></tr>`;
-
-    renderTop3Impressao(setor, diaSelecionado, problemas);
+    renderTop3Impressao(setor, diaSelecionado);
+    renderTop3Preenchido(setor, diaSelecionado);
   }
 
-  /** Folha 2 da impressão (#folhaTop3, ver quadro-sfm.html): só os 3 piores do dia, já que é pra caber numa folha só. */
-  function renderTop3Impressao(setor, diaSelecionado, problemas) {
+  /** Top 3 Problemas (D/I/C/Ca/S) preenchido pelo assistente da SFM (ver WIZARD_CAMPOS) — só leitura aqui. */
+  function renderTop3Preenchido(setor, diaSelecionado) {
+    const registro = DB.buscarRegistroQuadro(setor, diaSelecionado);
+    const top3 = Array.isArray(registro?.topProblemas) ? registro.topProblemas : [];
+    const corpo = document.getElementById("corpoTop3Preenchido");
+    if (!top3.length) {
+      corpo.innerHTML = `<p class="rodape-nota" style="text-align:left;">Nenhum Top 3 preenchido na SFM deste dia ainda.</p>`;
+      return;
+    }
+    corpo.innerHTML = top3.map((e, i) => campoTop3HtmlLeitura(e, i)).join("");
+  }
+
+  /** Mesma grade de campoTop3Html, mas só leitura (texto em vez de input) — pra exibir fora do assistente. */
+  function campoTop3HtmlLeitura(e, i) {
+    const v = (x) => `<span class="top3-valor">${escaparHtml(x || "—")}</span>`;
+    const checks = e.checks || {};
+    const diaAtual = e.dia || 1;
+    const rotuloDia = (estagio) => `<span class="${diaAtual === estagio ? "top3-dia-ativo" : ""}">${estagio}º</span>`;
+    return `
+      <div class="top3-folha">
+        <table class="top3-tabela top3-tabela-leitura">
+          <colgroup><col style="width:52px"><col style="width:34px"><col style="width:34px"><col><col style="width:64px"><col style="width:120px"></colgroup>
+          <tbody>
+            <tr>
+              <td class="top3-top" rowspan="5">${rotuloRankTop3(checks)}</td>
+              <td class="top3-dia" rowspan="2">${rotuloDia(1)}</td>
+              <td class="top3-let">D:</td>
+              <td>
+                <div class="top3-lbl">O que? Quando? Onde?</div>
+                <div class="top3-sub-grid">
+                  <div><div class="top3-lbl">Célula</div>${v(e.celula)}</div>
+                  <div><div class="top3-lbl">Máquina</div>${v(e.maquina)}</div>
+                  <div><div class="top3-lbl">Ordem</div>${v(e.ordem)}</div>
+                  <div><div class="top3-lbl">Horário</div>${v(e.horario)}</div>
+                  <div><div class="top3-lbl">Descrição do problema</div>${v(e.descricao)}</div>
+                </div>
+              </td>
+              <td class="top3-ajuda" rowspan="5">
+                <div class="top3-lbl">Ajuda</div>
+                ${e.ajuda === true ? "Sim" : e.ajuda === false ? "Não" : "—"}
+              </td>
+              <td rowspan="5"><div class="top3-lbl">Resp.</div>${v(e.responsavel)}</td>
+            </tr>
+            <tr>
+              <td class="top3-let">I:</td>
+              <td>
+                <div class="top3-lbl">Quais os efeitos do problema? Quanto?</div>
+                ${v(e.efeito)}
+                <div class="top3-lbl">Tempo de reparo = MTTR =</div>
+                ${v(e.mttr)}
+              </td>
+            </tr>
+            <tr>
+              <td class="top3-dia" rowspan="2">${rotuloDia(2)}</td>
+              <td class="top3-let">C:</td>
+              <td>
+                <div class="top3-lbl">Ações imediatas para eliminar ou reduzir o impacto. O que foi feito para reestabelecer o equipamento?</div>
+                ${v(e.contencao)}
+              </td>
+            </tr>
+            <tr>
+              <td class="top3-let">Ca:</td>
+              <td>
+                <div class="top3-lbl">Por que o problema aconteceu? 5 porquês</div>
+                ${v(e.causaRaiz)}
+              </td>
+            </tr>
+            <tr>
+              <td class="top3-dia">${rotuloDia(3)}</td>
+              <td class="top3-let">S:</td>
+              <td>
+                <div class="top3-lbl">Ações para eliminar a causa raiz. Ações para evitar que o equipamento quebre novamente pelo mesmo motivo. Tem abrangência?</div>
+                ${v(e.solucao)}
+              </td>
+            </tr>
+            <tr class="top3-rodape">
+              <td colspan="6">
+                ${TOP3_RANKS.map(({ chave, rotulo }) => `<span class="top3-check-leitura">${checks[chave] ? "☑" : "☐"} ${rotulo}</span>`).join("")}
+                ${TOP3_CHECKS.map(({ chave, rotulo }) => `<span class="top3-check-leitura">${checks[chave] ? "☑" : "☐"} ${rotulo}</span>`).join("")}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>`;
+  }
+
+  /** Folha 2 da impressão (#folhaTop3, ver quadro-sfm.html) — mesmo Top 3 preenchido na SFM (D/I/C/Ca/S)
+   * exibido na tela (ver renderTop3Preenchido); só imprime quando houver algum (ver classe "sem-dados"). */
+  function renderTop3Impressao(setor, diaSelecionado) {
+    const registro = DB.buscarRegistroQuadro(setor, diaSelecionado);
+    const top3 = Array.isArray(registro?.topProblemas) ? registro.topProblemas : [];
     document.getElementById("top3SetorMes").textContent = `${setor} — ${formatarDataBR(diaSelecionado)}`;
-    const top3 = problemas.slice(0, 3);
-    const corpo = document.getElementById("corpoTop3Impressao");
-    corpo.innerHTML = top3.length
-      ? top3.map((p, i) => {
-          return `<tr>
-            <td>${i + 1}</td>
-            <td>${escaparHtml(p.maquina || "—")}</td>
-            <td>${escaparHtml(p.descricao)}</td>
-            <td><strong>${formatarDuracaoMinutos(p.tempoParadoMinutos)}</strong></td>
-            <td>${new Date(p.finalizadaEm).toLocaleString("pt-BR")}</td>
-          </tr>`;
-        }).join("")
-      : `<tr><td colspan="5" style="text-align:center;color:var(--texto-suave);">Nenhuma máquina passou de 10h parada neste dia.</td></tr>`;
+    document.getElementById("corpoTop3Impressao").innerHTML = top3.map((e, i) => campoTop3HtmlLeitura(e, i)).join("");
+    document.getElementById("folhaTop3").classList.toggle("sem-dados", top3.length === 0);
   }
 
   window.addEventListener("beforeunload", (ev) => {

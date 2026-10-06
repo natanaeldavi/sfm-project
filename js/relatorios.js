@@ -57,7 +57,7 @@
     if (ate) notas = notas.filter((n) => n.dataEntrada && n.dataEntrada <= ate);
     if (termo) {
       notas = notas.filter((n) =>
-        [n.nota, n.ordem, n.textoBreve, n.equipamento].some((v) => (v || "").toString().toLowerCase().includes(termo))
+        [n.nota, n.ordem, n.textoBreve, n.equipamento, n.nomeEquipamento].some((v) => (v || "").toString().toLowerCase().includes(termo))
       );
     }
     notas.sort((a, b) => (b.dataEntrada || "").localeCompare(a.dataEntrada || ""));
@@ -70,7 +70,7 @@
         <td>${escaparHtml(n.nota)}</td>
         <td>${escaparHtml(n.ordem || "—")}</td>
         <td><span class="tag setor-${n.setor}">${n.setor}</span></td>
-        <td>${escaparHtml(n.equipamento || "—")}</td>
+        <td>${n.nomeEquipamento ? `${escaparHtml(n.nomeEquipamento)}<br><small style="color:var(--texto-suave);">${escaparHtml(n.equipamento || "—")}</small>` : escaparHtml(n.equipamento || "—")}</td>
         <td>${escaparHtml(n.textoBreve || "—")}</td>
         <td>${escaparHtml(n.statusUsuario || n.statusSistema || "—")}</td>
         <td>${formatarDataBR(n.dataEntrada)}</td>

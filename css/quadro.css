@@ -1,5 +1,53 @@
 /* SFM — quadro-sfm.html: reproduz o layout da folha física (S/Q/D/C) por setor. */
 
+/* ---------- Assistente: sugestões (retrabalho) e cards do Top 3 (D/I/C/Ca/S) ---------- */
+
+.wizard-sugestoes { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.wizard-sugestao-titulo { flex-basis: 100%; font-size: 12px; font-weight: 600; color: var(--texto-suave); margin-bottom: 2px; }
+.wizard-chip-sugestao {
+  background: #fff;
+  border: 1px solid var(--azul-secundario);
+  color: var(--azul-principal);
+  border-radius: 14px;
+  padding: 5px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.wizard-chip-sugestao:hover { background: var(--cinza-claro); }
+
+/* Grade do Top 3 Problemas, no mesmo layout D/I/C/Ca/S da folha impressa (ver modelo/problemas.html). */
+.top3-folha { margin-bottom: 16px; border: 1px solid var(--cinza-borda); overflow-x: auto; }
+.top3-tabela { border-collapse: collapse; width: 100%; min-width: 720px; table-layout: fixed; background: var(--bg-card); }
+.top3-tabela td { border: 1px solid var(--cinza-borda); padding: 0; vertical-align: top; }
+.top3-top {
+  text-align: center; vertical-align: middle; font-weight: 700;
+  background: var(--azul-principal); color: #fff; position: relative; font-size: 13px;
+}
+.top3-top .btn-remover-top3 {
+  position: absolute; top: 2px; right: 2px; border: none; background: transparent;
+  color: #fff; opacity: 0.8; cursor: pointer; font-size: 12px; line-height: 1; padding: 2px;
+}
+.top3-top .btn-remover-top3:hover { opacity: 1; }
+.top3-dia { text-align: center; vertical-align: middle; font-size: 11px; background: var(--cinza-claro); color: var(--texto-suave); }
+.top3-dia label { display: flex; align-items: center; justify-content: center; gap: 3px; cursor: pointer; padding: 2px; }
+.top3-dia-ativo { font-weight: 700; color: var(--azul-principal); background: #fff; border-radius: 3px; padding: 1px 5px; }
+.top3-let { text-align: center; vertical-align: middle; font-weight: 700; color: var(--azul-principal); background: var(--cinza-claro); }
+.top3-lbl { font-size: 10px; font-weight: 600; text-transform: uppercase; color: var(--texto-suave); padding: 3px 6px 0; }
+.top3-tabela input[type="text"], .top3-tabela textarea {
+  width: 100%; border: 0; background: transparent; color: var(--cinza-texto); font: inherit; padding: 3px 6px; resize: vertical;
+}
+.top3-tabela textarea { min-height: 38px; }
+.top3-tabela input[type="text"]:focus, .top3-tabela textarea:focus { background: var(--cinza-claro); outline: none; }
+.top3-sub-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 2fr; }
+.top3-sub-grid > div { border-right: 1px solid var(--cinza-borda); }
+.top3-sub-grid > div:last-child { border-right: 0; }
+.top3-ajuda { text-align: center; vertical-align: middle; font-size: 11px; }
+.top3-ajuda label { display: block; padding: 2px 0; cursor: pointer; }
+.top3-rodape td { background: var(--cinza-claro); padding: 6px 8px; }
+.top3-rodape label, .top3-check-leitura { margin-right: 14px; white-space: nowrap; font-size: 11px; font-weight: 600; color: var(--cinza-texto); display: inline-block; }
+.top3-valor { display: block; padding: 3px 6px; font-size: 12px; color: var(--cinza-texto); min-height: 1.4em; }
+.top3-tabela-leitura .top3-top { background: var(--azul-secundario); }
+
 .quadro-folha {
   background: var(--bg-card);
   border: 1px solid var(--cinza-borda);
@@ -32,6 +80,9 @@
 }
 .status-geral-quadrado.ok { background: #8FD19E; border-color: #5FA873; }
 .status-geral-quadrado.ocorrencia { background: #E28AA5; border-color: #C85F84; }
+
+/* Só existe na impressão (ver @media print abaixo) — invisível e sem altura na tela. */
+#quadroEspacadorImpressao { display: none; }
 
 .quadro-bloco { display: flex; gap: 12px; margin-bottom: 14px; align-items: stretch; }
 .quadro-rotulo {
@@ -192,6 +243,10 @@
   /* Dimensão fixa em mm (A4 retrato 210x297 menos 10mm de margem de cada
    * lado) em vez de width/height:100%: percentual contra a página impressa
    * não é confiável entre navegadores e causava conteúdo cortado/gigante. */
+  /* Ocupa, no fluxo normal, o mesmo espaço de uma página — ver comentário no HTML (quadro-sfm.html)
+   * sobre por que isso é necessário pro page-break-before de #folhaTop3 funcionar. */
+  #quadroEspacadorImpressao { display: block; visibility: hidden; height: 277mm; }
+
   #quadro {
     position: absolute;
     top: 0;
@@ -283,21 +338,29 @@
     color-adjust: exact !important;
   }
 
-  /* Folha 2: Top 3 Problemas do mês (ver #folhaTop3 em quadro-sfm.html e
-   * renderTop3Impressao em js/quadro-sfm.js). Ao contrário de #quadro, não
-   * precisa de posicionamento absoluto em mm — o conteúdo é curto (só 3
-   * linhas), então basta forçar quebra de página e deixar a altura natural. */
+  /* Folha 2: Top 3 Problemas da SFM, no mesmo grid D/I/C/Ca/S da tela (ver
+   * #folhaTop3 em quadro-sfm.html, renderTop3Impressao/campoTop3HtmlLeitura em
+   * js/quadro-sfm.js). Ao contrário de #quadro, não precisa de posicionamento
+   * absoluto em mm — deixa a altura natural, só forçando quebra de página.
+   * Some por completo (nem a quebra de página) quando não há nenhum Top 3
+   * preenchido pro dia selecionado — ver classe "sem-dados". */
   #folhaTop3 {
     display: block !important;
     visibility: visible;
     page-break-before: always;
   }
+  #folhaTop3.sem-dados { display: none !important; }
   #folhaTop3 * { visibility: visible; }
   #folhaTop3 .quadro-folha { height: auto; display: block; }
-  #folhaTop3 .top3-tabela { width: 100%; border-collapse: collapse; font-size: 11px; }
-  #folhaTop3 .top3-tabela th, #folhaTop3 .top3-tabela td {
-    border: 1px solid #999;
-    padding: 2mm;
-    text-align: left;
-  }
+  /* .top3-folha/.top3-tabela têm overflow-x:auto + min-width:720px pra rolar em telas
+   * estreitas (ver quadro.css) — na impressão isso fica maior que a própria página A4
+   * (190mm ≈ 718px), empurra o conteúdo pra fora e quebra a paginação inteira. Por isso,
+   * só na impressão: sem scroll, sem largura mínima fixa, e table-layout automático pra
+   * caber na largura real da página. */
+  #folhaTop3 .top3-folha { page-break-inside: avoid; border-color: #999; overflow: visible; }
+  #folhaTop3 .top3-tabela { font-size: 9px; width: 100%; min-width: 0; table-layout: auto; }
+  #folhaTop3 .top3-tabela col { width: auto !important; }
+  #folhaTop3 .top3-tabela td { border-color: #999; }
+  #folhaTop3 .top3-lbl { font-size: 7px; }
+  #folhaTop3 .top3-valor { font-size: 9px; }
 }

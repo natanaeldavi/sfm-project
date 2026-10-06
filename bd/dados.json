@@ -1,466 +1,502 @@
 {
-  "usuarios": [
+  "confirmacoesTurno": [
     {
-      "id": "u-admin",
-      "codigo": "admin",
-      "nome": "admin",
-      "senhaHash": "WgLoZMvFq4rGIdSFwPd9e+8WtJw0rIysOvlsb0SoFcI=",
-      "senhaSalt": "KN2TlKcQzI8IUONAOOxNuw==",
-      "papel": "admin",
-      "setor": null
-    },
-    {
-      "id": "u-gestor",
-      "codigo": "gestor",
-      "nome": "gestor",
-      "senhaHash": "T6uOue+D0EWwK03h2ByJz0NyM2VqljoX5IHigBqh60w=",
-      "senhaSalt": "gpiFvrLghH79fmdJBoi6tQ==",
-      "papel": "gestor",
-      "setor": null
-    },
-    {
-      "id": "u-user1",
-      "codigo": "user1",
-      "nome": "user1",
-      "senhaHash": "T5Y34fcyyy+UfMvYSxfBiRocT7u1lHDCZiiZwtiZeJM=",
-      "senhaSalt": "ir1hR6TR4oAsAi0xtgbtvg==",
-      "papel": "operador",
+      "concluidoEm": "2026-09-11T13:45:21.254Z",
+      "data": "2026-09-11",
+      "id": "ct-98fb19c3-8808-4843-80d0-de2ad9b35e5f",
       "setor": "Gasolina",
+      "tipo": "passagem",
       "turno": "Manhã",
-      "responsavelSfm": true
+      "usuario": "user1"
     },
     {
-      "id": "u-user2",
-      "codigo": "user2",
-      "nome": "user2",
-      "senhaHash": "HudZNCrmAGQYpj1mE19dVes6HHR7XhO53dKJmeW6hmk=",
-      "senhaSalt": "m1y/ugTnH0j+7IiXFBX8dw==",
-      "papel": "operador",
+      "concluidoEm": "2026-10-06T18:01:23.222Z",
+      "data": "2026-10-06",
+      "id": "ct-8f45dabf-4f88-4ef3-a05c-7fa560c0e4f0",
       "setor": "Diesel",
-      "turno": "Tarde"
+      "tipo": "sfm",
+      "turno": null,
+      "usuario": "user2"
     },
     {
-      "id": "u-user3",
-      "codigo": "user3",
-      "nome": "user3",
-      "senhaHash": "25A8LRn0ZXHQOwaaWJc+sKnK39cTPXiIXPi9AgjjshA=",
-      "senhaSalt": "SBHsKpVAHiNr/zzmkVZhTg==",
-      "papel": "operador",
-      "setor": "Controle",
-      "turno": "Noite"
-    },
-    {
-      "id": "u-23ebfba2-06ae-4334-8c44-c0904d22018e",
-      "codigo": "user4",
-      "nome": "user4",
-      "senhaHash": "vV9pMI3wH0YwGRm65WiB+15yVrzgh12aDoYJOvN1KFs=",
-      "senhaSalt": "iRXmJV0GO4TRQgDvQJjnsg==",
-      "papel": "operador",
-      "setor": "Biela",
-      "turno": "Manhã",
-      "responsavelSfm": true
-    },
-    {
-      "id": "u-db49ef96-9c3c-4fba-8297-fea242a4ea79",
-      "codigo": "gasolina",
-      "nome": "gasolina",
-      "senhaHash": "ljaEI6IaHScRjjqgH8r2k6/MZ62NNpWmfiWqtOTMYg4=",
-      "senhaSalt": "0ggV1YyiWTfusIy6aLr7MQ==",
-      "papel": "operador",
-      "setor": "Gasolina",
-      "turno": "Tarde",
-      "responsavelSfm": false
-    }
-  ],
-  "passagensTurno": [
-    {
-      "id": "pt-b1585754-ac30-496d-9eb6-be5a3add599b",
-      "nota": "75",
-      "setor": "Gasolina",
-      "turno": "Tarde",
-      "descricao": "asdkjasd",
-      "dataHora": "2026-09-08T20:20:04.246Z",
-      "status": "finalizada",
-      "finalizadaEm": "2026-09-08T23:16:00.000Z",
-      "registradoPor": "usergas",
-      "recebidoPor": "usergas",
-      "recebidoEm": "2026-09-08T20:20:23.972Z",
-      "inicioParadaEm": "2026-09-08T19:31:51.299Z",
-      "tempoParadoMinutos": 224,
-      "finalizadoPor": "admin"
-    },
-    {
-      "id": "pt-69b2038b-2f01-450e-ad69-de5e295a98c4",
-      "nota": "76",
-      "setor": "Gasolina",
-      "turno": "Tarde",
-      "descricao": "passando ordem",
-      "dataHora": "2026-09-08T20:20:05.831Z",
-      "status": "finalizada",
-      "finalizadaEm": "2026-09-08T23:16:00.000Z",
-      "registradoPor": "usergas",
-      "recebidoPor": "usergas",
-      "recebidoEm": "2026-09-08T20:20:23.972Z",
-      "inicioParadaEm": "2026-09-08T19:31:51.299Z",
-      "tempoParadoMinutos": 224,
-      "finalizadoPor": "admin"
-    },
-    {
-      "id": "pt-94fb6888-c941-4533-935a-f50237639777",
-      "nota": "14",
+      "id": "ct-8031d7f5-a969-4bf0-a0fb-ec5f4b571f2d",
       "setor": "Gasolina",
       "turno": null,
-      "descricao": "askdjasd",
-      "dataHora": "2026-09-08T23:16:10.547Z",
-      "inicioParadaEm": "2026-09-08T20:16:51.657Z",
-      "status": "finalizada",
-      "recebidoPor": "user1",
-      "recebidoEm": "2026-09-08T23:17:07.822Z",
-      "finalizadaEm": "2026-09-08T23:17:00.000Z",
-      "tempoParadoMinutos": 180,
-      "finalizadoPor": "user1",
-      "registradoPor": "admin"
-    },
-    {
-      "id": "pt-234881e7-185d-4d4a-b936-b556e682f0d8",
-      "nota": "246",
-      "setor": "Gasolina",
-      "turno": "Manhã",
-      "descricao": "agua",
-      "dataHora": "2026-09-11T13:45:21.252Z",
-      "inicioParadaEm": "2026-09-11T13:45:21.252Z",
-      "status": "finalizada",
-      "recebidoPor": "gasolina",
-      "recebidoEm": "2026-09-11T13:46:28.897Z",
-      "finalizadaEm": "2026-09-11T13:46:00.000Z",
-      "tempoParadoMinutos": 1,
-      "finalizadoPor": "gasolina",
-      "registradoPor": "user1"
-    },
-    {
-      "id": "pt-b48d587a-b2d4-468e-9506-6f78e93c4fc5",
-      "nota": "282",
-      "setor": "Gasolina",
-      "turno": "Manhã",
-      "descricao": "123",
-      "dataHora": "2026-09-11T13:45:21.252Z",
-      "inicioParadaEm": "2026-09-11T13:45:21.252Z",
-      "status": "finalizada",
-      "recebidoPor": "gasolina",
-      "recebidoEm": "2026-09-11T13:46:28.897Z",
-      "finalizadaEm": "2026-09-11T13:46:00.000Z",
-      "tempoParadoMinutos": 1,
-      "finalizadoPor": "gasolina",
-      "registradoPor": "user1"
-    },
-    {
-      "id": "pt-3f60ba5b-2d91-4b4e-ab5c-32e6059fa305",
-      "nota": "287",
-      "setor": "Gasolina",
-      "turno": "Manhã",
-      "descricao": "teste",
-      "dataHora": "2026-09-11T13:45:21.252Z",
-      "inicioParadaEm": "2026-09-11T13:45:21.252Z",
-      "status": "finalizada",
-      "recebidoPor": "gasolina",
-      "recebidoEm": "2026-09-11T13:46:28.897Z",
-      "finalizadaEm": "2026-09-11T13:46:00.000Z",
-      "tempoParadoMinutos": 1,
-      "finalizadoPor": "gasolina",
-      "registradoPor": "user1"
-    },
-    {
-      "id": "pt-6c529953-5231-4b39-8c9d-cc4060b0df64",
-      "nota": "13654629",
-      "setor": "Gasolina",
-      "turno": null,
-      "descricao": "lkgljsfs",
-      "dataHora": "2026-09-12T13:24:31.920Z",
-      "inicioParadaEm": "2026-09-12T13:24:31.920Z",
-      "status": "finalizada",
-      "recebidoPor": "admin",
-      "recebidoEm": "2026-09-12T13:25:01.859Z",
-      "finalizadaEm": "2026-09-13T13:25:00.000Z",
-      "tempoParadoMinutos": 1440,
-      "finalizadoPor": "admin",
-      "registradoPor": "admin"
-    },
-    {
-      "id": "pt-86697086-d3f3-44d2-aad0-f1883d06f3e1",
-      "nota": "13654668",
-      "setor": "Gasolina",
-      "turno": null,
-      "descricao": "12314",
-      "dataHora": "2026-09-12T13:25:51.237Z",
-      "inicioParadaEm": "2026-09-12T13:24:31.920Z",
-      "status": "finalizada",
-      "recebidoPor": "admin",
-      "recebidoEm": "2026-09-12T22:19:04.851Z",
-      "finalizadaEm": "2026-09-12T22:19:00.000Z",
-      "tempoParadoMinutos": 534,
-      "finalizadoPor": "admin",
-      "registradoPor": "admin"
-    },
-    {
-      "id": "pt-011df30d-810a-44b4-a02c-65882f3c221a",
-      "nota": "13654742",
-      "setor": "Gasolina",
-      "turno": null,
-      "descricao": "kasjda12312",
-      "dataHora": "2026-09-12T13:26:08.686Z",
-      "inicioParadaEm": "2026-09-12T13:24:31.920Z",
-      "status": "finalizada",
-      "recebidoPor": "admin",
-      "recebidoEm": "2026-09-12T22:19:04.851Z",
-      "finalizadaEm": "2026-09-12T22:19:00.000Z",
-      "tempoParadoMinutos": 534,
-      "finalizadoPor": "admin",
-      "registradoPor": "admin"
-    },
-    {
-      "id": "pt-f1dc41ae-bcf0-45fa-a22e-6f8c6a7fe1c4",
-      "nota": "13654638",
-      "setor": "Gasolina",
-      "turno": null,
-      "descricao": "dfsfasd",
-      "dataHora": "2026-09-12T22:17:45.916Z",
-      "inicioParadaEm": "2026-09-12T22:17:45.916Z",
-      "status": "finalizada",
-      "recebidoPor": "admin",
-      "recebidoEm": "2026-09-12T22:19:04.851Z",
-      "finalizadaEm": "2026-09-12T22:19:00.000Z",
-      "tempoParadoMinutos": 1,
-      "finalizadoPor": "admin",
-      "registradoPor": "admin"
-    },
-    {
-      "id": "pt-9f8610c8-f9fe-4694-b20a-f0d10e7c315f",
-      "nota": "13654697",
-      "setor": "Gasolina",
-      "turno": null,
-      "descricao": "2133311231",
-      "dataHora": "2026-09-12T22:17:45.916Z",
-      "inicioParadaEm": "2026-09-12T22:17:45.916Z",
-      "status": "finalizada",
-      "recebidoPor": "admin",
-      "recebidoEm": "2026-09-12T22:19:04.851Z",
-      "finalizadaEm": "2026-09-12T22:19:00.000Z",
-      "tempoParadoMinutos": 1,
-      "finalizadoPor": "admin",
-      "registradoPor": "admin"
+      "data": "2026-10-06",
+      "tipo": "sfm",
+      "usuario": "user1",
+      "concluidoEm": "2026-10-06T18:58:39.781Z"
     }
   ],
   "eficiencia": [
     {
+      "atualizadoEm": "2026-09-08T20:18:03.775Z",
       "data": "2026-09-08",
-      "setor": "Gasolina",
       "naoAtendidas": 6,
       "registradoPor": "user1",
-      "atualizadoEm": "2026-09-08T20:18:03.775Z"
+      "setor": "Gasolina"
     },
     {
+      "atualizadoEm": "2026-09-08T20:41:51.405Z",
       "data": "2026-09-01_2026-09-07",
-      "setor": "Gasolina",
       "naoAtendidas": 0,
       "registradoPor": "admin",
-      "atualizadoEm": "2026-09-08T20:41:51.405Z"
+      "setor": "Gasolina"
     },
     {
+      "atualizadoEm": "2026-09-08T20:42:09.629Z",
       "data": "2026-09-01_2026-09-07",
-      "setor": "Diesel",
       "naoAtendidas": 0,
       "registradoPor": "admin",
-      "atualizadoEm": "2026-09-08T20:42:09.629Z"
+      "setor": "Diesel"
     },
     {
+      "atualizadoEm": "2026-09-09T00:19:09.399Z",
       "data": "2026-09-07_2026-09-07",
-      "setor": "Gasolina",
       "naoAtendidas": 5,
       "registradoPor": "admin",
-      "atualizadoEm": "2026-09-09T00:19:09.399Z"
+      "setor": "Gasolina"
     },
     {
+      "atualizadoEm": "2026-09-09T00:19:18.393Z",
       "data": "2026-09-07_2026-09-07",
-      "setor": "Diesel",
       "naoAtendidas": 3,
       "registradoPor": "admin",
-      "atualizadoEm": "2026-09-09T00:19:18.393Z"
+      "setor": "Diesel"
     },
     {
+      "atualizadoEm": "2026-09-09T00:19:25.589Z",
       "data": "2026-09-07_2026-09-07",
-      "setor": "Controle",
       "naoAtendidas": 8,
       "registradoPor": "admin",
-      "atualizadoEm": "2026-09-09T00:19:25.589Z"
+      "setor": "Controle"
     },
     {
+      "atualizadoEm": "2026-09-09T00:20:18.849Z",
       "data": "2026-09-06_2026-09-06",
-      "setor": "Controle",
       "naoAtendidas": 3,
       "registradoPor": "admin",
-      "atualizadoEm": "2026-09-09T00:20:18.849Z"
+      "setor": "Controle"
     },
     {
+      "atualizadoEm": "2026-09-09T00:20:24.950Z",
       "data": "2026-09-06_2026-09-06",
-      "setor": "Diesel",
       "naoAtendidas": 4,
       "registradoPor": "admin",
-      "atualizadoEm": "2026-09-09T00:20:24.950Z"
+      "setor": "Diesel"
     },
     {
+      "atualizadoEm": "2026-09-09T00:20:32.230Z",
       "data": "2026-09-06_2026-09-06",
-      "setor": "Gasolina",
       "naoAtendidas": 7,
       "registradoPor": "admin",
-      "atualizadoEm": "2026-09-09T00:20:32.230Z"
-    }
-  ],
-  "confirmacoesTurno": [
-    {
-      "id": "ct-98fb19c3-8808-4843-80d0-de2ad9b35e5f",
-      "setor": "Gasolina",
-      "turno": "Manhã",
-      "data": "2026-09-11",
-      "tipo": "passagem",
-      "usuario": "user1",
-      "concluidoEm": "2026-09-11T13:45:21.254Z"
+      "setor": "Gasolina"
     }
   ],
   "eventosPassagem": [
     {
       "id": "ep-b52b3314-c88e-4530-999b-18c10eb2d299",
       "numero": 1,
-      "setor": "Gasolina",
-      "turnoOrigem": "Manhã",
-      "turnoDestino": "Tarde",
-      "passadoPor": "user1",
-      "passadoEm": "2026-09-11T13:45:21.254Z",
-      "recebidoPor": "gasolina",
-      "recebidoEm": "2026-09-11T13:46:28.898Z",
       "ordens": [
         {
+          "descricao": "agua",
+          "equipamento": "2600401374",
           "nota": "246",
           "ordem": "50000749506",
-          "equipamento": "2600401374",
-          "descricao": "agua",
           "tempoParadoMinutos": 0
         },
         {
+          "descricao": "123",
+          "equipamento": "2600408347",
           "nota": "282",
           "ordem": "50000749816",
-          "equipamento": "2600408347",
-          "descricao": "123",
           "tempoParadoMinutos": 0
         },
         {
+          "descricao": "teste",
+          "equipamento": "2600402506",
           "nota": "287",
           "ordem": "50000749179",
-          "equipamento": "2600402506",
-          "descricao": "teste",
           "tempoParadoMinutos": 0
         }
-      ]
+      ],
+      "passadoEm": "2026-09-11T13:45:21.254Z",
+      "passadoPor": "user1",
+      "recebidoEm": "2026-09-11T13:46:28.898Z",
+      "recebidoPor": "gasolina",
+      "setor": "Gasolina",
+      "turnoDestino": "Tarde",
+      "turnoOrigem": "Manhã"
     },
     {
       "id": "ep-a1793361-37f8-440e-8920-f2428624e904",
       "numero": 2,
-      "setor": "Gasolina",
-      "turnoOrigem": null,
-      "turnoDestino": null,
-      "passadoPor": "admin",
-      "passadoEm": "2026-09-12T13:24:31.920Z",
-      "recebidoPor": "admin",
-      "recebidoEm": "2026-09-12T13:25:01.860Z",
       "ordens": [
         {
+          "descricao": "lkgljsfs",
+          "equipamento": "2600408833",
           "nota": "13654629",
           "ordem": "50000751196",
-          "equipamento": "2600408833",
-          "descricao": "lkgljsfs",
           "tempoParadoMinutos": 0
         },
         {
+          "descricao": "12314",
+          "equipamento": "2620015285",
           "nota": "13654668",
           "ordem": "50000751247",
-          "equipamento": "2620015285",
-          "descricao": "12314",
           "tempoParadoMinutos": 0
         },
         {
+          "descricao": "kasjda12312",
+          "equipamento": "2600002187",
           "nota": "13654742",
           "ordem": "50000751290",
-          "equipamento": "2600002187",
-          "descricao": "kasjda12312",
           "tempoParadoMinutos": 0
         }
-      ]
+      ],
+      "passadoEm": "2026-09-12T13:24:31.920Z",
+      "passadoPor": "admin",
+      "recebidoEm": "2026-09-12T13:25:01.860Z",
+      "recebidoPor": "admin",
+      "setor": "Gasolina",
+      "turnoDestino": null,
+      "turnoOrigem": null
     },
     {
       "id": "ep-7c660793-998b-4021-a57a-b60469b33fa0",
       "numero": 3,
-      "setor": "Gasolina",
-      "turnoOrigem": null,
-      "turnoDestino": null,
-      "passadoPor": "admin",
-      "passadoEm": "2026-09-12T13:25:51.237Z",
-      "recebidoPor": "admin",
-      "recebidoEm": "2026-09-12T22:19:04.851Z",
       "ordens": [
         {
+          "descricao": "12314",
+          "equipamento": "2620015285",
           "nota": "13654668",
           "ordem": "50000751247",
-          "equipamento": "2620015285",
-          "descricao": "12314",
           "tempoParadoMinutos": 1
         }
-      ]
+      ],
+      "passadoEm": "2026-09-12T13:25:51.237Z",
+      "passadoPor": "admin",
+      "recebidoEm": "2026-09-12T22:19:04.851Z",
+      "recebidoPor": "admin",
+      "setor": "Gasolina",
+      "turnoDestino": null,
+      "turnoOrigem": null
     },
     {
       "id": "ep-dd9cc9fc-24c0-4858-a2e0-02f35090298f",
       "numero": 4,
-      "setor": "Gasolina",
-      "turnoOrigem": null,
-      "turnoDestino": null,
-      "passadoPor": "admin",
-      "passadoEm": "2026-09-12T13:26:08.687Z",
-      "recebidoPor": "admin",
-      "recebidoEm": "2026-09-12T22:19:04.851Z",
       "ordens": [
         {
+          "descricao": "kasjda12312",
+          "equipamento": "2600002187",
           "nota": "13654742",
           "ordem": "50000751290",
-          "equipamento": "2600002187",
-          "descricao": "kasjda12312",
           "tempoParadoMinutos": 2
         }
-      ]
+      ],
+      "passadoEm": "2026-09-12T13:26:08.687Z",
+      "passadoPor": "admin",
+      "recebidoEm": "2026-09-12T22:19:04.851Z",
+      "recebidoPor": "admin",
+      "setor": "Gasolina",
+      "turnoDestino": null,
+      "turnoOrigem": null
     },
     {
       "id": "ep-66cf0706-15e3-4e92-9664-2d2f90c1368e",
       "numero": 5,
-      "setor": "Gasolina",
-      "turnoOrigem": null,
-      "turnoDestino": null,
-      "passadoPor": "admin",
-      "passadoEm": "2026-09-12T22:17:45.917Z",
-      "recebidoPor": "admin",
-      "recebidoEm": "2026-09-12T22:19:04.851Z",
       "ordens": [
         {
+          "descricao": "dfsfasd",
+          "equipamento": "2600401776",
           "nota": "13654638",
           "ordem": "50000751213",
-          "equipamento": "2600401776",
-          "descricao": "dfsfasd",
           "tempoParadoMinutos": 0
         },
         {
+          "descricao": "2133311231",
+          "equipamento": "2600406787",
           "nota": "13654697",
           "ordem": "50000751251",
-          "equipamento": "2600406787",
-          "descricao": "2133311231",
           "tempoParadoMinutos": 0
         }
-      ]
+      ],
+      "passadoEm": "2026-09-12T22:17:45.917Z",
+      "passadoPor": "admin",
+      "recebidoEm": "2026-09-12T22:19:04.851Z",
+      "recebidoPor": "admin",
+      "setor": "Gasolina",
+      "turnoDestino": null,
+      "turnoOrigem": null
+    }
+  ],
+  "passagensTurno": [
+    {
+      "celula": "Célula 015",
+      "dataHora": "2026-10-05T12:05:00.000Z",
+      "defeito": "Rolamento quebrado",
+      "descricao": "Rolamento do eixo principal quebrado, máquina parada aguardando peça",
+      "finalizadaEm": "2026-10-05T23:00:00.000Z",
+      "finalizadoPor": "user1",
+      "id": "pt-teste-quebragrave-01",
+      "inicioParadaEm": "2026-10-05T12:00:00.000Z",
+      "maquina": "Torno CNC 015",
+      "recebidoEm": "2026-10-05T12:10:00.000Z",
+      "recebidoPor": "user1",
+      "registradoPor": "user1",
+      "setor": "Gasolina",
+      "status": "finalizada",
+      "tempoParadoMinutos": 660,
+      "turno": "Manhã"
+    },
+    {
+      "dataHora": "2026-09-08T20:20:04.246Z",
+      "descricao": "asdkjasd",
+      "finalizadaEm": "2026-09-08T23:16:00.000Z",
+      "finalizadoPor": "admin",
+      "id": "pt-b1585754-ac30-496d-9eb6-be5a3add599b",
+      "inicioParadaEm": "2026-09-08T19:31:51.299Z",
+      "nota": "75",
+      "recebidoEm": "2026-09-08T20:20:23.972Z",
+      "recebidoPor": "usergas",
+      "registradoPor": "usergas",
+      "setor": "Gasolina",
+      "status": "finalizada",
+      "tempoParadoMinutos": 224,
+      "turno": "Tarde"
+    },
+    {
+      "dataHora": "2026-09-08T20:20:05.831Z",
+      "descricao": "passando ordem",
+      "finalizadaEm": "2026-09-08T23:16:00.000Z",
+      "finalizadoPor": "admin",
+      "id": "pt-69b2038b-2f01-450e-ad69-de5e295a98c4",
+      "inicioParadaEm": "2026-09-08T19:31:51.299Z",
+      "nota": "76",
+      "recebidoEm": "2026-09-08T20:20:23.972Z",
+      "recebidoPor": "usergas",
+      "registradoPor": "usergas",
+      "setor": "Gasolina",
+      "status": "finalizada",
+      "tempoParadoMinutos": 224,
+      "turno": "Tarde"
+    },
+    {
+      "dataHora": "2026-09-08T23:16:10.547Z",
+      "descricao": "askdjasd",
+      "finalizadaEm": "2026-09-08T23:17:00.000Z",
+      "finalizadoPor": "user1",
+      "id": "pt-94fb6888-c941-4533-935a-f50237639777",
+      "inicioParadaEm": "2026-09-08T20:16:51.657Z",
+      "nota": "14",
+      "recebidoEm": "2026-09-08T23:17:07.822Z",
+      "recebidoPor": "user1",
+      "registradoPor": "admin",
+      "setor": "Gasolina",
+      "status": "finalizada",
+      "tempoParadoMinutos": 180,
+      "turno": null
+    },
+    {
+      "dataHora": "2026-09-11T13:45:21.252Z",
+      "descricao": "agua",
+      "finalizadaEm": "2026-09-11T13:46:00.000Z",
+      "finalizadoPor": "gasolina",
+      "id": "pt-234881e7-185d-4d4a-b936-b556e682f0d8",
+      "inicioParadaEm": "2026-09-11T13:45:21.252Z",
+      "nota": "246",
+      "recebidoEm": "2026-09-11T13:46:28.897Z",
+      "recebidoPor": "gasolina",
+      "registradoPor": "user1",
+      "setor": "Gasolina",
+      "status": "finalizada",
+      "tempoParadoMinutos": 1,
+      "turno": "Manhã"
+    },
+    {
+      "dataHora": "2026-09-11T13:45:21.252Z",
+      "descricao": "123",
+      "finalizadaEm": "2026-09-11T13:46:00.000Z",
+      "finalizadoPor": "gasolina",
+      "id": "pt-b48d587a-b2d4-468e-9506-6f78e93c4fc5",
+      "inicioParadaEm": "2026-09-11T13:45:21.252Z",
+      "nota": "282",
+      "recebidoEm": "2026-09-11T13:46:28.897Z",
+      "recebidoPor": "gasolina",
+      "registradoPor": "user1",
+      "setor": "Gasolina",
+      "status": "finalizada",
+      "tempoParadoMinutos": 1,
+      "turno": "Manhã"
+    },
+    {
+      "dataHora": "2026-09-11T13:45:21.252Z",
+      "descricao": "teste",
+      "finalizadaEm": "2026-09-11T13:46:00.000Z",
+      "finalizadoPor": "gasolina",
+      "id": "pt-3f60ba5b-2d91-4b4e-ab5c-32e6059fa305",
+      "inicioParadaEm": "2026-09-11T13:45:21.252Z",
+      "nota": "287",
+      "recebidoEm": "2026-09-11T13:46:28.897Z",
+      "recebidoPor": "gasolina",
+      "registradoPor": "user1",
+      "setor": "Gasolina",
+      "status": "finalizada",
+      "tempoParadoMinutos": 1,
+      "turno": "Manhã"
+    },
+    {
+      "dataHora": "2026-09-12T13:24:31.920Z",
+      "descricao": "lkgljsfs",
+      "finalizadaEm": "2026-09-13T13:25:00.000Z",
+      "finalizadoPor": "admin",
+      "id": "pt-6c529953-5231-4b39-8c9d-cc4060b0df64",
+      "inicioParadaEm": "2026-09-12T13:24:31.920Z",
+      "nota": "13654629",
+      "recebidoEm": "2026-09-12T13:25:01.859Z",
+      "recebidoPor": "admin",
+      "registradoPor": "admin",
+      "setor": "Gasolina",
+      "status": "finalizada",
+      "tempoParadoMinutos": 1440,
+      "turno": null
+    },
+    {
+      "dataHora": "2026-09-12T13:25:51.237Z",
+      "descricao": "12314",
+      "finalizadaEm": "2026-09-12T22:19:00.000Z",
+      "finalizadoPor": "admin",
+      "id": "pt-86697086-d3f3-44d2-aad0-f1883d06f3e1",
+      "inicioParadaEm": "2026-09-12T13:24:31.920Z",
+      "nota": "13654668",
+      "recebidoEm": "2026-09-12T22:19:04.851Z",
+      "recebidoPor": "admin",
+      "registradoPor": "admin",
+      "setor": "Gasolina",
+      "status": "finalizada",
+      "tempoParadoMinutos": 534,
+      "turno": null
+    },
+    {
+      "dataHora": "2026-09-12T13:26:08.686Z",
+      "descricao": "kasjda12312",
+      "finalizadaEm": "2026-09-12T22:19:00.000Z",
+      "finalizadoPor": "admin",
+      "id": "pt-011df30d-810a-44b4-a02c-65882f3c221a",
+      "inicioParadaEm": "2026-09-12T13:24:31.920Z",
+      "nota": "13654742",
+      "recebidoEm": "2026-09-12T22:19:04.851Z",
+      "recebidoPor": "admin",
+      "registradoPor": "admin",
+      "setor": "Gasolina",
+      "status": "finalizada",
+      "tempoParadoMinutos": 534,
+      "turno": null
+    },
+    {
+      "dataHora": "2026-09-12T22:17:45.916Z",
+      "descricao": "dfsfasd",
+      "finalizadaEm": "2026-09-12T22:19:00.000Z",
+      "finalizadoPor": "admin",
+      "id": "pt-f1dc41ae-bcf0-45fa-a22e-6f8c6a7fe1c4",
+      "inicioParadaEm": "2026-09-12T22:17:45.916Z",
+      "nota": "13654638",
+      "recebidoEm": "2026-09-12T22:19:04.851Z",
+      "recebidoPor": "admin",
+      "registradoPor": "admin",
+      "setor": "Gasolina",
+      "status": "finalizada",
+      "tempoParadoMinutos": 1,
+      "turno": null
+    },
+    {
+      "dataHora": "2026-09-12T22:17:45.916Z",
+      "descricao": "2133311231",
+      "finalizadaEm": "2026-09-12T22:19:00.000Z",
+      "finalizadoPor": "admin",
+      "id": "pt-9f8610c8-f9fe-4694-b20a-f0d10e7c315f",
+      "inicioParadaEm": "2026-09-12T22:17:45.916Z",
+      "nota": "13654697",
+      "recebidoEm": "2026-09-12T22:19:04.851Z",
+      "recebidoPor": "admin",
+      "registradoPor": "admin",
+      "setor": "Gasolina",
+      "status": "finalizada",
+      "tempoParadoMinutos": 1,
+      "turno": null
+    }
+  ],
+  "usuarios": [
+    {
+      "codigo": "admin",
+      "id": "u-admin",
+      "nome": "admin",
+      "papel": "admin",
+      "senhaHash": "WgLoZMvFq4rGIdSFwPd9e+8WtJw0rIysOvlsb0SoFcI=",
+      "senhaSalt": "KN2TlKcQzI8IUONAOOxNuw==",
+      "setor": null
+    },
+    {
+      "codigo": "gestor",
+      "id": "u-gestor",
+      "nome": "gestor",
+      "papel": "gestor",
+      "senhaHash": "T6uOue+D0EWwK03h2ByJz0NyM2VqljoX5IHigBqh60w=",
+      "senhaSalt": "gpiFvrLghH79fmdJBoi6tQ==",
+      "setor": null
+    },
+    {
+      "codigo": "user1",
+      "id": "u-user1",
+      "nome": "user1",
+      "papel": "operador",
+      "responsavelSfm": true,
+      "senhaHash": "T5Y34fcyyy+UfMvYSxfBiRocT7u1lHDCZiiZwtiZeJM=",
+      "senhaSalt": "ir1hR6TR4oAsAi0xtgbtvg==",
+      "setor": "Gasolina",
+      "turno": "Manhã"
+    },
+    {
+      "codigo": "user2",
+      "id": "u-user2",
+      "nome": "user2",
+      "papel": "operador",
+      "senhaHash": "HudZNCrmAGQYpj1mE19dVes6HHR7XhO53dKJmeW6hmk=",
+      "senhaSalt": "m1y/ugTnH0j+7IiXFBX8dw==",
+      "setor": "Diesel",
+      "turno": "Manhã"
+    },
+    {
+      "codigo": "user3",
+      "id": "u-user3",
+      "nome": "user3",
+      "papel": "operador",
+      "senhaHash": "25A8LRn0ZXHQOwaaWJc+sKnK39cTPXiIXPi9AgjjshA=",
+      "senhaSalt": "SBHsKpVAHiNr/zzmkVZhTg==",
+      "setor": "Controle",
+      "turno": "Noite"
+    },
+    {
+      "codigo": "user4",
+      "id": "u-23ebfba2-06ae-4334-8c44-c0904d22018e",
+      "nome": "user4",
+      "papel": "operador",
+      "responsavelSfm": true,
+      "senhaHash": "vV9pMI3wH0YwGRm65WiB+15yVrzgh12aDoYJOvN1KFs=",
+      "senhaSalt": "iRXmJV0GO4TRQgDvQJjnsg==",
+      "setor": "Biela",
+      "turno": "Manhã"
+    },
+    {
+      "codigo": "gasolina",
+      "id": "u-db49ef96-9c3c-4fba-8297-fea242a4ea79",
+      "nome": "gasolina",
+      "papel": "operador",
+      "responsavelSfm": false,
+      "senhaHash": "ljaEI6IaHScRjjqgH8r2k6/MZ62NNpWmfiWqtOTMYg4=",
+      "senhaSalt": "0ggV1YyiWTfusIy6aLr7MQ==",
+      "setor": "Gasolina",
+      "turno": "Tarde"
     }
   ]
 }

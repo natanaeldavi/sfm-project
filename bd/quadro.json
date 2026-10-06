@@ -1,92 +1,151 @@
 {
   "registros": {
+    "Diesel|2026-10-05": {
+      "acidente": false,
+      "data": "2026-10-05",
+      "falhaFornecedor": false,
+      "quaseAcidente": false,
+      "retrabalho": false,
+      "setor": "Diesel",
+      "topProblemas": [
+        {
+          "causaRaiz": "Motor do spindle ruim",
+          "celula": "C-31",
+          "contencao": "Retirado alarme e abaixado potência",
+          "descricao": "Alarme de Spindle",
+          "efeito": "Maquina parada",
+          "horario": "09:00",
+          "maquina": "FBK",
+          "mttr": "11 horas de parada",
+          "ordem": "5000098981283",
+          "origemPassagemId": null,
+          "solucao": "Trocado motor do Spindle"
+        }
+      ]
+    },
     "Gasolina|2026-09-01": {
-      "setor": "Gasolina",
+      "acidente": false,
       "data": "2026-09-01",
       "falhaFornecedor": false,
-      "retrabalho": false,
       "quaseAcidente": false,
-      "acidente": false
+      "retrabalho": false,
+      "setor": "Gasolina"
     },
     "Gasolina|2026-09-02": {
-      "setor": "Gasolina",
+      "acidente": false,
       "data": "2026-09-02",
       "falhaFornecedor": false,
-      "retrabalho": false,
       "quaseAcidente": false,
-      "acidente": false
+      "retrabalho": false,
+      "setor": "Gasolina"
     },
     "Gasolina|2026-09-03": {
-      "setor": "Gasolina",
+      "acidente": true,
       "data": "2026-09-03",
       "falhaFornecedor": false,
-      "retrabalho": true,
       "quaseAcidente": true,
-      "acidente": true
+      "retrabalho": true,
+      "setor": "Gasolina"
     },
     "Gasolina|2026-09-04": {
-      "setor": "Gasolina",
+      "acidente": false,
       "data": "2026-09-04",
       "falhaFornecedor": false,
+      "quaseAcidente": false,
       "retrabalho": false,
-      "acidente": false,
-      "quaseAcidente": false
+      "setor": "Gasolina"
     },
     "Gasolina|2026-09-05": {
-      "setor": "Gasolina",
+      "acidente": false,
       "data": "2026-09-05",
       "falhaFornecedor": true,
+      "quaseAcidente": false,
       "retrabalho": false,
-      "acidente": false,
-      "quaseAcidente": false
+      "setor": "Gasolina"
     },
     "Gasolina|2026-09-06": {
-      "setor": "Gasolina",
+      "acidente": false,
       "data": "2026-09-06",
       "falhaFornecedor": false,
+      "quaseAcidente": false,
       "retrabalho": false,
-      "acidente": false,
-      "quaseAcidente": false
+      "setor": "Gasolina"
     },
     "Gasolina|2026-09-07": {
-      "setor": "Gasolina",
+      "acidente": false,
       "data": "2026-09-07",
       "falhaFornecedor": false,
+      "quaseAcidente": false,
       "retrabalho": false,
-      "acidente": false,
-      "quaseAcidente": false
+      "setor": "Gasolina"
     },
     "Gasolina|2026-09-08": {
-      "setor": "Gasolina",
+      "acidente": false,
       "data": "2026-09-08",
       "falhaFornecedor": true,
+      "quaseAcidente": false,
       "retrabalho": false,
-      "acidente": false,
-      "quaseAcidente": false
+      "setor": "Gasolina"
     },
     "Gasolina|2026-09-09": {
-      "setor": "Gasolina",
-      "data": "2026-09-09",
-      "retrabalho": false,
-      "falhaFornecedor": false,
       "acidente": false,
-      "quaseAcidente": false
+      "data": "2026-09-09",
+      "falhaFornecedor": false,
+      "quaseAcidente": false,
+      "retrabalho": false,
+      "setor": "Gasolina"
     },
     "Gasolina|2026-09-10": {
-      "setor": "Gasolina",
+      "acidente": false,
       "data": "2026-09-10",
       "falhaFornecedor": false,
-      "acidente": false,
-      "quaseAcidente": false,
-      "retrabalho": true
-    },
-    "Gasolina|2026-09-11": {
-      "setor": "Gasolina",
-      "data": "2026-09-11",
-      "acidente": false,
       "quaseAcidente": false,
       "retrabalho": true,
-      "falhaFornecedor": false
+      "setor": "Gasolina"
+    },
+    "Gasolina|2026-09-11": {
+      "acidente": false,
+      "data": "2026-09-11",
+      "falhaFornecedor": false,
+      "quaseAcidente": false,
+      "retrabalho": true,
+      "setor": "Gasolina"
+    },
+    "Gasolina|2026-10-05": {
+      "setor": "Gasolina",
+      "data": "2026-10-05",
+      "acidente": false,
+      "quaseAcidente": false,
+      "retrabalho": false,
+      "falhaFornecedor": false,
+      "topProblemas": [
+        {
+          "id": "top3-580c485b-a9ff-4445-9a4f-ddab1da19509",
+          "dia": 1,
+          "celula": "Célula 015",
+          "maquina": "Torno CNC 015",
+          "ordem": null,
+          "horario": "09:00",
+          "descricao": "Rolamento quebrado — Rolamento do eixo principal quebrado, máquina parada aguardando peça",
+          "efeito": "Máquina parada 11h 0min",
+          "mttr": "11h 0min",
+          "contencao": "Foi trocado o rolamento.",
+          "causaRaiz": "Aconteceu por conta da vibração da maquina",
+          "solucao": "Tensionado a correia para eliminar vibração",
+          "ajuda": false,
+          "responsavel": "Natanael",
+          "checks": {
+            "top1": true,
+            "top2": false,
+            "top3": false,
+            "goSee": false,
+            "pdcaA3": false,
+            "planoAcao": false,
+            "feedback": false
+          },
+          "origemPassagemId": "pt-teste-quebragrave-01"
+        }
+      ]
     }
   }
 }

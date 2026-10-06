@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Top 3 Problemas</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f4f5f7;--card:#fff;--ink:#1a1d23;--line:#9aa3b2;--head:#1f4e8c;--headink:#fff;--sub:#e6ecf5;--accent:#1f4e8c}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15181d;--card:#1e2229;--ink:#e8eaee;--line:#4a5262;--head:#2c5fa8;--headink:#fff;--sub:#2a303a;--accent:#7fb0f0}}
+:root[data-theme="dark"]{--bg:#15181d;--card:#1e2229;--ink:#e8eaee;--line:#4a5262;--head:#2c5fa8;--headink:#fff;--sub:#2a303a;--accent:#7fb0f0}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;padding:16px}
+.wrap{max-width:1200px;margin:0 auto;overflow-x:auto}
+.board{min-width:920px;background:var(--card);border:1px solid var(--line)}
+.title{background:var(--head);color:var(--headink);text-align:center;padding:8px 12px}
+.title h1{margin:0;font-size:18px}
+.title small{display:block;font-size:12px;opacity:.9}
+table{border-collapse:collapse;width:100%;table-layout:fixed}
+td,th{border:1px solid var(--line);padding:0;vertical-align:top}
+th{background:var(--sub);font-size:12px;padding:4px}
+.top{width:60px;text-align:center;vertical-align:middle;font-weight:700;background:var(--sub)}
+.dia{width:42px;text-align:center;vertical-align:middle;font-size:12px}
+.let{width:42px;text-align:center;vertical-align:middle;font-weight:700;color:var(--accent)}
+.side{width:90px;vertical-align:middle;text-align:center;font-size:12px}
+.side label{display:block;padding:2px}
+.lbl{font-size:11px;font-weight:600;padding:3px 6px 0;text-transform:uppercase}
+textarea,input[type=text]{width:100%;border:0;background:transparent;color:inherit;font:inherit;padding:4px 6px;resize:vertical;outline:none}
+textarea{min-height:48px}
+textarea:focus,input[type=text]:focus{background:var(--sub)}
+.sub{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 3fr}
+.sub>div{border-right:1px solid var(--line)}.sub>div:last-child{border:0}
+.foot td{background:var(--sub);padding:5px 8px;font-size:12px;font-weight:600}
+.foot label{margin-right:14px;white-space:nowrap}
+.block{border-top:2px solid var(--line)}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="board">
+<div class="title"><h1>Top 3 Problemas</h1><small>D - Descrição; I - Impacto; C - Contenção; Ca - Causa Raiz; S - Solução Definitiva</small></div>
+<div id="root"></div>
+</div></div>
+<script>
+const rows=[
+ {k:'D',dia:'1º',span:2,a:'O que? Quando? Onde?',sub:true},
+ {k:'I',a:'Quais os efeitos do problema? Quanto?',b:'Tempo de reparo = MTTR ='},
+ {k:'C',dia:'2º',span:2,a:'Ações imediatas para eliminar ou reduzir o impacto. O que foi feito para reestabelecer o equipamento?'},
+ {k:'Ca',a:'Por que o problema aconteceu? 5 porquês'},
+ {k:'S',dia:'3º',span:1,a:'Ações para eliminar a causa raiz. Ações para evitar que o equipamento quebre novamente pelo mesmo motivo. Tem abrangência?'}
+];
+const checks=['TOP 1','TOP 2','TOP 3','GO & SEE','PDCA A3','Plano de ação','Feedback'];
+let html='<table><colgroup><col style="width:60px"><col style="width:42px"><col style="width:42px"><col><col style="width:90px"><col style="width:110px"></colgroup><thead><tr><th colspan="3">Dia</th><th></th><th>Ajuda</th><th>Resp.</th></tr></thead></table>';
+for(let n=1;n<=3;n++){
+ html+='<table class="block"><colgroup><col style="width:60px"><col style="width:42px"><col style="width:42px"><col><col style="width:90px"><col style="width:110px"></colgroup><tbody>';
+ rows.forEach((r,i)=>{
+  html+='<tr>';
+  if(i==0)html+=`<td class="top" rowspan="5">TOP ${n}</td>`;
+  if(r.dia)html+=`<td class="dia" rowspan="${r.span}">${r.dia}</td>`;
+  html+=`<td class="let">${r.k}:</td><td>`;
+  html+=`<div class="lbl">${r.a}</div>`;
+  if(r.sub){
+   html+='<div class="sub">'+['Célula','Máquina','Ordem','Horário','Descrição do problema'].map(t=>`<div><div class="lbl">${t}</div><textarea rows="2"></textarea></div>`).join('')+'</div>';
+  } else {
+   if(r.b)html+=`<div class="lbl">${r.b}</div>`;
+   html+='<textarea></textarea>';
+  }
+  html+='</td>';
+  if(i==0){
+   html+=`<td class="side" rowspan="5"><label><input type="radio" name="aj${n}"> Sim</label><label><input type="radio" name="aj${n}"> Não</label></td>`;
+   html+=`<td rowspan="5"><input type="text" placeholder="Responsável"></td>`;
+  }
+  html+='</tr>';
+ });
+ html+=`<tr class="foot"><td colspan="6">${checks.map(c=>`<label><input type="checkbox"> ${c}</label>`).join('')}</td></tr>`;
+ html+='</tbody></table>';
+}
+document.getElementById('root').innerHTML=html;
+</script>
+</body>
+</html>

@@ -58,6 +58,7 @@
     </div>
 
     <div id="wizardDetalhe" hidden>
+      <div id="wizardSugestoesRetrabalho"></div>
       <div class="linha-campos">
         <div class="campo">
           <label for="wizardDefeito">Defeito</label>
@@ -78,6 +79,15 @@
       </div>
       <p class="rodape-nota" id="wizardMsgDetalhe" style="text-align:left;"></p>
       <button type="button" id="wizardBtnConfirmarDetalhe">Confirmar e avançar</button>
+    </div>
+
+    <div id="wizardTop3" hidden>
+      <div id="wizardTop3Continuacao"></div>
+      <div id="wizardTop3Sugestoes"></div>
+      <div id="wizardTop3Lista"></div>
+      <button type="button" id="wizardBtnTop3Adicionar" class="secundario">+ Adicionar problema manualmente</button>
+      <p class="rodape-nota" id="wizardMsgTop3" style="text-align:left;"></p>
+      <button type="button" id="wizardBtnConfirmarTop3" style="margin-top:10px;">Confirmar e avançar</button>
     </div>
 
     <div class="toolbar" style="margin-top:16px;">
@@ -107,6 +117,12 @@
   </div>
 
   <div id="quadro"></div>
+  <!-- #quadro é position:absolute na impressão (ocupa a folha A4 inteira em mm) e por isso não
+       reserva espaço no fluxo normal da página — sem isso, a folha seguinte (#folhaTop3) viraria
+       o primeiro elemento do fluxo, e o navegador ignora page-break-before no primeiro elemento
+       (não há "antes" pra quebrar), sobrepondo as duas folhas na mesma página impressa. Só existe
+       na impressão (ver quadro.css). -->
+  <div id="quadroEspacadorImpressao" aria-hidden="true"></div>
 
   <div class="card no-print" id="cardComoAlimentar">
     <h2>Como cada linha é preenchida</h2>
@@ -138,26 +154,19 @@
   </div>
 
   <div class="card no-print" id="cardTopProblemas">
-    <h2>Top problemas do dia (parada acima de 10h)</h2>
-    <div class="tabela-scroll" style="max-height:260px;">
-      <table>
-        <thead><tr><th>Máquina</th><th>Descrição</th><th>Tempo parado</th><th>Finalizada em</th></tr></thead>
-        <tbody id="corpoTopProblemas"></tbody>
-      </table>
-    </div>
+    <h2>Top 3 Problemas da SFM (D/I/C/Ca/S)</h2>
+    <div id="corpoTop3Preenchido"></div>
   </div>
 
-  <!-- Só aparece na impressão/PDF, como folha 2 (ver renderTop3Impressao em js/quadro-sfm.js). -->
+  <!-- Só aparece na impressão/PDF, como folha 2, e só quando há algum Top 3 preenchido pra esse
+       dia (ver renderTop3Impressao em js/quadro-sfm.js, que alterna a classe "sem-dados"). -->
   <div id="folhaTop3" hidden>
     <div class="quadro-folha">
       <div class="quadro-folha-titulo">
-        <h2>Top 3 Problemas do Dia</h2>
+        <h2>Top 3 Problemas da SFM</h2>
         <span class="setor-mes" id="top3SetorMes"></span>
       </div>
-      <table class="top3-tabela">
-        <thead><tr><th>#</th><th>Máquina</th><th>Descrição</th><th>Tempo parado</th><th>Finalizada em</th></tr></thead>
-        <tbody id="corpoTop3Impressao"></tbody>
-      </table>
+      <div id="corpoTop3Impressao"></div>
     </div>
   </div>
 </main>
