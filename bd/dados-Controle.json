@@ -1,0 +1,21 @@
+{
+  "passagensTurno": [],
+  "eficiencia": [
+    {
+      "atualizadoEm": "2026-09-09T00:19:25.589Z",
+      "data": "2026-09-07_2026-09-07",
+      "naoAtendidas": 8,
+      "registradoPor": "admin",
+      "setor": "Controle"
+    },
+    {
+      "atualizadoEm": "2026-09-09T00:20:18.849Z",
+      "data": "2026-09-06_2026-09-06",
+      "naoAtendidas": 3,
+      "registradoPor": "admin",
+      "setor": "Controle"
+    }
+  ],
+  "confirmacoesTurno": [],
+  "eventosPassagem": []
+}

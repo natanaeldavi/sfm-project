@@ -1,0 +1,27 @@
+{
+  "registros": {
+    "2026-10-05": {
+      "acidente": false,
+      "data": "2026-10-05",
+      "falhaFornecedor": false,
+      "quaseAcidente": false,
+      "retrabalho": false,
+      "setor": "Diesel",
+      "topProblemas": [
+        {
+          "causaRaiz": "Motor do spindle ruim",
+          "celula": "C-31",
+          "contencao": "Retirado alarme e abaixado potência",
+          "descricao": "Alarme de Spindle",
+          "efeito": "Maquina parada",
+          "horario": "09:00",
+          "maquina": "FBK",
+          "mttr": "11 horas de parada",
+          "ordem": "5000098981283",
+          "origemPassagemId": null,
+          "solucao": "Trocado motor do Spindle"
+        }
+      ]
+    }
+  }
+}

@@ -5,7 +5,9 @@
   if (!usuario) return;
   Auth.garantirSetorOperador(usuario);
 
-  await DB.carregarAutoLoad();
+  // Gestor/admin não têm setor fixo (escolhem depois, no seletor abaixo) e os gates logo
+  // adiante não se aplicam a eles — não precisam de nenhum dados-<setor>.json aqui.
+  await DB.carregarAutoLoad({ setor: usuario.papel === "operador" ? usuario.setor : null });
   Auth.atualizarUsuarioDoBanco(usuario);
   if (Auth.aplicarGatePassagemObrigatoria(usuario)) return;
   if (Auth.aplicarGateRecebimento(usuario)) return;

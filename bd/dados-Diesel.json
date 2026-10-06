@@ -1,0 +1,38 @@
+{
+  "passagensTurno": [],
+  "eficiencia": [
+    {
+      "atualizadoEm": "2026-09-08T20:42:09.629Z",
+      "data": "2026-09-01_2026-09-07",
+      "naoAtendidas": 0,
+      "registradoPor": "admin",
+      "setor": "Diesel"
+    },
+    {
+      "atualizadoEm": "2026-09-09T00:19:18.393Z",
+      "data": "2026-09-07_2026-09-07",
+      "naoAtendidas": 3,
+      "registradoPor": "admin",
+      "setor": "Diesel"
+    },
+    {
+      "atualizadoEm": "2026-09-09T00:20:24.950Z",
+      "data": "2026-09-06_2026-09-06",
+      "naoAtendidas": 4,
+      "registradoPor": "admin",
+      "setor": "Diesel"
+    }
+  ],
+  "confirmacoesTurno": [
+    {
+      "concluidoEm": "2026-10-06T18:01:23.222Z",
+      "data": "2026-10-06",
+      "id": "ct-8f45dabf-4f88-4ef3-a05c-7fa560c0e4f0",
+      "setor": "Diesel",
+      "tipo": "sfm",
+      "turno": null,
+      "usuario": "user2"
+    }
+  ],
+  "eventosPassagem": []
+}

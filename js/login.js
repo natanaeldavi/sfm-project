@@ -1,10 +1,13 @@
 /* SFM — login.html */
 
 (async function () {
-  await DB.carregarAutoLoad();
+  // Setor da sessão existente (se houver) — lido antes do carregamento pra já buscar o
+  // bd/dados-<setor>.json certo (Auth.temPendenciaRecebimento, abaixo, precisa dele).
+  const sessaoExistente = Auth.getUsuario();
+  await DB.carregarAutoLoad({ setor: sessaoExistente ? sessaoExistente.setor : null });
 
   // Se já estiver logado, vai direto pro destino certo (menu ou recebimento pendente).
-  const jaLogado = Auth.getUsuario();
+  const jaLogado = sessaoExistente;
   if (jaLogado) {
     Auth.garantirSetorOperador(jaLogado);
     window.location.href = Auth.temPendenciaRecebimento(jaLogado) ? "receber-turno.html" : "menu.html";

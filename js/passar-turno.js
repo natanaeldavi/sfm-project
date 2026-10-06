@@ -6,6 +6,12 @@
  * nota/ordem nem código de máquina. A planilha do SAP continua existindo,
  * mas passou a ser importada uma vez por dia na tela SFM (quadro-sfm.js),
  * na hora da reunião — não mais a cada passagem de turno.
+ *
+ * Antes do cadastro manual, uma lista (ver cardOrdensAbertas) mostra as notas
+ * do setor ainda abertas (sem Data fim) do dia mais recente importado — cada
+ * linha tem um campo Defeito (obrigatório) e Célula (opcional) e seu próprio
+ * botão Adicionar, que já joga direto pra lista de pendentes abaixo, sem
+ * precisar passar pelos campos do cadastro manual.
  */
 
 (async function () {
@@ -13,13 +19,13 @@
   if (!usuario) return;
   Auth.garantirSetorOperador(usuario);
 
-  await DB.carregarAutoLoad();
+  const setorAtivo = Auth.getSetorAtivo();
+  await DB.carregarAutoLoad({ notas: true, setor: setorAtivo });
   Auth.atualizarUsuarioDoBanco(usuario);
   if (Auth.aplicarGateRecebimento(usuario)) return;
 
   montarTopbar(document.getElementById("topbar"), usuario, "Passar Turno");
 
-  const setorAtivo = Auth.getSetorAtivo();
   const alerta = document.getElementById("alerta");
   if (!setorAtivo) {
     mostrarAlerta(alerta, "aviso", "Nenhum setor selecionado. Volte ao menu e escolha um setor.");
@@ -37,6 +43,9 @@
   const campoDescricao = document.getElementById("campoDescricao");
   const btnAdicionarOrdem = document.getElementById("btnAdicionarOrdem");
   const msgNovaOrdem = document.getElementById("msgNovaOrdem");
+  const cardOrdensAbertas = document.getElementById("cardOrdensAbertas");
+  const corpoOrdensAbertas = document.getElementById("corpoOrdensAbertas");
+  const msgOrdensAbertas = document.getElementById("msgOrdensAbertas");
 
   campoHoraDefeito.value = paraDatetimeLocal(new Date());
 
@@ -102,6 +111,93 @@
   function renderTudo() {
     renderRecebidas();
     renderTabelaPendentes();
+    renderOrdensAbertas();
+  }
+
+  // ---------- Seção 2: ordens abertas do dia (planilha do SAP) — lista com botão Adicionar por linha ----------
+
+  /**
+   * Janela de tempo das "ordens abertas" mostradas aqui — não é "o dia mais recente que a
+   * planilha foi importada" (isso sempre seria só o dia da própria importação), e sim um período
+   * fixo que sempre termina hoje às 06:00 (horário em que a SFM da manhã é feita) e começa duas
+   * noites antes às 22:30 — cobrindo as passagens de turno desde então. Numa segunda-feira a
+   * janela recua mais (começa 4 dias antes, não 2), pra cobrir também sexta/sábado/domingo, sem
+   * SFM nesses dias — mesmo princípio de calcularJanelaSfm (ver js/util.js), só que aqui o fim é
+   * sempre "hoje 06:00" (não "ontem").
+   */
+  function janelaOrdensAbertas(agora) {
+    const ref = agora || new Date();
+    const fim = new Date(ref.getFullYear(), ref.getMonth(), ref.getDate(), 6, 0, 0, 0);
+    const diasVoltar = ref.getDay() === 1 ? 4 : 2; // segunda-feira (getDay()===1): recua até a sexta
+    const inicio = new Date(fim);
+    inicio.setDate(inicio.getDate() - diasVoltar);
+    inicio.setHours(22, 30, 0, 0);
+    return { inicio, fim };
+  }
+
+  function quandoDaNota(n) {
+    return new Date(`${n.dataEntrada}T${n.horaEntrada || "00:00"}:00`);
+  }
+
+  /** Notas do setor ainda sem Data fim (em aberto), com abertura dentro da janela de tempo acima,
+   * e que ainda não foram adicionadas à lista de pendentes. */
+  function ordensAbertasDoUltimoDia() {
+    const { inicio, fim } = janelaOrdensAbertas();
+    const jaAdicionadas = new Set(pendentes.map((p) => p.notaOrigem).filter(Boolean));
+    return DB.notas
+      .filter((n) => n.setor === setorAtivo && !n.dataFim && n.dataEntrada && !jaAdicionadas.has(n.nota))
+      .filter((n) => { const q = quandoDaNota(n); return !isNaN(q) && q >= inicio && q <= fim; })
+      .sort((a, b) => quandoDaNota(a) - quandoDaNota(b));
+  }
+
+  function renderOrdensAbertas() {
+    const ordens = ordensAbertasDoUltimoDia();
+    cardOrdensAbertas.hidden = ordens.length === 0;
+    msgOrdensAbertas.textContent = "";
+
+    corpoOrdensAbertas.innerHTML = ordens.map((n) => `
+      <tr data-nota="${escaparHtml(n.nota)}">
+        <td>${escaparHtml(n.nota)}</td>
+        <td>${escaparHtml(n.ordem || "—")}</td>
+        <td>${escaparHtml(n.nomeEquipamento || n.equipamento || "—")}</td>
+        <td>${escaparHtml(n.textoBreve || "—")}</td>
+        <td>${escaparHtml(n.horaEntrada || "—")}</td>
+        <td><input type="text" class="inputDefeitoOrdemAberta" placeholder="Ex.: vazamento hidráulico"></td>
+        <td><input type="text" class="inputCelulaOrdemAberta" placeholder="Opcional"></td>
+        <td><button type="button" class="btnAdicionarOrdemAberta">Adicionar</button></td>
+      </tr>`).join("");
+
+    corpoOrdensAbertas.querySelectorAll(".btnAdicionarOrdemAberta").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const tr = btn.closest("tr");
+        const numNota = tr.dataset.nota;
+        const nota = DB.notas.find((n) => n.nota === numNota);
+        if (!nota) return;
+
+        const defeito = tr.querySelector(".inputDefeitoOrdemAberta").value.trim();
+        if (!defeito) {
+          msgOrdensAbertas.textContent = "Preencha o Defeito dessa ordem antes de adicionar.";
+          msgOrdensAbertas.style.color = "var(--vermelho-alerta)";
+          return;
+        }
+        const celula = tr.querySelector(".inputCelulaOrdemAberta").value.trim();
+
+        const horaDefeito = quandoDaNota(nota);
+        const inicioParadaEm = (!isNaN(horaDefeito) && horaDefeito <= new Date()) ? horaDefeito.toISOString() : new Date().toISOString();
+
+        pendentes.push({
+          defeito,
+          maquina: nota.nomeEquipamento || nota.equipamento || "",
+          celula,
+          descricao: nota.textoBreve || "",
+          inicioParadaEm,
+          notaOrigem: nota.nota,
+        });
+        msgOrdensAbertas.textContent = "";
+        renderTabelaPendentes();
+        renderOrdensAbertas();
+      });
+    });
   }
 
   // ---------- Seção 1: ordens já recebidas — continuar parada ou finalizar ----------
@@ -222,7 +318,7 @@
       return;
     }
 
-    pendentes.push({ defeito, maquina, celula, descricao, inicioParadaEm: horaDefeito.toISOString() });
+    pendentes.push({ defeito, maquina, celula, descricao, inicioParadaEm: horaDefeito.toISOString(), notaOrigem: null });
     campoDefeito.value = "";
     campoMaquina.value = "";
     campoCelula.value = "";
@@ -231,6 +327,7 @@
     campoDefeito.focus();
     msgNovaOrdem.textContent = "";
     renderTabelaPendentes();
+    renderOrdensAbertas();
   });
 
   function renderTabelaPendentes() {
@@ -253,6 +350,7 @@
         const idx = Number(btn.closest("tr").dataset.idx);
         pendentes.splice(idx, 1);
         renderTabelaPendentes();
+        renderOrdensAbertas();
       });
     });
   }
@@ -287,6 +385,7 @@
         tempoParadoMinutos: null,
         finalizadoPor: null,
         registradoPor: usuario.nome,
+        notaOrigem: p.notaOrigem || null,
       });
       // Tempo parado até o momento de passar, calculado a partir do
       // horário real do defeito (não de agora) — a máquina pode já estar
@@ -298,6 +397,7 @@
         celula: p.celula || null,
         descricao: p.descricao,
         tempoParadoMinutos,
+        notaOrigem: p.notaOrigem || null,
       });
     }
 

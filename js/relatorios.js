@@ -33,6 +33,8 @@
     sel.innerHTML += SETORES.map((s) => `<option value="${s}">${s}</option>`).join("");
   }
 
+  // Sem `setor`: carrega os 4 setores de uma vez (ver DB._escopoSetores) — Relatórios precisa
+  // ver todos ao mesmo tempo (o filtro de setor abaixo é só visual, em cima do que já carregou).
   await DB.carregarAutoLoad({ notas: true });
   conteudo.hidden = false;
   renderNotas();

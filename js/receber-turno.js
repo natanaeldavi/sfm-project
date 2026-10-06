@@ -29,7 +29,7 @@
   const corpoAndamento = document.getElementById("corpoAndamento");
   const contagemAndamento = document.getElementById("contagemAndamento");
 
-  await DB.carregarAutoLoad();
+  await DB.carregarAutoLoad({ setor: setorAtivo });
   Auth.atualizarUsuarioDoBanco(usuario);
   if (Auth.aplicarGatePassagemObrigatoria(usuario)) return;
   cardLista.hidden = false;

@@ -1,22 +1,33 @@
 /* SFM — camada de "banco de dados".
  *
- * Três arquivos, dentro de bd/, ao lado dos .html: bd/dados.json (usuarios,
- * passagensTurno, eficiencia, confirmacoesTurno, eventosPassagem),
- * bd/notas.json (notas/ordens importadas do SAP) e bd/quadro.json
- * (registros manuais do quadro S/Q/D/C).
+ * Dentro de bd/, ao lado dos .html:
+ *   bd/usuarios.json          — todos os usuários, global (poucas escritas, só Admin)
+ *   bd/notas.json             — notas/ordens do SAP, global (alimentado por import manual
+ *                               e por uma ferramenta externa — continua um arquivo só)
+ *   bd/dados-<Setor>.json     — passagensTurno/eficiencia/confirmacoesTurno/eventosPassagem
+ *                               só daquele setor
+ *   bd/quadro-<Setor>.json    — registros do quadro S/Q/D/C só daquele setor
  *
  * Leitura e escrita passam pelo backend local (Flask, ver ../app-python/) via
- * /api/dados, /api/notas, /api/quadro — o servidor lê/escreve esses arquivos
- * como arquivos comuns do sistema, então não pede nenhuma permissão de pasta
- * ao navegador.
+ * /api/usuarios, /api/notas, /api/dados/<setor>, /api/quadro/<setor> — o servidor
+ * lê/escreve esses arquivos como arquivos comuns do sistema, então não pede
+ * nenhuma permissão de pasta ao navegador.
  *
- * bd/notas.json só cresce (acumula toda nota já importada do SAP, nunca é
- * podado) — num setor com bastante movimento ele fica bem maior que os
- * outros dois arquivos, e como bd/ normalmente é uma pasta de rede, ler
- * esse arquivo tem um custo real (round-trip de rede a cada leitura). Por
- * isso carregarAutoLoad só busca notas.json/quadro.json nas páginas que
- * realmente usam DB.notas/DB.quadro (Admin, Quadro SFM, Relatórios) — o
- * restante (login, menu, passar/receber turno) carrega só dados.json.
+ * Por que por setor: antes era um dados.json/quadro.json único pra todos os
+ * setores — cada página carrega o arquivo inteiro e regrava o arquivo inteiro ao
+ * salvar, sem checar se mudou nesse meio tempo, então duas pessoas de setores
+ * diferentes salvando por perto (ex.: dois operadores preenchendo a SFM no mesmo
+ * horário) podiam sobrescrever o trabalho uma da outra. Dividido por setor, cada
+ * gravação só toca o arquivo daquele setor. `DB.dados`/`DB.quadro` continuam com
+ * a MESMA forma de sempre (usuarios/passagensTurno/etc., registros por
+ * "Setor|data") — só a origem/destino dos dados mudou, pro resto do app ler/
+ * escrever DB.dados/DB.quadro continua idêntico a antes.
+ *
+ * `bd/notas.json` fica de fora dessa divisão de propósito: quem escreve nele não
+ * são pessoas usando o app ao mesmo tempo (é uma ferramenta externa de import
+ * automático, que escreve direto no arquivo — ver bd/ no README), então não tem
+ * a mesma concorrência que motivou dividir dados/quadro. Dividir ele também
+ * quebraria essa ferramenta externa sem necessidade.
  */
 
 const DB = {
@@ -25,43 +36,95 @@ const DB = {
   /* quadro.registros: mapa "setor|YYYY-MM-DD" -> { setor, data, acidente, quaseAcidente,
    * retrabalho, falhaFornecedor }, cada campo true/false/undefined (undefined = não marcado
    * ainda). Preenchimento manual (ver quadro-sfm.html) — Delivery e Cost do mesmo quadro são
-   * calculados automaticamente a partir de notas/passagensTurno e não usam este arquivo. */
+   * calculados automaticamente a partir de notas/passagensTurno e não usam este arquivo. Em
+   * memória continua unificado (prefixo "setor|"), mesmo vindo de arquivos separados por
+   * setor — ver carregarAutoLoad/salvarQuadro. */
   quadro: { registros: {} },
   autoLoadOk: false,
 
-  async _buscar(chave) {
-    const resp = await fetch(`/api/${chave}`);
-    if (!resp.ok) throw new Error(`Falha ao carregar ${chave}`);
+  /** Setores cujo dados-<setor>.json/quadro-<setor>.json estão carregados em DB.dados/DB.quadro
+   * nesta sessão — salvarDados/salvarQuadro só escrevem os arquivos desses setores, nunca os
+   * outros (escrever um setor que não foi carregado sobrescreveria o arquivo dele com dados
+   * vazios/parciais). Ver _escopoSetores. */
+  _setoresCarregados: [],
+
+  async _buscar(caminho) {
+    const resp = await fetch(`/api/${caminho}`);
+    if (!resp.ok) throw new Error(`Falha ao carregar ${caminho}`);
     return resp.json();
   },
 
-  async _salvar(chave, valor) {
-    const resp = await fetch(`/api/${chave}`, {
+  async _salvar(caminho, valor) {
+    const resp = await fetch(`/api/${caminho}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(valor),
     });
-    if (!resp.ok) throw new Error(`Falha ao salvar ${chave}`);
+    if (!resp.ok) throw new Error(`Falha ao salvar ${caminho}`);
   },
 
   _ultimasOpcoesCarga: {},
 
   /**
-   * Carrega bd/dados.json (sempre) e, sob pedido, bd/notas.json e/ou
-   * bd/quadro.json — chamar (com await) no início de cada página, passando
-   * { notas: true } e/ou { quadro: true } só se a página realmente usa
-   * DB.notas/DB.quadro. Ver nota sobre notas.json no topo do arquivo.
+   * `opcoes.setor` decide quais setores de dados/quadro carregar:
+   *  - omitido (undefined): todos os setores (usado por telas que precisam ver todos de uma
+   *    vez, ex.: Relatórios) — é o padrão mais seguro quando não se sabe o escopo certo.
+   *  - null: nenhum (usado por telas que só mexem em dados globais, ex.: Admin/usuarios).
+   *  - "Gasolina" (um nome de SETORES): só aquele setor (o caso comum — cada operador só
+   *    mexe no próprio setor).
+   */
+  _escopoSetores(setorOpcao) {
+    if (setorOpcao === null) return [];
+    if (setorOpcao === undefined) return SETORES.slice();
+    return [setorOpcao];
+  },
+
+  /**
+   * Carrega bd/usuarios.json (sempre) e, sob pedido, bd/notas.json e/ou
+   * bd/quadro-<setor>.json, mais bd/dados-<setor>.json (sempre, mas só dos
+   * setores em `opcoes.setor` — ver _escopoSetores) — chamar (com await) no
+   * início de cada página, passando { notas: true } e/ou { quadro: true } só se
+   * a página realmente usa DB.notas/DB.quadro, e { setor } com o setor relevante
+   * (ou null se a página não usa setor nenhum). Ver nota sobre notas.json no
+   * topo do arquivo.
    */
   async carregarAutoLoad(opcoes = {}) {
     this._ultimasOpcoesCarga = opcoes;
+    const setores = this._escopoSetores(opcoes.setor);
+    this._setoresCarregados = setores;
     try {
-      const promessas = { dados: this._buscar("dados") };
+      const promessas = { usuarios: this._buscar("usuarios") };
       if (opcoes.notas) promessas.notas = this._buscar("notas");
-      if (opcoes.quadro) promessas.quadro = this._buscar("quadro");
+      for (const s of setores) {
+        promessas[`dados:${s}`] = this._buscar(`dados/${s}`);
+        if (opcoes.quadro) promessas[`quadro:${s}`] = this._buscar(`quadro/${s}`);
+      }
 
       const chaves = Object.keys(promessas);
       const resultados = await Promise.all(chaves.map((k) => promessas[k]));
-      chaves.forEach((k, i) => { this[k] = resultados[i]; });
+      const porChave = {};
+      chaves.forEach((k, i) => { porChave[k] = resultados[i]; });
+
+      this.dados = { usuarios: porChave.usuarios || [], passagensTurno: [], eficiencia: [], confirmacoesTurno: [], eventosPassagem: [] };
+      for (const s of setores) {
+        const d = porChave[`dados:${s}`] || {};
+        this.dados.passagensTurno.push(...(d.passagensTurno || []));
+        this.dados.eficiencia.push(...(d.eficiencia || []));
+        this.dados.confirmacoesTurno.push(...(d.confirmacoesTurno || []));
+        this.dados.eventosPassagem.push(...(d.eventosPassagem || []));
+      }
+
+      if (opcoes.notas) this.notas = porChave.notas || [];
+
+      if (opcoes.quadro) {
+        this.quadro = { registros: {} };
+        for (const s of setores) {
+          const q = porChave[`quadro:${s}`] || { registros: {} };
+          for (const [data, registro] of Object.entries(q.registros || {})) {
+            this.quadro.registros[this._chaveQuadro(s, data)] = registro;
+          }
+        }
+      }
 
       this.autoLoadOk = true;
     } catch {
@@ -82,16 +145,35 @@ const DB = {
     if (!this.quadro.registros || typeof this.quadro.registros !== "object") this.quadro.registros = {};
   },
 
+  /** Só grava bd/usuarios.json e os bd/dados-<setor>.json dos setores carregados nesta sessão
+   * (ver _setoresCarregados) — nunca os outros setores, pra não sobrescrevê-los com dados que
+   * esta sessão nunca carregou de verdade. */
   async salvarDados() {
-    await this._salvar("dados", this.dados);
+    await this._salvar("usuarios", this.dados.usuarios);
+    for (const s of this._setoresCarregados) {
+      await this._salvar(`dados/${s}`, {
+        passagensTurno: this.dados.passagensTurno.filter((p) => p.setor === s),
+        eficiencia: this.dados.eficiencia.filter((e) => e.setor === s),
+        confirmacoesTurno: this.dados.confirmacoesTurno.filter((c) => c.setor === s),
+        eventosPassagem: this.dados.eventosPassagem.filter((e) => e.setor === s),
+      });
+    }
   },
 
   async salvarNotas() {
     await this._salvar("notas", this.notas);
   },
 
+  /** Só grava os bd/quadro-<setor>.json dos setores carregados nesta sessão (mesma lógica de salvarDados). */
   async salvarQuadro() {
-    await this._salvar("quadro", this.quadro);
+    for (const s of this._setoresCarregados) {
+      const prefixo = this._chaveQuadro(s, "");
+      const registros = {};
+      for (const [chave, registro] of Object.entries(this.quadro.registros)) {
+        if (chave.startsWith(prefixo)) registros[chave.slice(prefixo.length)] = registro;
+      }
+      await this._salvar(`quadro/${s}`, { registros });
+    }
   },
 
   /** Recarrega os bancos do servidor (os mesmos da última chamada a carregarAutoLoad), descartando alterações locais não salvas. */
@@ -206,7 +288,14 @@ const DB = {
 
   // ---------- Eventos de passagem de turno (log permanente, nunca sobrescrito) ----------
 
-  /** Próximo número sequencial de evento de passagem (global, não por setor). */
+  /**
+   * Próximo número sequencial de evento de passagem. Antes da divisão por setor (ver topo do
+   * arquivo) isso era global entre todos os setores; agora, como cada sessão só carrega os
+   * eventos do(s) setor(es) em DB._setoresCarregados, a numeração vira efetivamente por
+   * setor (cada setor tem sua própria sequência, podendo repetir número com outro setor) —
+   * é só um número de referência pra exibição (Relatórios), não uma chave de verdade (essa é
+   * o `id`), então essa mudança é segura.
+   */
   _proximoNumeroEventoPassagem() {
     return this.dados.eventosPassagem.reduce((max, e) => Math.max(max, e.numero || 0), 0) + 1;
   },

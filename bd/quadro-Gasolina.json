@@ -1,29 +1,6 @@
 {
   "registros": {
-    "Diesel|2026-10-05": {
-      "acidente": false,
-      "data": "2026-10-05",
-      "falhaFornecedor": false,
-      "quaseAcidente": false,
-      "retrabalho": false,
-      "setor": "Diesel",
-      "topProblemas": [
-        {
-          "causaRaiz": "Motor do spindle ruim",
-          "celula": "C-31",
-          "contencao": "Retirado alarme e abaixado potência",
-          "descricao": "Alarme de Spindle",
-          "efeito": "Maquina parada",
-          "horario": "09:00",
-          "maquina": "FBK",
-          "mttr": "11 horas de parada",
-          "ordem": "5000098981283",
-          "origemPassagemId": null,
-          "solucao": "Trocado motor do Spindle"
-        }
-      ]
-    },
-    "Gasolina|2026-09-01": {
+    "2026-09-01": {
       "acidente": false,
       "data": "2026-09-01",
       "falhaFornecedor": false,
@@ -31,7 +8,7 @@
       "retrabalho": false,
       "setor": "Gasolina"
     },
-    "Gasolina|2026-09-02": {
+    "2026-09-02": {
       "acidente": false,
       "data": "2026-09-02",
       "falhaFornecedor": false,
@@ -39,7 +16,7 @@
       "retrabalho": false,
       "setor": "Gasolina"
     },
-    "Gasolina|2026-09-03": {
+    "2026-09-03": {
       "acidente": true,
       "data": "2026-09-03",
       "falhaFornecedor": false,
@@ -47,7 +24,7 @@
       "retrabalho": true,
       "setor": "Gasolina"
     },
-    "Gasolina|2026-09-04": {
+    "2026-09-04": {
       "acidente": false,
       "data": "2026-09-04",
       "falhaFornecedor": false,
@@ -55,7 +32,7 @@
       "retrabalho": false,
       "setor": "Gasolina"
     },
-    "Gasolina|2026-09-05": {
+    "2026-09-05": {
       "acidente": false,
       "data": "2026-09-05",
       "falhaFornecedor": true,
@@ -63,7 +40,7 @@
       "retrabalho": false,
       "setor": "Gasolina"
     },
-    "Gasolina|2026-09-06": {
+    "2026-09-06": {
       "acidente": false,
       "data": "2026-09-06",
       "falhaFornecedor": false,
@@ -71,7 +48,7 @@
       "retrabalho": false,
       "setor": "Gasolina"
     },
-    "Gasolina|2026-09-07": {
+    "2026-09-07": {
       "acidente": false,
       "data": "2026-09-07",
       "falhaFornecedor": false,
@@ -79,7 +56,7 @@
       "retrabalho": false,
       "setor": "Gasolina"
     },
-    "Gasolina|2026-09-08": {
+    "2026-09-08": {
       "acidente": false,
       "data": "2026-09-08",
       "falhaFornecedor": true,
@@ -87,7 +64,7 @@
       "retrabalho": false,
       "setor": "Gasolina"
     },
-    "Gasolina|2026-09-09": {
+    "2026-09-09": {
       "acidente": false,
       "data": "2026-09-09",
       "falhaFornecedor": false,
@@ -95,7 +72,7 @@
       "retrabalho": false,
       "setor": "Gasolina"
     },
-    "Gasolina|2026-09-10": {
+    "2026-09-10": {
       "acidente": false,
       "data": "2026-09-10",
       "falhaFornecedor": false,
@@ -103,7 +80,7 @@
       "retrabalho": true,
       "setor": "Gasolina"
     },
-    "Gasolina|2026-09-11": {
+    "2026-09-11": {
       "acidente": false,
       "data": "2026-09-11",
       "falhaFornecedor": false,
@@ -111,7 +88,7 @@
       "retrabalho": true,
       "setor": "Gasolina"
     },
-    "Gasolina|2026-10-05": {
+    "2026-10-05": {
       "setor": "Gasolina",
       "data": "2026-10-05",
       "acidente": false,

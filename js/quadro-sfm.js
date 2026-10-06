@@ -235,7 +235,15 @@ function importarPlanilhaSap(arrayBuffer) {
   if (!usuario) return;
   Auth.garantirSetorOperador(usuario);
 
-  await DB.carregarAutoLoad({ notas: true, quadro: true });
+  // Operador: setor fixo. Admin/gestor: o que estiver ativo na sessão (escolhido no menu),
+  // com o mesmo fallback que o seletor de setor abaixo usa (SETORES[0] se inválido/ausente) —
+  // precisa resolver isso já aqui porque carregarAutoLoad só busca o setor que a gente pedir.
+  const setorInicial = usuario.papel === "operador"
+    ? usuario.setor
+    : (SETORES.includes(Auth.getSetorAtivo()) ? Auth.getSetorAtivo() : SETORES[0]);
+  Auth.setSetorAtivo(setorInicial);
+
+  await DB.carregarAutoLoad({ notas: true, quadro: true, setor: setorInicial });
   Auth.atualizarUsuarioDoBanco(usuario);
   if (Auth.aplicarGatePassagemObrigatoria(usuario)) return;
   if (Auth.aplicarGateRecebimento(usuario)) return;
@@ -340,16 +348,24 @@ function importarPlanilhaSap(arrayBuffer) {
     campoSetor.hidden = true;
   } else {
     seletorSetor.innerHTML = SETORES.map((s) => `<option value="${s}">${s}</option>`).join("");
-    seletorSetor.value = SETORES.includes(Auth.getSetorAtivo()) ? Auth.getSetorAtivo() : SETORES[0];
-    seletorSetor.addEventListener("change", () => { avisarSeSujo(); Auth.setSetorAtivo(seletorSetor.value); renderizar(); });
+    seletorSetor.value = setorInicial;
+
+    // Admin/gestor podem trocar de setor sem sair da página — como dados/quadro agora vêm
+    // por setor (ver js/db.js), trocar o setor precisa recarregar do servidor, não só
+    // re-renderizar o que já estava em memória (que é só do setor anterior).
+    async function trocarSetor(novoSetor) {
+      avisarSeSujo();
+      seletorSetor.value = novoSetor;
+      Auth.setSetorAtivo(novoSetor);
+      await DbUI.comCarregando(() => DB.carregarAutoLoad({ quadro: true, setor: novoSetor }));
+      renderizar();
+    }
+
+    seletorSetor.addEventListener("change", () => trocarSetor(seletorSetor.value));
 
     const navegarSetor = (passo) => {
       const i = SETORES.indexOf(seletorSetor.value);
-      const proximo = SETORES[(i + passo + SETORES.length) % SETORES.length];
-      avisarSeSujo();
-      seletorSetor.value = proximo;
-      Auth.setSetorAtivo(proximo);
-      renderizar();
+      trocarSetor(SETORES[(i + passo + SETORES.length) % SETORES.length]);
     };
     btnSetorAnterior.addEventListener("click", () => navegarSetor(-1));
     btnSetorProximo.addEventListener("click", () => navegarSetor(1));

@@ -1,0 +1,73 @@
+[
+  {
+    "codigo": "admin",
+    "id": "u-admin",
+    "nome": "admin",
+    "papel": "admin",
+    "senhaHash": "YX20ledD3yhaJOdL/UP1MzNOImvZbywKDYVdacGNfmM=",
+    "senhaSalt": "Do6sWQ3fjSoDc9nUEOu6Yg==",
+    "setor": null
+  },
+  {
+    "codigo": "gestor",
+    "id": "u-gestor",
+    "nome": "gestor",
+    "papel": "gestor",
+    "senhaHash": "T6uOue+D0EWwK03h2ByJz0NyM2VqljoX5IHigBqh60w=",
+    "senhaSalt": "gpiFvrLghH79fmdJBoi6tQ==",
+    "setor": null
+  },
+  {
+    "codigo": "user1",
+    "id": "u-user1",
+    "nome": "user1",
+    "papel": "operador",
+    "responsavelSfm": true,
+    "senhaHash": "X7y2LZqeTg1Qsm4rwSgz2CTbJNCRu36vyFr+uG+EOC8=",
+    "senhaSalt": "9pL9gZPC4p4e1ZM0oqRvkw==",
+    "setor": "Gasolina",
+    "turno": "Manhã"
+  },
+  {
+    "codigo": "user2",
+    "id": "u-user2",
+    "nome": "user2",
+    "papel": "operador",
+    "senhaHash": "HudZNCrmAGQYpj1mE19dVes6HHR7XhO53dKJmeW6hmk=",
+    "senhaSalt": "m1y/ugTnH0j+7IiXFBX8dw==",
+    "setor": "Diesel",
+    "turno": "Manhã"
+  },
+  {
+    "codigo": "user3",
+    "id": "u-user3",
+    "nome": "user3",
+    "papel": "operador",
+    "senhaHash": "25A8LRn0ZXHQOwaaWJc+sKnK39cTPXiIXPi9AgjjshA=",
+    "senhaSalt": "SBHsKpVAHiNr/zzmkVZhTg==",
+    "setor": "Controle",
+    "turno": "Noite"
+  },
+  {
+    "codigo": "user4",
+    "id": "u-23ebfba2-06ae-4334-8c44-c0904d22018e",
+    "nome": "user4",
+    "papel": "operador",
+    "responsavelSfm": true,
+    "senhaHash": "vV9pMI3wH0YwGRm65WiB+15yVrzgh12aDoYJOvN1KFs=",
+    "senhaSalt": "iRXmJV0GO4TRQgDvQJjnsg==",
+    "setor": "Biela",
+    "turno": "Manhã"
+  },
+  {
+    "codigo": "gasolina",
+    "id": "u-db49ef96-9c3c-4fba-8297-fea242a4ea79",
+    "nome": "gasolina",
+    "papel": "operador",
+    "responsavelSfm": false,
+    "senhaHash": "ljaEI6IaHScRjjqgH8r2k6/MZ62NNpWmfiWqtOTMYg4=",
+    "senhaSalt": "0ggV1YyiWTfusIy6aLr7MQ==",
+    "setor": "Gasolina",
+    "turno": "Tarde"
+  }
+]
