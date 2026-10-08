@@ -193,6 +193,82 @@
       "status": "finalizada",
       "tempoParadoMinutos": 1,
       "turno": null
+    },
+    {
+      "celula": "1012-PISTA-USPIS-CEL007",
+      "dataHora": "2026-10-08T20:28:27.943Z",
+      "defeito": "vazamento hidráulico",
+      "descricao": "VAZAMENTO HIDRAULICO NA PRENSA",
+      "finalizadaEm": "2026-10-09T20:29:00.000Z",
+      "finalizadoPor": "admin",
+      "id": "pt-ef553b61-489e-4795-96fc-6baa347d7b9b",
+      "inicioParadaEm": "2026-10-08T08:10:00.000Z",
+      "maquina": "PRENSA HIDRAULICA 04",
+      "notaOrigem": "13699201",
+      "recebidoEm": "2026-10-08T20:28:34.421Z",
+      "recebidoPor": "admin",
+      "registradoPor": "admin",
+      "setor": "Gasolina",
+      "status": "finalizada",
+      "tempoParadoMinutos": 2179,
+      "turno": null
+    },
+    {
+      "celula": "1012-PISTA-USPIS-CEL007",
+      "dataHora": "2026-10-08T20:37:49.232Z",
+      "defeito": "vazamento",
+      "descricao": "VAZAMENTO HIDRAULICO NA PRENSA",
+      "finalizadaEm": "2026-10-08T20:38:00.000Z",
+      "finalizadoPor": "user1",
+      "id": "pt-67561ba6-e923-4e2c-a54f-7bf21d4842fc",
+      "inicioParadaEm": "2026-10-08T08:10:00.000Z",
+      "maquina": "PRENSA HIDRAULICA 04",
+      "notaOrigem": "13699201",
+      "recebidoEm": "2026-10-08T20:38:08.231Z",
+      "recebidoPor": "admin",
+      "registradoPor": "admin",
+      "setor": "Gasolina",
+      "status": "finalizada",
+      "tempoParadoMinutos": 748,
+      "turno": null
+    },
+    {
+      "celula": "cel3",
+      "dataHora": "2026-10-08T20:38:40.235Z",
+      "defeito": "vazamento",
+      "descricao": "Maquina deu balalasdklajds",
+      "finalizadaEm": "2026-10-08T20:44:00.000Z",
+      "finalizadoPor": "admin",
+      "id": "pt-2e5e7090-5a3e-48d4-bbdf-22adf5c15d3b",
+      "inicioParadaEm": "2026-10-08T20:38:00.000Z",
+      "maquina": "prenssa 3",
+      "notaOrigem": null,
+      "recebidoEm": "2026-10-08T20:38:44.448Z",
+      "recebidoPor": "user1",
+      "registradoPor": "user1",
+      "setor": "Gasolina",
+      "status": "finalizada",
+      "tempoParadoMinutos": 6,
+      "turno": "Manhã"
+    },
+    {
+      "id": "pt-835c5e7f-d1df-4a4f-8ff1-3e8f2931f577",
+      "setor": "Gasolina",
+      "turno": null,
+      "defeito": "vazamento hidráulico",
+      "maquina": "PRENSA HIDRAULICA 04",
+      "celula": "1012-PISTA-USPIS-CEL007",
+      "descricao": "ocorreu um vazamento blablabla",
+      "dataHora": "2026-10-08T20:58:28.662Z",
+      "inicioParadaEm": "2026-10-08T08:10:00.000Z",
+      "status": "aberta",
+      "recebidoPor": null,
+      "recebidoEm": null,
+      "finalizadaEm": null,
+      "tempoParadoMinutos": null,
+      "finalizadoPor": null,
+      "registradoPor": "admin",
+      "notaOrigem": "13699201"
     }
   ],
   "eficiencia": [
@@ -236,13 +312,22 @@
       "usuario": "user1"
     },
     {
+      "concluidoEm": "2026-10-06T18:58:39.781Z",
+      "data": "2026-10-06",
       "id": "ct-8031d7f5-a969-4bf0-a0fb-ec5f4b571f2d",
       "setor": "Gasolina",
-      "turno": null,
-      "data": "2026-10-06",
       "tipo": "sfm",
-      "usuario": "user1",
-      "concluidoEm": "2026-10-06T18:58:39.781Z"
+      "turno": null,
+      "usuario": "user1"
+    },
+    {
+      "concluidoEm": "2026-10-08T20:38:40.235Z",
+      "data": "2026-10-08",
+      "id": "ct-4faa398c-ba9d-4c82-927c-67f0c8cf2a99",
+      "setor": "Gasolina",
+      "tipo": "passagem",
+      "turno": "Manhã",
+      "usuario": "user1"
     }
   ],
   "eventosPassagem": [
@@ -380,6 +465,93 @@
       "setor": "Gasolina",
       "turnoDestino": null,
       "turnoOrigem": null
+    },
+    {
+      "id": "ep-ab3ce984-6275-4814-b040-dd642faa1ec5",
+      "numero": 6,
+      "ordens": [
+        {
+          "celula": "1012-PISTA-USPIS-CEL007",
+          "defeito": "vazamento hidráulico",
+          "descricao": "VAZAMENTO HIDRAULICO NA PRENSA",
+          "maquina": "PRENSA HIDRAULICA 04",
+          "notaOrigem": "13699201",
+          "tempoParadoMinutos": 738
+        }
+      ],
+      "passadoEm": "2026-10-08T20:28:27.943Z",
+      "passadoPor": "admin",
+      "recebidoEm": "2026-10-08T20:28:34.422Z",
+      "recebidoPor": "admin",
+      "setor": "Gasolina",
+      "turnoDestino": null,
+      "turnoOrigem": null
+    },
+    {
+      "id": "ep-99f06b01-7877-41ff-add5-038532f2e0a4",
+      "numero": 7,
+      "ordens": [
+        {
+          "celula": "1012-PISTA-USPIS-CEL007",
+          "defeito": "vazamento",
+          "descricao": "VAZAMENTO HIDRAULICO NA PRENSA",
+          "maquina": "PRENSA HIDRAULICA 04",
+          "notaOrigem": "13699201",
+          "passagemId": "pt-67561ba6-e923-4e2c-a54f-7bf21d4842fc",
+          "tempoParadoMinutos": 748
+        }
+      ],
+      "passadoEm": "2026-10-08T20:37:49.233Z",
+      "passadoPor": "admin",
+      "recebidoEm": "2026-10-08T20:38:08.231Z",
+      "recebidoPor": "admin",
+      "setor": "Gasolina",
+      "turnoDestino": null,
+      "turnoOrigem": null
+    },
+    {
+      "id": "ep-6fc8aed1-074a-48c0-aab2-a3065118d40f",
+      "numero": 8,
+      "ordens": [
+        {
+          "celula": "cel3",
+          "defeito": "vazamento",
+          "descricao": "Maquina deu balalasdklajds",
+          "maquina": "prenssa 3",
+          "notaOrigem": null,
+          "passagemId": "pt-2e5e7090-5a3e-48d4-bbdf-22adf5c15d3b",
+          "tempoParadoMinutos": 1
+        }
+      ],
+      "passadoEm": "2026-10-08T20:38:40.235Z",
+      "passadoPor": "user1",
+      "recebidoEm": "2026-10-08T20:38:44.448Z",
+      "recebidoPor": "user1",
+      "setor": "Gasolina",
+      "turnoDestino": "Tarde",
+      "turnoOrigem": "Manhã"
+    },
+    {
+      "id": "ep-115904ea-a76d-42ca-8479-fb6400fbccf2",
+      "numero": 9,
+      "setor": "Gasolina",
+      "turnoOrigem": null,
+      "turnoDestino": null,
+      "passadoPor": "admin",
+      "passadoEm": "2026-10-08T20:58:28.663Z",
+      "recebidoPor": null,
+      "recebidoEm": null,
+      "ordens": [
+        {
+          "defeito": "vazamento hidráulico",
+          "maquina": "PRENSA HIDRAULICA 04",
+          "celula": "1012-PISTA-USPIS-CEL007",
+          "descricao": "ocorreu um vazamento blablabla",
+          "tempoParadoMinutos": 768,
+          "passagemId": "pt-835c5e7f-d1df-4a4f-8ff1-3e8f2931f577",
+          "notaOrigem": "13699201"
+        }
+      ]
     }
   ]
 }

@@ -2945,7 +2945,7 @@
     "dataEntrada": "2026-09-01",
     "horaEntrada": "17:05",
     "atualizadoEm": "2026-09-11T22:48:11.241Z",
-    "setor": "Biela"
+    "setor": "Gasolina"
   },
   {
     "nota": "13648044",
@@ -4313,7 +4313,7 @@
     "dataEntrada": "2026-09-02",
     "horaEntrada": "07:40",
     "atualizadoEm": "2026-09-11T22:48:11.241Z",
-    "setor": "Biela"
+    "setor": "Gasolina"
   },
   {
     "nota": "13648549",
@@ -4332,7 +4332,7 @@
     "dataEntrada": "2026-09-02",
     "horaEntrada": "07:45",
     "atualizadoEm": "2026-09-11T22:48:11.241Z",
-    "setor": "Biela"
+    "setor": "Gasolina"
   },
   {
     "nota": "13648563",
@@ -6707,7 +6707,7 @@
     "dataEntrada": "2026-09-03",
     "horaEntrada": "08:35",
     "atualizadoEm": "2026-09-11T22:48:11.241Z",
-    "setor": "Biela"
+    "setor": "Gasolina"
   },
   {
     "nota": "13649637",
@@ -11381,7 +11381,7 @@
     "dataEntrada": "2026-09-05",
     "horaEntrada": "18:15",
     "atualizadoEm": "2026-09-11T22:48:11.242Z",
-    "setor": "Biela"
+    "setor": "Gasolina"
   },
   {
     "nota": "13651818",
@@ -11970,7 +11970,7 @@
     "dataEntrada": "2026-09-06",
     "horaEntrada": "17:10",
     "atualizadoEm": "2026-09-11T22:48:11.242Z",
-    "setor": "Biela"
+    "setor": "Gasolina"
   },
   {
     "nota": "13651979",
@@ -12369,7 +12369,7 @@
     "dataEntrada": "2026-09-07",
     "horaEntrada": "06:50",
     "atualizadoEm": "2026-09-11T22:48:11.242Z",
-    "setor": "Biela"
+    "setor": "Gasolina"
   },
   {
     "nota": "13652104",
@@ -14288,7 +14288,7 @@
     "dataEntrada": "2026-09-08",
     "horaEntrada": "08:30",
     "atualizadoEm": "2026-09-11T22:48:11.242Z",
-    "setor": "Biela"
+    "setor": "Gasolina"
   },
   {
     "nota": "13652786",
@@ -14763,7 +14763,7 @@
     "dataEntrada": "2026-09-08",
     "horaEntrada": "13:05",
     "atualizadoEm": "2026-09-11T22:48:11.242Z",
-    "setor": "Biela"
+    "setor": "Gasolina"
   },
   {
     "nota": "13653091",
@@ -20957,6 +20957,86 @@
     "dataEntrada": "2026-09-10",
     "horaEntrada": "23:55",
     "atualizadoEm": "2026-09-11T22:48:11.243Z",
+    "setor": "Biela"
+  },
+  {
+    "nota": "13699201",
+    "ordem": "50000912001",
+    "statusSistema": "MSEN ORDA",
+    "statusUsuario": null,
+    "tipoOrdem": null,
+    "centrab": "MUPMEC",
+    "equipamento": "2600410210",
+    "nomeEquipamento": "PRENSA HIDRAULICA 04",
+    "loc": "1012-PISTA-USPIS-CEL007",
+    "textoBreve": "VAZAMENTO HIDRAULICO NA PRENSA",
+    "dataInicio": "2026-10-08",
+    "dataFim": null,
+    "centroCusto": "2630290",
+    "criadoPor": "teste",
+    "dataEntrada": "2026-10-08",
+    "horaEntrada": "05:10",
+    "atualizadoEm": "2026-10-08T19:37:47.228135Z",
+    "setor": "Gasolina"
+  },
+  {
+    "nota": "13699202",
+    "ordem": "50000912002",
+    "statusSistema": "MSEN ORDA",
+    "statusUsuario": null,
+    "tipoOrdem": null,
+    "centrab": "MUPMEC",
+    "equipamento": "2600410355",
+    "nomeEquipamento": "TORNO CNC 032",
+    "loc": "1012-PISTA-USPIS-CEL032",
+    "textoBreve": "FALHA NO EIXO X",
+    "dataInicio": "2026-10-08",
+    "dataFim": null,
+    "centroCusto": "2630290",
+    "criadoPor": "teste",
+    "dataEntrada": "2026-10-08",
+    "horaEntrada": "05:35",
+    "atualizadoEm": "2026-10-08T19:37:47.228135Z",
+    "setor": "Diesel"
+  },
+  {
+    "nota": "13699203",
+    "ordem": "50000912003",
+    "statusSistema": "MSEN ORDA",
+    "statusUsuario": null,
+    "tipoOrdem": null,
+    "centrab": "1012",
+    "equipamento": "2600406410",
+    "nomeEquipamento": "ESTEIRA TRASU 02",
+    "loc": "1012-PISTA-TRASU-02",
+    "textoBreve": "SENSOR DE POSICAO COM FALHA INTERMITENTE",
+    "dataInicio": "2026-10-08",
+    "dataFim": null,
+    "centroCusto": "2630290",
+    "criadoPor": "teste",
+    "dataEntrada": "2026-10-08",
+    "horaEntrada": "04:50",
+    "atualizadoEm": "2026-10-08T19:37:47.228135Z",
+    "setor": "Controle"
+  },
+  {
+    "nota": "13699204",
+    "ordem": "50000912004",
+    "statusSistema": "MSEN ORDA",
+    "statusUsuario": null,
+    "tipoOrdem": null,
+    "centrab": "MUPMEC",
+    "equipamento": "2600410488",
+    "nomeEquipamento": "RETIFICA DE BIELAS 01",
+    "loc": "1012-PISTA-BIELA-01",
+    "textoBreve": "RUIDO ANORMAL NO FUSO",
+    "dataInicio": "2026-10-08",
+    "dataFim": null,
+    "centroCusto": "2630290",
+    "criadoPor": "teste",
+    "dataEntrada": "2026-10-08",
+    "horaEntrada": "05:50",
+    "atualizadoEm": "2026-10-08T19:37:47.228135Z",
     "setor": "Biela"
   }
 ]

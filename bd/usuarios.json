@@ -69,5 +69,15 @@
     "senhaSalt": "0ggV1YyiWTfusIy6aLr7MQ==",
     "setor": "Gasolina",
     "turno": "Tarde"
+  },
+  {
+    "codigo": "mestre1",
+    "id": "u-273f175d-81e3-4af5-b494-55740ed75fc3",
+    "nome": "Mestre Teste",
+    "papel": "mestre",
+    "senhaHash": "7kL/zl36doNzlZ/KDpBRehJiIALc7m85PO2uEN6/NiQ=",
+    "senhaSalt": "FrENRNVuIdkpR5F+H7Qh+A==",
+    "setor": "Gasolina",
+    "turno": null
   }
 ]
