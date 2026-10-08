@@ -1,7 +1,7 @@
-/* SFM — admin.html (somente papel admin) */
+/* SFM — admin.html (papéis admin e mestre) */
 
 (async function () {
-  const usuario = Auth.exigirPapel(["admin"]);
+  const usuario = Auth.exigirPapel(["admin", "mestre"]);
   if (!usuario) return;
   montarTopbar(document.getElementById("topbar"), usuario, "Administração");
 
@@ -14,13 +14,20 @@
   const campoTurnoWrap = document.getElementById("campoTurnoWrap");
   const campoTurno = document.getElementById("campoTurno");
 
+  // Mestre tem as mesmas permissões de admin, exceto criar cadastros de Gestor — a opção nem
+  // aparece no select (reforçado na validação do submit mais abaixo, por garantia).
+  if (usuario.papel === "mestre") {
+    campoPapel.querySelector('option[value="gestor"]')?.remove();
+  }
+
   campoSetor.innerHTML = SETORES.map((s) => `<option value="${s}">${s}</option>`).join("");
   campoTurno.innerHTML = TURNOS.map((t) => `<option value="${t}">${t}</option>`).join("");
 
+  // Mestre também tem setor fixo (ver papelTemSetorFixo), mas não turno (não é um turno de
+  // chão de fábrica) — só Manutentor (operador) tem os dois.
   function atualizarVisibilidadeSetor() {
-    const mostrar = campoPapel.value === "operador";
-    campoSetorWrap.style.display = mostrar ? "" : "none";
-    campoTurnoWrap.style.display = mostrar ? "" : "none";
+    campoSetorWrap.style.display = papelTemSetorFixo(campoPapel.value) ? "" : "none";
+    campoTurnoWrap.style.display = campoPapel.value === "operador" ? "" : "none";
   }
   campoPapel.addEventListener("change", atualizarVisibilidadeSetor);
   atualizarVisibilidadeSetor();
@@ -102,7 +109,7 @@
   function renderTabela() {
     const corpo = document.getElementById("corpoTabelaUsuarios");
     corpo.innerHTML = DB.dados.usuarios.map((u) => {
-      const setorCelula = u.papel === "operador"
+      const setorCelula = papelTemSetorFixo(u.papel)
         ? `<select class="seletorSetorLinha" style="display:inline-block;width:auto;">` +
             SETORES.map((s) => `<option value="${s}" ${u.setor === s ? "selected" : ""}>${s}</option>`).join("") +
           `</select>`
@@ -120,7 +127,7 @@
       <tr data-id="${escaparHtml(u.id)}">
         <td>${escaparHtml(u.codigo)}</td>
         <td>${escaparHtml(u.nome)}</td>
-        <td>${escaparHtml(u.papel)}</td>
+        <td>${escaparHtml(rotuloPapel(u.papel))}</td>
         <td>${setorCelula}</td>
         <td>${turnoCelula}</td>
         <td>${senhaCelula}</td>
@@ -216,12 +223,13 @@
     const codigo = document.getElementById("campoCodigo").value.trim();
     const nome = document.getElementById("campoNome").value.trim();
     const papel = campoPapel.value;
-    const setor = papel === "operador" ? campoSetor.value : null;
+    const setor = papelTemSetorFixo(papel) ? campoSetor.value : null;
     const turno = papel === "operador" ? campoTurno.value : null;
 
     if (!codigo) { mostrarAlerta(alerta, "erro", "Informe o número pessoal."); return; }
     if (!nome) { mostrarAlerta(alerta, "erro", "Informe o nome."); return; }
     if (DB.buscarUsuarioPorCodigo(codigo)) { mostrarAlerta(alerta, "erro", "Já existe um usuário com esse número pessoal."); return; }
+    if (papel === "gestor" && usuario.papel === "mestre") { mostrarAlerta(alerta, "erro", "Mestre não pode criar cadastros de Gestor."); return; }
 
     DB.dados.usuarios.push({ id: gerarId("u"), codigo, nome, senhaHash: null, senhaSalt: null, papel, setor, turno });
 

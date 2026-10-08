@@ -27,9 +27,17 @@
     <div class="card">
       <h2>Ordens / notas</h2>
       <div class="toolbar">
-        <div class="campo" style="margin:0;">
+        <div class="campo" id="campoFiltroSetorWrap" style="margin:0;">
           <label for="filtroSetor">Setor</label>
           <select id="filtroSetor"><option value="">Todos</option></select>
+        </div>
+        <div class="campo" style="margin:0;">
+          <label for="filtroTipoManutencao">Tipo de manutenção</label>
+          <select id="filtroTipoManutencao">
+            <option value="">Todos</option>
+            <option value="Eletrica">Elétrica</option>
+            <option value="Mecanica">Mecânica</option>
+          </select>
         </div>
         <div class="campo" style="margin:0;">
           <label for="filtroDataDe">De</label>
@@ -43,14 +51,28 @@
           <label for="filtroTexto">Buscar</label>
           <input type="text" id="filtroTexto" placeholder="Nota, ordem, texto, equipamento...">
         </div>
+        <div class="campo" style="margin:0;display:flex;align-items:center;gap:6px;">
+          <input type="checkbox" id="filtroSomenteAbertas" style="width:auto;margin:0;">
+          <label for="filtroSomenteAbertas" style="margin:0;display:inline;">Somente abertas</label>
+        </div>
         <span class="contagem-pill" id="contagemNotas" style="margin-top:18px;"></span>
       </div>
+      <p class="rodape-nota" id="msgNotasPadrao" style="text-align:left;"></p>
       <div class="tabela-scroll">
         <table>
           <thead>
             <tr>
-              <th>Nota</th><th>Ordem</th><th>Setor</th><th>Equipamento</th><!-- nome + código, quando a nota traz nomeEquipamento -->
-              <th>Texto breve</th><th>Status</th><th>Entrada</th><th>Hora</th><th>Fim</th>
+              <th data-sort="nota">Nota<span class="seta-ordenacao"></span></th>
+              <th data-sort="ordem">Ordem<span class="seta-ordenacao"></span></th>
+              <th data-sort="setor">Setor<span class="seta-ordenacao"></span></th>
+              <th data-sort="tipoManutencao">Tipo<span class="seta-ordenacao"></span></th>
+              <th data-sort="equipamento">Equipamento<span class="seta-ordenacao"></span></th><!-- nome + código, quando a nota traz nomeEquipamento -->
+              <th data-sort="loc">Loc. de Instalação<span class="seta-ordenacao"></span></th>
+              <th data-sort="textoBreve">Texto breve<span class="seta-ordenacao"></span></th>
+              <th data-sort="status">Status<span class="seta-ordenacao"></span></th>
+              <th data-sort="dataEntrada">Entrada<span class="seta-ordenacao"></span></th>
+              <th data-sort="horaEntrada">Hora<span class="seta-ordenacao"></span></th>
+              <th data-sort="dataFim">Fim<span class="seta-ordenacao"></span></th>
             </tr>
           </thead>
           <tbody id="corpoTabelaNotas"></tbody>
@@ -60,8 +82,9 @@
 
     <div class="card">
       <h2>Passagens de turno</h2>
+      <p class="subtitulo" style="margin-top:-6px;">Uma linha por ordem passada — "Detalhes" mostra a descrição de cada vez que essa mesma ordem foi passada (quando passada mais de uma vez sem ser finalizada).</p>
       <div class="toolbar">
-        <div class="campo" style="margin:0;">
+        <div class="campo" id="campoFiltroSetorPTWrap" style="margin:0;">
           <label for="filtroSetorPT">Setor</label>
           <select id="filtroSetorPT"><option value="">Todos</option></select>
         </div>
@@ -87,37 +110,20 @@
       <div class="tabela-scroll">
         <table>
           <thead>
-            <tr><th>Defeito</th><th>Máquina</th><th>Célula</th><th>Setor</th><th>Turno</th><th>Descrição</th><th>Status</th><th>Passado por</th><th>Passado em</th><th>Recebido por</th><th>Recebido em</th><th>Finalizada em</th><th>Tempo parado</th></tr>
+            <tr>
+              <th data-sort="defeito">Defeito<span class="seta-ordenacao"></span></th>
+              <th data-sort="maquina">Máquina<span class="seta-ordenacao"></span></th>
+              <th data-sort="celula">Loc. de Instalação<span class="seta-ordenacao"></span></th>
+              <th data-sort="setor">Setor<span class="seta-ordenacao"></span></th>
+              <th data-sort="turno">Turno<span class="seta-ordenacao"></span></th>
+              <th data-sort="descricao">Descrição (mais recente)<span class="seta-ordenacao"></span></th>
+              <th data-sort="status">Status<span class="seta-ordenacao"></span></th>
+              <th data-sort="registradoPor">Passado por<span class="seta-ordenacao"></span></th>
+              <th data-sort="dataHora">Passado em<span class="seta-ordenacao"></span></th>
+              <th></th>
+            </tr>
           </thead>
           <tbody id="corpoTabelaPT"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>Eventos de passagem de turno</h2>
-      <p class="subtitulo" style="margin-top:-6px;">Um evento por ação de passar (nova ordem ou "Continuar parada"), numerado e permanente — mostra pra qual turno foi e o tempo de parada de cada ordem no momento em que foi passada.</p>
-      <div class="toolbar">
-        <div class="campo" style="margin:0;">
-          <label for="filtroSetorEP">Setor</label>
-          <select id="filtroSetorEP"><option value="">Todos</option></select>
-        </div>
-        <div class="campo" style="margin:0;">
-          <label for="filtroDataDeEP">Passado de</label>
-          <input type="date" id="filtroDataDeEP">
-        </div>
-        <div class="campo" style="margin:0;">
-          <label for="filtroDataAteEP">até</label>
-          <input type="date" id="filtroDataAteEP">
-        </div>
-        <span class="contagem-pill" id="contagemEP" style="margin-top:18px;"></span>
-      </div>
-      <div class="tabela-scroll">
-        <table>
-          <thead>
-            <tr><th>Nº</th><th>Setor</th><th>Turno</th><th>Passado por</th><th>Passado em</th><th>Recebido por</th><th>Recebido em</th><th>Ordens</th><th></th></tr>
-          </thead>
-          <tbody id="corpoTabelaEP"></tbody>
         </table>
       </div>
     </div>

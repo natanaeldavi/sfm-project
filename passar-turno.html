@@ -30,11 +30,11 @@
       <table>
         <thead>
           <tr>
-            <th>Defeito</th>
-            <th>Máquina</th>
-            <th>Célula</th>
-            <th>Parada desde</th>
-            <th>Descrição</th>
+            <th data-sort="defeito">Defeito<span class="seta-ordenacao"></span></th>
+            <th data-sort="maquina">Máquina<span class="seta-ordenacao"></span></th>
+            <th data-sort="celula">Loc. de Instalação<span class="seta-ordenacao"></span></th>
+            <th data-sort="paradaDesde">Parada desde<span class="seta-ordenacao"></span></th>
+            <th data-sort="descricao">Descrição<span class="seta-ordenacao"></span></th>
             <th style="min-width:280px;">Ação</th>
           </tr>
         </thead>
@@ -45,18 +45,18 @@
 
   <div class="card" id="cardOrdensAbertas" hidden>
     <h2>2. Ordens abertas do período (planilha do SAP)</h2>
-    <p class="subtitulo" style="margin-bottom:10px;">Notas do setor ainda sem Data fim, abertas desde a última janela de passagens de turno (ou desde sexta, numa segunda-feira). Preencha o Defeito (e a Célula, se quiser) e clique Adicionar — vai direto pra lista de ordens a passar, abaixo.</p>
+    <p class="subtitulo" style="margin-bottom:10px;">Notas do setor ainda sem Data fim, abertas desde o início do seu turno atual. Clique Adicionar e descreva o Defeito e o que aconteceu ao passar — vai direto pra lista de ordens a passar, abaixo.</p>
     <div class="tabela-scroll">
       <table>
         <thead>
           <tr>
-            <th>Nota</th>
-            <th>Ordem</th>
-            <th>Máquina</th>
-            <th>Descrição (SAP)</th>
-            <th>Horário</th>
-            <th style="min-width:140px;">Defeito</th>
-            <th style="min-width:120px;">Célula</th>
+            <th data-sort="nota">Nota<span class="seta-ordenacao"></span></th>
+            <th data-sort="ordem">Ordem<span class="seta-ordenacao"></span></th>
+            <th data-sort="tipoManutencao">Tipo<span class="seta-ordenacao"></span></th>
+            <th data-sort="maquina">Máquina<span class="seta-ordenacao"></span></th>
+            <th data-sort="textoBreve">Descrição (SAP)<span class="seta-ordenacao"></span></th>
+            <th data-sort="loc">Loc. de Instalação<span class="seta-ordenacao"></span></th>
+            <th data-sort="quando">Horário<span class="seta-ordenacao"></span></th>
             <th></th>
           </tr>
         </thead>
@@ -79,16 +79,12 @@
         <input type="text" id="campoMaquina" placeholder="Ex.: prensa 3">
       </div>
       <div class="campo">
-        <label for="campoCelula">Célula</label>
-        <input type="text" id="campoCelula" placeholder="Ex.: célula 2">
+        <label for="campoCelula">Loc. de Instalação</label>
+        <input type="text" id="campoCelula" placeholder="Ex.: USPIS-CEL003">
       </div>
       <div class="campo">
         <label for="campoHoraDefeito">Horário do defeito</label>
         <input type="datetime-local" id="campoHoraDefeito">
-      </div>
-      <div class="campo" style="flex:2;">
-        <label for="campoDescricao">Descrição</label>
-        <input type="text" id="campoDescricao" placeholder="Descrição breve da ocorrência">
       </div>
       <button type="button" id="btnAdicionarOrdem" style="margin-top:18px;">Adicionar à lista</button>
     </div>
@@ -105,11 +101,11 @@
       <table>
         <thead>
           <tr>
-            <th>Defeito</th>
-            <th>Máquina</th>
-            <th>Célula</th>
-            <th>Horário do defeito</th>
-            <th>Descrição</th>
+            <th data-sort="defeito">Defeito<span class="seta-ordenacao"></span></th>
+            <th data-sort="maquina">Máquina<span class="seta-ordenacao"></span></th>
+            <th data-sort="celula">Loc. de Instalação<span class="seta-ordenacao"></span></th>
+            <th data-sort="inicioParadaEm">Horário do defeito<span class="seta-ordenacao"></span></th>
+            <th data-sort="descricao">Descrição<span class="seta-ordenacao"></span></th>
             <th></th>
           </tr>
         </thead>

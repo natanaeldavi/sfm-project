@@ -29,6 +29,15 @@
   const corpoAndamento = document.getElementById("corpoAndamento");
   const contagemAndamento = document.getElementById("contagemAndamento");
 
+  // Ordenação por cabeçalho clicável (ver tornarOrdenavel/ordenarPorEstado em js/util.js) — a
+  // fila de "aguardando recebimento" começa com a mais antiga primeiro (atender a mais velha
+  // antes), "em acompanhamento" começa com a recebida mais recentemente primeiro.
+  const estadoAbertas = { campo: "dataHora", dir: "asc" };
+  tornarOrdenavel(corpoTabela.closest("table").querySelector("thead"), estadoAbertas, renderAbertas);
+
+  const estadoAndamento = { campo: "recebidoEm", dir: "desc" };
+  tornarOrdenavel(corpoAndamento.closest("table").querySelector("thead"), estadoAndamento, renderAndamento);
+
   await DB.carregarAutoLoad({ setor: setorAtivo });
   Auth.atualizarUsuarioDoBanco(usuario);
   if (Auth.aplicarGatePassagemObrigatoria(usuario)) return;
@@ -46,9 +55,8 @@
   function renderAbertas() {
     if (!setorAtivo) return;
 
-    const abertas = DB.dados.passagensTurno
-      .filter((p) => p.setor === setorAtivo && p.status === "aberta")
-      .sort((a, b) => (a.dataHora || "").localeCompare(b.dataHora || ""));
+    const abertas = DB.dados.passagensTurno.filter((p) => p.setor === setorAtivo && p.status === "aberta");
+    ordenarPorEstado(abertas, estadoAbertas, {});
 
     contagemAbertas.textContent = `${abertas.length} em aberto`;
     btnReceberTudo.hidden = abertas.length === 0;
@@ -83,9 +91,8 @@
   function renderAndamento() {
     if (!setorAtivo) return;
 
-    const emAndamento = DB.dados.passagensTurno
-      .filter((p) => p.setor === setorAtivo && p.status === "recebida")
-      .sort((a, b) => (b.recebidoEm || "").localeCompare(a.recebidoEm || ""));
+    const emAndamento = DB.dados.passagensTurno.filter((p) => p.setor === setorAtivo && p.status === "recebida");
+    ordenarPorEstado(emAndamento, estadoAndamento, {});
 
     contagemAndamento.textContent = `${emAndamento.length} em acompanhamento`;
 

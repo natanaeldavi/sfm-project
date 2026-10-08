@@ -205,6 +205,13 @@ tbody td { padding: 7px 10px; border-bottom: 1px solid var(--cinza-borda); verti
 tbody tr:hover { background: #FAFBFC; }
 .tabela-scroll { max-height: 60vh; overflow: auto; border: 1px solid var(--cinza-borda); border-radius: 4px; }
 
+/* Cabeçalho clicável para ordenar (ver tornarOrdenavel em js/util.js) — o texto da seta
+   (▲/▼ na coluna ativa, ⇅ fraco nas demais) é escrito pelo JS a cada clique. */
+thead th[data-sort] { cursor: pointer; user-select: none; }
+thead th[data-sort]:hover { background: var(--cinza-borda); }
+thead th[data-sort] .seta-ordenacao { display: inline-block; width: 1.2em; margin-left: 2px; opacity: 0.4; }
+thead th[data-sort].ordenado .seta-ordenacao { opacity: 1; }
+
 .tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
 .tag.setor-Gasolina { background: #FBE9D6; color: #8A5A1E; }
 .tag.setor-Diesel { background: #DCE6F0; color: #234A6E; }
@@ -213,6 +220,8 @@ tbody tr:hover { background: #FAFBFC; }
 .tag.status-aberta { background: #FFF3CD; color: #8A6608; }
 .tag.status-recebida { background: #DCE6F0; color: #234A6E; }
 .tag.status-finalizada { background: #DCEFE1; color: #256B3E; }
+.tag.tipo-Eletrica { background: #FFF0DB; color: #946200; }
+.tag.tipo-Mecanica { background: #E6EEF7; color: #1E5285; }
 
 .acaoRecebida { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
 
@@ -314,3 +323,45 @@ tbody tr:hover { background: #FAFBFC; }
   0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
   40% { transform: scale(1); opacity: 1; }
 }
+
+/* ---------- Menu flutuante (modal) — ver abrirModal/fecharModal em js/util.js ---------- */
+.modal-fundo {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 30, 40, 0.45);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 16px;
+  overflow: auto;
+  z-index: 10000;
+}
+.modal-caixa {
+  background: #fff;
+  border-radius: 6px;
+  max-width: 900px;
+  width: 100%;
+  max-height: calc(100vh - 80px);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+}
+.modal-cabecalho {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--cinza-borda);
+}
+.modal-cabecalho h3 { margin: 0; flex: 1; font-size: 16px; color: var(--azul-principal); }
+.modal-fechar {
+  background: none;
+  border: none;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--texto-suave);
+  cursor: pointer;
+  padding: 2px 6px;
+}
+.modal-fechar:hover { color: var(--cinza-texto); background: var(--cinza-claro); border-radius: 4px; }
+.modal-corpo { padding: 16px 18px; overflow: auto; }

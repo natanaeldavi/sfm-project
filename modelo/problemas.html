@@ -59,7 +59,7 @@ for(let n=1;n<=3;n++){
   html+=`<td class="let">${r.k}:</td><td>`;
   html+=`<div class="lbl">${r.a}</div>`;
   if(r.sub){
-   html+='<div class="sub">'+['Célula','Máquina','Ordem','Horário','Descrição do problema'].map(t=>`<div><div class="lbl">${t}</div><textarea rows="2"></textarea></div>`).join('')+'</div>';
+   html+='<div class="sub">'+['Loc. de Instalação','Máquina','Ordem','Horário','Descrição do problema'].map(t=>`<div><div class="lbl">${t}</div><textarea rows="2"></textarea></div>`).join('')+'</div>';
   } else {
    if(r.b)html+=`<div class="lbl">${r.b}</div>`;
    html+='<textarea></textarea>';

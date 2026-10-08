@@ -7,7 +7,7 @@
 
   // Gestor/admin não têm setor fixo (escolhem depois, no seletor abaixo) e os gates logo
   // adiante não se aplicam a eles — não precisam de nenhum dados-<setor>.json aqui.
-  await DB.carregarAutoLoad({ setor: usuario.papel === "operador" ? usuario.setor : null });
+  await DB.carregarAutoLoad({ setor: papelTemSetorFixo(usuario.papel) ? usuario.setor : null });
   Auth.atualizarUsuarioDoBanco(usuario);
   if (Auth.aplicarGatePassagemObrigatoria(usuario)) return;
   if (Auth.aplicarGateRecebimento(usuario)) return;
@@ -21,14 +21,14 @@
   const linkRelatorios = document.getElementById("linkRelatorios");
   const linkAdmin = document.getElementById("linkAdmin");
 
-  if (usuario.papel === "gestor" || usuario.papel === "admin") {
+  if (usuario.papel === "gestor" || usuario.papel === "admin" || usuario.papel === "mestre") {
     cardGestao.hidden = false;
-    if (usuario.papel === "gestor" || usuario.papel === "admin") linkRelatorios.hidden = false;
-    if (usuario.papel === "admin") linkAdmin.hidden = false;
+    linkRelatorios.hidden = false;
+    if (usuario.papel === "admin" || usuario.papel === "mestre") linkAdmin.hidden = false;
   }
 
-  if (usuario.papel === "operador") {
-    // Operador tem setor fixo — não escolhe, e o card fica escondido.
+  if (papelTemSetorFixo(usuario.papel)) {
+    // Operador e Mestre têm setor fixo — não escolhem, e o card fica escondido.
     Auth.setSetorAtivo(usuario.setor);
     cardSetor.hidden = true;
   } else {

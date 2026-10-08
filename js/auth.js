@@ -130,15 +130,14 @@ const Auth = {
   },
 
   /**
-   * Operador tem setor fixo (o próprio) — garante que o setor ativo esteja
-   * sempre correto, independente de qual página foi a primeira acessada
-   * após o login (ex.: redirecionado direto pra receber-turno.html sem
-   * passar pelo menu.html). Chamar logo após Auth.exigirLogin() em toda
-   * página que usa Auth.getSetorAtivo(). Não faz nada para admin/gestor
-   * (eles escolhem o setor no menu).
+   * Operador e Mestre têm setor fixo (o próprio, ver papelTemSetorFixo) — garante que o setor
+   * ativo esteja sempre correto, independente de qual página foi a primeira acessada após o
+   * login (ex.: redirecionado direto pra receber-turno.html sem passar pelo menu.html). Chamar
+   * logo após Auth.exigirLogin() em toda página que usa Auth.getSetorAtivo(). Não faz nada para
+   * admin/gestor (eles escolhem o setor no menu).
    */
   garantirSetorOperador(usuario) {
-    if (usuario && usuario.papel === "operador" && this.getSetorAtivo() !== usuario.setor) {
+    if (usuario && papelTemSetorFixo(usuario.papel) && this.getSetorAtivo() !== usuario.setor) {
       this.setSetorAtivo(usuario.setor);
     }
   },
@@ -214,7 +213,7 @@ function montarTopbar(elemento, usuario, tituloPagina) {
   elemento.innerHTML = `
     <div class="marca">SFM <small>${escaparHtml(tituloPagina || "")}</small></div>
     <div class="usuario-info">
-      <span>${escaparHtml(usuario.nome)} <em style="opacity:.75">(${escaparHtml(usuario.papel)})</em></span>
+      <span>${escaparHtml(usuario.nome)} <em style="opacity:.75">(${escaparHtml(rotuloPapel(usuario.papel))})</em></span>
       ${setorAtivo ? `<span class="setor-pill">${escaparHtml(setorAtivo)}</span>` : ""}
       <button class="sair" id="btnSair" type="button">Sair</button>
     </div>

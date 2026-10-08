@@ -28,7 +28,7 @@ const QUADRO_META_EFICIENCIA = 70; // %, mesma meta impressa na folha física
  * Itens do assistente por etapas de preenchimento da SFM (turno Manhã) —
  * mesma ordem/rótulos da grade S/Q, mais o Top 3 Problemas no final. Passos
  * `tipo: "simNao"` (padrão) perguntam Sim/Não e, se "Sim", pedem
- * Defeito/Máquina/Célula/Descrição (mesmos campos do cadastro manual de
+ * Defeito/Máquina/Loc. de Instalação/Descrição (mesmos campos do cadastro manual de
  * Passar Turno) antes de avançar. O passo `tipo: "top3"` é tratado à parte
  * (ver renderWizardStep/renderWizardTop3) — monta até 3 entradas no formato
  * D/I/C/Ca/S da folha impressa (ver modelo/modelo-problemas.jpeg).
@@ -235,10 +235,11 @@ function importarPlanilhaSap(arrayBuffer) {
   if (!usuario) return;
   Auth.garantirSetorOperador(usuario);
 
-  // Operador: setor fixo. Admin/gestor: o que estiver ativo na sessão (escolhido no menu),
-  // com o mesmo fallback que o seletor de setor abaixo usa (SETORES[0] se inválido/ausente) —
-  // precisa resolver isso já aqui porque carregarAutoLoad só busca o setor que a gente pedir.
-  const setorInicial = usuario.papel === "operador"
+  // Operador/Mestre: setor fixo. Admin/gestor: o que estiver ativo na sessão (escolhido no
+  // menu), com o mesmo fallback que o seletor de setor abaixo usa (SETORES[0] se inválido/
+  // ausente) — precisa resolver isso já aqui porque carregarAutoLoad só busca o setor que a
+  // gente pedir.
+  const setorInicial = papelTemSetorFixo(usuario.papel)
     ? usuario.setor
     : (SETORES.includes(Auth.getSetorAtivo()) ? Auth.getSetorAtivo() : SETORES[0]);
   Auth.setSetorAtivo(setorInicial);
@@ -344,7 +345,7 @@ function importarPlanilhaSap(arrayBuffer) {
   });
 
   // ---------- Setor ----------
-  if (usuario.papel === "operador") {
+  if (papelTemSetorFixo(usuario.papel)) {
     campoSetor.hidden = true;
   } else {
     seletorSetor.innerHTML = SETORES.map((s) => `<option value="${s}">${s}</option>`).join("");
@@ -372,18 +373,16 @@ function importarPlanilhaSap(arrayBuffer) {
   }
 
   function setorAtual() {
-    return usuario.papel === "operador" ? usuario.setor : seletorSetor.value;
+    return papelTemSetorFixo(usuario.papel) ? usuario.setor : seletorSetor.value;
   }
 
-  // Se o operador já concluiu a SFM de hoje, abre direto no último dia que ela cobriu
-  // (normalmente "ontem" — ver calcularJanelaSfm) em vez de "hoje", onde a SFM recém-preenchida
-  // não aparece (nada foi marcado pra hoje, só pro(s) dia(s) da janela).
-  const janelaSfmHoje = usuario.papel === "operador" ? calcularJanelaSfm() : null;
-  seletorDia.value = (janelaSfmHoje && DB.sfmConcluidaHoje(usuario.setor, hojeISO()))
-    ? janelaSfmHoje[janelaSfmHoje.length - 1]
-    : hojeISO();
+  // A SFM "de hoje" é sempre sobre o(s) dia(s) anterior(es) (ver calcularJanelaSfm) —
+  // nunca sobre o dia real de hoje, onde nada foi marcado ainda e o quadro apareceria em
+  // branco. Por isso tanto a abertura da página quanto o botão "HOJE" apontam para o
+  // último dia coberto pela janela de hoje (ou ontem, se hoje não tem janela).
+  seletorDia.value = diaReferenciaSfmHoje();
   seletorDia.addEventListener("change", () => { avisarSeSujo(); renderizar(); });
-  btnHoje.addEventListener("click", () => { avisarSeSujo(); seletorDia.value = hojeISO(); renderizar(); });
+  btnHoje.addEventListener("click", () => { avisarSeSujo(); seletorDia.value = diaReferenciaSfmHoje(); renderizar(); });
   btnImprimir.addEventListener("click", () => window.print());
 
   // O tamanho do quadro na impressão é controlado só por CSS (mm fixos +
@@ -557,7 +556,7 @@ function importarPlanilhaSap(arrayBuffer) {
       </div>
       <div id="wizardRetrabalhoDetalhe"></div>`;
     const painelDetalhe = wizardSugestoesRetrabalho.querySelector("#wizardRetrabalhoDetalhe");
-    // Só mostra as ordens como referência — não preenche Defeito/Máquina/Célula/Descrição
+    // Só mostra as ordens como referência — não preenche Defeito/Máquina/Loc. de Instalação/Descrição
     // sozinho, o operador descreve o retrabalho com as próprias palavras, olhando essa referência.
     wizardSugestoesRetrabalho.querySelectorAll(".wizard-chip-sugestao").forEach((btn) => {
       btn.addEventListener("click", () => {
@@ -565,11 +564,12 @@ function importarPlanilhaSap(arrayBuffer) {
         painelDetalhe.innerHTML = `
           <div class="tabela-scroll" style="margin-top:8px;max-height:200px;">
             <table>
-              <thead><tr><th>Nota</th><th>Ordem</th><th>Data</th><th>Horário</th><th>Local / Célula</th><th>Máquina</th><th>Descrição</th></tr></thead>
+              <thead><tr><th>Nota</th><th>Ordem</th><th>Tipo</th><th>Data</th><th>Horário</th><th>Loc. de Instalação</th><th>Máquina</th><th>Descrição</th></tr></thead>
               <tbody>
                 ${c.notas.map((n) => `<tr>
                   <td>${escaparHtml(n.nota)}</td>
                   <td>${escaparHtml(n.ordem || "—")}</td>
+                  <td>${tagTipoManutencaoHtml(n.centrab)}</td>
                   <td>${formatarDataBR(n.dataEntrada)}</td>
                   <td>${escaparHtml(n.horaEntrada || "—")}</td>
                   <td>${escaparHtml(n.loc || "—")}</td>
@@ -585,12 +585,30 @@ function importarPlanilhaSap(arrayBuffer) {
 
   // ---------- Top 3 Problemas (D/I/C/Ca/S) ----------
 
+  /** true se a parada já é (ou já foi) uma quebra grave (10h+) — pra quem ainda não foi
+   * finalizada, conta o tempo decorrido até agora (ainda não tem tempoParadoMinutos fechado). */
+  function eQuebraGrave(p) {
+    if (p.status === "finalizada") return (p.tempoParadoMinutos || 0) >= LIMITE_PARADA_MINUTOS;
+    if (!p.inicioParadaEm) return false;
+    const decorridoMinutos = (Date.now() - new Date(p.inicioParadaEm).getTime()) / 60000;
+    return decorridoMinutos >= LIMITE_PARADA_MINUTOS;
+  }
+
+  /**
+   * Dias (ISO) em que uma parada conta como quebra grave — do dia de ABERTURA (não mais o de
+   * finalização) até o dia em que foi fechada ou, se continuar aberta, até hoje. Isso faz uma
+   * quebra que atravessa vários dias sem ser finalizada continuar aparecendo como candidata em
+   * cada SFM seguinte (acúmulo de quebras), não só numa única vez no dia em que foi encerrada.
+   */
+  function diasQuebraGrave(p) {
+    if (!p.inicioParadaEm || !eQuebraGrave(p)) return [];
+    const diaAbertura = formatarDataISO(new Date(p.inicioParadaEm));
+    const diaFinal = p.finalizadaEm ? formatarDataISO(new Date(p.finalizadaEm)) : hojeISO();
+    return expandirIntervaloISO(diaAbertura, diaFinal);
+  }
+
   function candidatosQuebraGrave(dia) {
-    return DB.dados.passagensTurno.filter((p) =>
-      p.setor === usuario.setor && p.status === "finalizada" &&
-      p.tempoParadoMinutos >= LIMITE_PARADA_MINUTOS &&
-      p.finalizadaEm && formatarDataISO(new Date(p.finalizadaEm)) === dia
-    );
+    return DB.dados.passagensTurno.filter((p) => p.setor === usuario.setor && diasQuebraGrave(p).includes(dia));
   }
 
   /** TOP1/TOP2/TOP3 são mutuamente exclusivos (ver TOP3_RANKS) — definem o rótulo mostrado à
@@ -692,7 +710,7 @@ function importarPlanilhaSap(arrayBuffer) {
               <td>
                 <div class="top3-lbl">O que? Quando? Onde?</div>
                 <div class="top3-sub-grid">
-                  <div><div class="top3-lbl">Célula</div><input type="text" data-campo="celula" data-i="${i}" value="${v(e.celula)}"></div>
+                  <div><div class="top3-lbl">Loc. de Instalação</div><input type="text" data-campo="celula" data-i="${i}" value="${v(e.celula)}"></div>
                   <div><div class="top3-lbl">Máquina</div><input type="text" data-campo="maquina" data-i="${i}" value="${v(e.maquina)}"></div>
                   <div><div class="top3-lbl">Ordem</div><input type="text" data-campo="ordem" data-i="${i}" value="${v(e.ordem)}"></div>
                   <div><div class="top3-lbl">Horário</div><input type="text" data-campo="horario" data-i="${i}" value="${v(e.horario)}" placeholder="hh:mm"></div>
@@ -942,10 +960,10 @@ function importarPlanilhaSap(arrayBuffer) {
 
     quebrasIndexAtual = new Map();
     for (const p of DB.dados.passagensTurno) {
-      if (p.setor !== setor || p.status !== "finalizada" || !p.finalizadaEm) continue;
-      if (p.tempoParadoMinutos < LIMITE_PARADA_MINUTOS) continue;
-      const dia = formatarDataISO(new Date(p.finalizadaEm));
-      quebrasIndexAtual.set(dia, (quebrasIndexAtual.get(dia) || 0) + 1);
+      if (p.setor !== setor) continue;
+      for (const dia of diasQuebraGrave(p)) {
+        quebrasIndexAtual.set(dia, (quebrasIndexAtual.get(dia) || 0) + 1);
+      }
     }
   }
 
@@ -954,7 +972,8 @@ function importarPlanilhaSap(arrayBuffer) {
     return notasIndexAtual?.get(dataISO) || { total: 0, realizadas: 0, pendentes: 0 };
   }
 
-  /** Nº de máquinas que passaram de 10h de parada e foram finalizadas neste dia. */
+  /** Nº de quebras graves (10h+) que incluem este dia no intervalo abertura→fechamento (ou
+   * abertura→hoje, se ainda em aberto) — ver diasQuebraGrave. */
   function quebrasGravesDia(setor, dataISO) {
     return quebrasIndexAtual?.get(dataISO) || 0;
   }
@@ -1080,13 +1099,13 @@ function importarPlanilhaSap(arrayBuffer) {
   // ---------- S / Q: grades clicáveis ----------
 
   /**
-   * Quem pode editar a grade S/Q diretamente (clique na célula): só admin
-   * e gestor, em qualquer setor/dia — edição livre, fora do fluxo guiado.
-   * O turno Manhã preenche pelo assistente por etapas (ver
+   * Quem pode editar a grade S/Q diretamente (clique na célula): admin,
+   * mestre e gestor, em qualquer setor/dia — edição livre, fora do fluxo
+   * guiado. O turno Manhã preenche pelo assistente por etapas (ver
    * elegivelParaWizardHoje/iniciarWizard), não mais clicando na grade.
    */
   function podeEditarSecaoSQ(setor) {
-    return usuario.papel === "admin" || usuario.papel === "gestor";
+    return usuario.papel === "admin" || usuario.papel === "gestor" || usuario.papel === "mestre";
   }
 
   function diaEditavel(setor, dataISO, hoje) {
@@ -1305,7 +1324,7 @@ function importarPlanilhaSap(arrayBuffer) {
               <td>
                 <div class="top3-lbl">O que? Quando? Onde?</div>
                 <div class="top3-sub-grid">
-                  <div><div class="top3-lbl">Célula</div>${v(e.celula)}</div>
+                  <div><div class="top3-lbl">Loc. de Instalação</div>${v(e.celula)}</div>
                   <div><div class="top3-lbl">Máquina</div>${v(e.maquina)}</div>
                   <div><div class="top3-lbl">Ordem</div>${v(e.ordem)}</div>
                   <div><div class="top3-lbl">Horário</div>${v(e.horario)}</div>

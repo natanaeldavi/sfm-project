@@ -1,8 +1,32 @@
 /* SFM — funções utilitárias compartilhadas (classificação, datas, formatação). */
 
 const SETORES = ["Gasolina", "Diesel", "Controle", "Biela"];
+
+/** Rótulo de exibição de cada papel — o valor interno (`usuario.papel`, salvo em
+ * bd/usuarios.json) continua "operador"/"gestor"/"admin"/"mestre"; só o texto mostrado mudou. */
+const ROLE_LABELS = { operador: "Manutentor", gestor: "Gestor", admin: "Admin", mestre: "Mestre" };
+function rotuloPapel(papel) {
+  return ROLE_LABELS[papel] || papel;
+}
+
+/** Papéis com setor fixo (sem seletor livre de setor, e com acesso restrito aos dados só
+ * daquele setor em Relatórios/SFM): Manutentor (operador) e Mestre. Gestor e Admin continuam
+ * escolhendo o setor ativo livremente e vendo todos os setores. */
+function papelTemSetorFixo(papel) {
+  return papel === "operador" || papel === "mestre";
+}
 const TURNOS = ["Manhã", "Tarde", "Noite"];
 const LIMITE_PARADA_MINUTOS = 10 * 60; // 10 horas -> entra no top problemas do próximo SFM
+
+/** Login/senha fixos da página escondida de configuração da pasta "bd" (ver
+ * configuracao.html) — não vêm de bd/usuarios.json (essa tela existe justamente pra
+ * configurar onde esse arquivo fica, então não pode depender dele). Entra-se digitando o
+ * "número pessoal" especial abaixo direto na tela de login normal (ver js/login.js); a senha
+ * é conferida de novo no servidor (SENHA_CONFIGURACAO em app-python/main.py) antes de aceitar
+ * qualquer troca de caminho, não só no cliente. */
+const CONFIG_LOGIN_ESCONDIDO = "sfmadmin123";
+const CONFIG_SENHA_ESCONDIDA = "sfm2026@mahle";
+const CONFIG_SESSAO_CHAVE = "sfm_config_autenticado";
 
 /** Horário oficial (início/fim) de cada turno — usado para as janelas obrigatórias de passar/receber turno. */
 const TURNO_HORARIOS = {
@@ -97,8 +121,10 @@ function dataDoTurnoAtual(turno) {
  * Classifica o setor a partir da coluna "Loc.instalação" do SAP.
  * Regras (nesta ordem de prioridade):
  *  - contém TRASU ou CONQU              -> Controle (TRS e CQG)
+ *  - contém APOIO-FERPIS                -> Biela (Bielas e Sal)
  *  - USPIS-CEL + número 003..019        -> Gasolina
  *  - USPIS-CEL + número 021..038        -> Diesel
+ *  - contém USPIS, sem CEL nenhum       -> Gasolina (ex.: "1012-PISTA-USPIS")
  *  - qualquer outro local                -> Biela (Bielas e Sal)
  */
 function classificarSetor(locInstalacao) {
@@ -106,6 +132,7 @@ function classificarSetor(locInstalacao) {
   if (!loc) return "Biela";
 
   if (loc.includes("TRASU") || loc.includes("CONQU")) return "Controle";
+  if (loc.includes("APOIO-FERPIS")) return "Biela";
 
   const m = loc.match(/USPIS-CEL\D{0,3}(\d{3})/);
   if (m) {
@@ -114,7 +141,34 @@ function classificarSetor(locInstalacao) {
     if (n >= 21 && n <= 38) return "Diesel";
   }
 
+  if (loc.includes("USPIS") && !loc.includes("CEL")) return "Gasolina";
+
   return "Biela";
+}
+
+/**
+ * Classifica o tipo de manutenção a partir da coluna "Centrab.respon." do SAP (campo `centrab`
+ * da nota — ver MAPA_CABECALHOS_SAP em js/quadro-sfm.js): MUPELE -> Eletrica, MUPMEC -> Mecanica.
+ * Retorna null se o código não bater com nenhuma das duas (ex.: notas antigas/de teste que
+ * trazem só o centro de custo nesse campo) — exibir como "—" nesse caso, não travar a tela.
+ * Valor sem acento de propósito (usado também como sufixo de classe CSS, ver .tag.tipo-* em
+ * css/style.css) — o rótulo acentuado pra exibição vem de TIPOS_MANUTENCAO_ROTULOS.
+ */
+function tipoManutencaoPorCentrab(centrab) {
+  const c = (centrab || "").toString().toUpperCase();
+  if (c.includes("MUPELE")) return "Eletrica";
+  if (c.includes("MUPMEC")) return "Mecanica";
+  return null;
+}
+
+const TIPOS_MANUTENCAO_ROTULOS = { Eletrica: "Elétrica", Mecanica: "Mecânica" };
+
+/** HTML da tag colorida de tipo de manutenção (ver .tag.tipo-* em css/style.css), ou "—" quando
+ * o `centrab` da nota não classifica em nenhum dos dois tipos conhecidos. */
+function tagTipoManutencaoHtml(centrab) {
+  const tipo = tipoManutencaoPorCentrab(centrab);
+  if (!tipo) return "—";
+  return `<span class="tag tipo-${tipo}">${TIPOS_MANUTENCAO_ROTULOS[tipo]}</span>`;
 }
 
 /** Converte um valor de célula do SAP (Date, serial Excel ou string dd.mm.aaaa) para "YYYY-MM-DD". */
@@ -230,6 +284,17 @@ function calcularJanelaSfm(dataRef) {
   return [somarDiasISO(hoje, -1)];
 }
 
+/**
+ * "Hoje" na SFM nunca se refere ao dia real de hoje — a folha de hoje cobre o
+ * dia (ou dias) anterior, ver calcularJanelaSfm. Esta função dá o dia que a
+ * tela deve mostrar quando o usuário pede "hoje": o último dia coberto pela
+ * janela de hoje, ou ontem, se hoje não tem janela (sábado/domingo).
+ */
+function diaReferenciaSfmHoje() {
+  const janela = calcularJanelaSfm();
+  return janela ? janela[janela.length - 1] : ontemISO();
+}
+
 /** Quantos dias existem entre duas datas ISO (inclusive nas duas pontas). */
 function diasEntreISO(de, ate) {
   const [y1, m1, d1] = de.split("-").map(Number);
@@ -286,6 +351,93 @@ function escaparHtml(texto) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
+}
+
+// ---------- Tabelas com cabeçalho clicável pra ordenar (ver css/style.css, th[data-sort]) ----------
+// Usado em todas as telas com tabela de ordens/passagens (Relatórios, Passar Turno, Receber
+// Turno): cada tabela tem seu próprio `estado` ({campo, dir}), iniciado com a ordenação padrão
+// daquela tela (normalmente a mais recente primeiro) — clicar num `<th data-sort="campo">` troca
+// pra ordenar por ele (clicar de novo na mesma coluna inverte asc/desc).
+
+/** Liga o clique nos `<th data-sort="campo">` de uma `<thead>`: `estado` ({campo, dir}) é mutado
+ * in-place e `aoMudar` é chamado pra re-renderizar a tabela com a nova ordenação. */
+function tornarOrdenavel(thead, estado, aoMudar) {
+  thead.querySelectorAll("th[data-sort]").forEach((th) => {
+    th.addEventListener("click", () => {
+      if (estado.campo === th.dataset.sort) {
+        estado.dir = estado.dir === "asc" ? "desc" : "asc";
+      } else {
+        estado.campo = th.dataset.sort;
+        estado.dir = "asc";
+      }
+      atualizarSetasOrdenacao(thead, estado);
+      aoMudar();
+    });
+  });
+  atualizarSetasOrdenacao(thead, estado);
+}
+
+function atualizarSetasOrdenacao(thead, estado) {
+  thead.querySelectorAll("th[data-sort]").forEach((th) => {
+    const ativo = th.dataset.sort === estado.campo;
+    th.classList.toggle("ordenado", ativo);
+    const seta = th.querySelector(".seta-ordenacao");
+    if (seta) seta.textContent = ativo ? (estado.dir === "asc" ? "▲" : "▼") : "⇅";
+  });
+}
+
+/** Ordena `lista` in-place conforme `estado` ({campo, dir}) — `getters` (opcional) cobre colunas
+ * cujo valor de ordenação não é um campo direto do objeto (ex.: um campo calculado a partir de
+ * dois outros). Compara numericamente quando os dois valores são number, senão como texto
+ * (localeCompare em pt-BR, com `numeric` pra "10" vir depois de "2"). */
+function ordenarPorEstado(lista, estado, getters) {
+  const obterValor = (getters && getters[estado.campo]) || ((item) => item[estado.campo]);
+  const sinal = estado.dir === "asc" ? 1 : -1;
+  lista.sort((a, b) => {
+    const va = obterValor(a);
+    const vb = obterValor(b);
+    if (typeof va === "number" && typeof vb === "number") return (va - vb) * sinal;
+    const sa = (va ?? "").toString();
+    const sb = (vb ?? "").toString();
+    return sa.localeCompare(sb, "pt-BR", { numeric: true }) * sinal;
+  });
+}
+
+// ---------- Menu flutuante (modal) — ver .modal-* em css/style.css ----------
+
+/** Abre um menu flutuante com `tituloTexto` no cabeçalho e `corpoHtml` como conteúdo — fecha
+ * clicando no X, clicando fora da caixa (no fundo escurecido) ou apertando Esc. Só um por vez:
+ * abrir um novo fecha o anterior, se houver. */
+function abrirModal(tituloTexto, corpoHtml) {
+  fecharModal();
+
+  const fundo = document.createElement("div");
+  fundo.className = "modal-fundo";
+  fundo.id = "modalFundoAtivo";
+  fundo.innerHTML = `
+    <div class="modal-caixa">
+      <div class="modal-cabecalho">
+        <h3>${escaparHtml(tituloTexto)}</h3>
+        <button type="button" class="modal-fechar" aria-label="Fechar">✕</button>
+      </div>
+      <div class="modal-corpo">${corpoHtml}</div>
+    </div>`;
+
+  fundo.addEventListener("click", (ev) => { if (ev.target === fundo) fecharModal(); });
+  fundo.querySelector(".modal-fechar").addEventListener("click", fecharModal);
+  document.addEventListener("keydown", _fecharModalNoEsc);
+
+  document.body.appendChild(fundo);
+  return fundo;
+}
+
+function _fecharModalNoEsc(ev) {
+  if (ev.key === "Escape") fecharModal();
+}
+
+function fecharModal() {
+  document.getElementById("modalFundoAtivo")?.remove();
+  document.removeEventListener("keydown", _fecharModalNoEsc);
 }
 
 function mostrarAlerta(container, tipo, mensagem) {
