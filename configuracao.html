@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SFM — Configuração</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="login-wrap">
+  <div class="login-box" style="max-width:480px;">
+    <h1>SFM</h1>
+    <p class="subtitulo">Configuração da pasta de dados (uso interno)</p>
+
+    <div id="alertaConfig" hidden></div>
+
+    <form id="formLoginConfig">
+      <div class="campo">
+        <label for="campoLoginConfig">Login</label>
+        <input type="text" id="campoLoginConfig" autocomplete="off" required>
+      </div>
+      <div class="campo">
+        <label for="campoSenhaConfig">Senha</label>
+        <input type="password" id="campoSenhaConfig" autocomplete="off" required>
+      </div>
+      <button type="submit" style="width:100%;">Entrar</button>
+    </form>
+
+    <div id="painelConfig" hidden>
+      <p class="subtitulo" style="margin-top:0;">Caminho atual da pasta "bd" usada por este PC:</p>
+      <p id="caminhoAtual" style="font-family:monospace;font-size:13px;word-break:break-all;background:var(--cinza-claro);border:1px solid var(--cinza-borda);border-radius:4px;padding:8px 10px;"></p>
+      <p id="statusCaminho" class="rodape-nota" style="text-align:left;"></p>
+
+      <div class="campo">
+        <label for="campoNovoCaminho">Novo caminho da pasta "bd"</label>
+        <input type="text" id="campoNovoCaminho" placeholder="Ex.: \\SERVIDOR\SFM\bd ou C:\SFM\bd">
+      </div>
+      <button type="button" id="btnSalvarCaminho" style="width:100%;">Salvar e usar este caminho</button>
+
+      <p class="rodape-nota" style="text-align:left;margin-top:14px;">
+        Aplicado imediatamente neste PC, sem precisar reiniciar o SFM.exe. Essa configuração fica
+        salva em <code>C:\ProgramData\SFM\config.json</code> — sobrevive a trocar o .exe por uma
+        versão nova (mesmo numa pasta diferente), não precisa configurar de novo depois de atualizar.
+      </p>
+    </div>
+  </div>
+</div>
+
+<script src="js/util.js"></script>
+<script src="js/configuracao.js"></script>
+</body>
+</html>

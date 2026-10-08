@@ -26,9 +26,16 @@ memória e regrava o arquivo inteiro ao salvar, sem checar se mudou nesse meio t
 Dividindo por setor, cada gravação só afeta o arquivo daquele setor — a corrida só
 continua existindo se duas pessoas mexerem no MESMO setor ao mesmo tempo (bem mais
 raro). Ver _migrar_para_por_setor() para a migração automática do formato antigo.
+
+Onde fica a pasta "bd": por padrão, ao lado do .exe (BASE_DIR/bd) — mas isso é
+configurável (ver _bd_dir_configurado()/config.json e a página escondida
+configuracao.html, não linkada em nenhum lugar do app) pra cada PC poder rodar o
+.exe copiado localmente e só apontar pra pasta "bd" compartilhada na rede, em vez
+de rodar o .exe direto da rede (mais lento/instável de abrir).
 """
 
 import json
+import os
 import socket
 import sys
 import threading
@@ -38,6 +45,10 @@ from pathlib import Path
 from flask import Flask, jsonify, request
 
 SETORES_VALIDOS = ("Gasolina", "Diesel", "Controle", "Biela")
+
+# Senha da página escondida de configuração (configuracao.html, não linkada em nenhum menu) —
+# só ela protege a troca de pasta "bd", então é checada aqui no servidor também, não só na tela.
+SENHA_CONFIGURACAO = "sfm2026@mahle"
 
 PROJETO_DIR = Path(__file__).resolve().parent.parent  # raiz do repo: html/css/js/bd ficam lá, intocados
 
@@ -58,8 +69,54 @@ def diretorio_bundle() -> Path:
 
 BASE_DIR = diretorio_base()
 BUNDLE_DIR = diretorio_bundle()
-BD_DIR = BASE_DIR / "bd"
-BD_DIR.mkdir(exist_ok=True)
+
+
+def _ler_json(caminho: Path, padrao):
+    if not caminho.exists():
+        return padrao
+    with caminho.open("r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def _escrever_json(caminho: Path, valor) -> None:
+    with caminho.open("w", encoding="utf-8") as f:
+        json.dump(valor, f, ensure_ascii=False, indent=2)
+
+
+def _caminho_config() -> Path:
+    """config.json fica em C:\\ProgramData\\SFM — não ao lado do .exe nem dentro de "bd" —
+    porque isso precisa sobreviver a trocar o .exe por uma versão nova (ex.: numa pasta nova),
+    sem perder o caminho configurado da pasta "bd" e precisar configurar de novo. ProgramData é
+    usado (não "Arquivos de Programas"/Program Files) porque é gravável por usuário comum sem
+    precisar rodar como administrador; Program Files normalmente exige elevação de UAC."""
+    base = Path(os.environ.get("PROGRAMDATA", r"C:\ProgramData")) / "SFM"
+    base.mkdir(parents=True, exist_ok=True)
+    return base / "config.json"
+
+
+def _ler_config() -> dict:
+    return _ler_json(_caminho_config(), {})
+
+
+def _bd_dir_configurado() -> Path:
+    """Pasta "bd" a usar: a configurada em config.json (ver página escondida de configuração,
+    configuracao.html), ou BASE_DIR/bd por padrão — mesmo comportamento de sempre quando
+    ninguém mexeu na configuração ainda (instalação nova, ou .exe rodando direto da rede)."""
+    caminho = _ler_config().get("bd_dir")
+    return Path(caminho) if caminho else (BASE_DIR / "bd")
+
+
+BD_DIR = _bd_dir_configurado()
+try:
+    # Só cria automaticamente a pasta padrão (BASE_DIR/bd, sempre local e sob controle do
+    # programa) — uma pasta configurada na página escondida pode ser um caminho de rede
+    # momentaneamente fora do ar (VPN caída, servidor desligado etc.); nesse caso o programa
+    # ainda assim precisa SUBIR (pra pelo menos abrir e mostrar "sem conexão", ou deixar
+    # corrigir o caminho na página escondida), não travar aqui na inicialização.
+    if not _ler_config().get("bd_dir"):
+        BD_DIR.mkdir(exist_ok=True)
+except OSError:
+    pass
 
 
 def _caminho_usuarios() -> Path:
@@ -78,26 +135,16 @@ def _caminho_quadro_setor(setor: str) -> Path:
     return BD_DIR / f"quadro-{setor}.json"
 
 
-def _ler_json(caminho: Path, padrao):
-    if not caminho.exists():
-        return padrao
-    with caminho.open("r", encoding="utf-8") as f:
-        return json.load(f)
-
-
-def _escrever_json(caminho: Path, valor) -> None:
-    with caminho.open("w", encoding="utf-8") as f:
-        json.dump(valor, f, ensure_ascii=False, indent=2)
-
-
 def _migrar_para_por_setor() -> None:
     """Primeira vez que o .exe nesse formato novo roda numa pasta "bd/" ainda no formato
     antigo (dados.json/quadro.json únicos, com "setor" dentro de cada registro): separa
     tudo nos arquivos por setor e renomeia os antigos pra ".pre-split.bak" (nunca apaga).
     Idempotente — se bd/usuarios.json já existir, não faz nada (assume que já migrou, ou
-    que é uma instalação nova que já nasce no formato novo).
+    que é uma instalação nova que já nasce no formato novo). Não faz nada também se BD_DIR
+    não existir/não estiver acessível agora (ex.: caminho de rede configurado fora do ar) —
+    não é hora de criar nada nem migrar, só deixar o programa subir mesmo assim.
     """
-    if _caminho_usuarios().exists():
+    if not BD_DIR.exists() or _caminho_usuarios().exists():
         return
 
     dados_antigo_path = BD_DIR / "dados.json"
@@ -147,6 +194,49 @@ def _lock_para(nome: str) -> threading.Lock:
 
 
 app = Flask(__name__, static_folder=str(BUNDLE_DIR), static_url_path="")
+
+
+def _listar_arquivos(pasta: Path) -> list[str]:
+    try:
+        return sorted(p.name for p in pasta.iterdir() if p.is_file())
+    except OSError:
+        return []
+
+
+@app.get("/api/config")
+def api_get_config():
+    """Usado pela página escondida configuracao.html pra mostrar o caminho atual da pasta
+    "bd" e os arquivos encontrados nela (confirma visualmente se é a pasta certa)."""
+    return jsonify(bd_dir=str(BD_DIR), existe=BD_DIR.exists(), arquivos=_listar_arquivos(BD_DIR))
+
+
+@app.post("/api/config")
+def api_post_config():
+    """Troca a pasta "bd" em uso — grava em config.json (ver _caminho_config) e já atualiza
+    BD_DIR nesta mesma execução do servidor, sem precisar reiniciar o programa. Exige a senha
+    da página escondida mesmo aqui no servidor (não só na tela), já que troca de onde TODOS os
+    dados são lidos/gravados dali em diante."""
+    global BD_DIR
+    valor = request.get_json(force=True, silent=False) or {}
+
+    if valor.get("senha") != SENHA_CONFIGURACAO:
+        return jsonify(erro="Senha incorreta."), 403
+
+    novo_caminho = (valor.get("bd_dir") or "").strip()
+    if not novo_caminho:
+        return jsonify(erro="Informe um caminho."), 400
+
+    caminho = Path(novo_caminho)
+    try:
+        criada = not caminho.exists()
+        caminho.mkdir(parents=True, exist_ok=True)
+    except OSError as e:
+        return jsonify(erro=f"Não consegui acessar/criar esse caminho: {e}"), 400
+
+    BD_DIR = caminho
+    _escrever_json(_caminho_config(), {"bd_dir": str(BD_DIR)})
+
+    return jsonify(ok=True, bd_dir=str(BD_DIR), existe=True, criada=criada, arquivos=_listar_arquivos(BD_DIR))
 
 
 @app.get("/api/usuarios")

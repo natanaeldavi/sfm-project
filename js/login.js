@@ -65,6 +65,21 @@
 
     if (etapa === "codigo") {
       const codigo = campoCodigo.value.trim();
+
+      // Login escondido pra página de configuração da pasta "bd" (ver configuracao.html) — não
+      // é um usuário de bd/usuarios.json, não aparece em lugar nenhum da tela normal, só quem
+      // sabe o número pessoal exato chega até o campo de senha dele.
+      if (codigo === CONFIG_LOGIN_ESCONDIDO) {
+        usuarioEncontrado = null;
+        etapa = "senhaConfig";
+        campoCodigo.disabled = true;
+        btnTrocarCodigo.hidden = false;
+        campoSenhaWrap.hidden = false;
+        campoSenha.required = true;
+        campoSenha.focus();
+        return;
+      }
+
       const usuario = DB.buscarUsuarioPorCodigo(codigo);
       if (!usuario) {
         mostrarAlerta(alertaLogin, "erro", "Número pessoal inválido.");
@@ -88,6 +103,16 @@
         btnEntrar.textContent = "Criar senha e entrar";
         campoNovaSenha.focus();
       }
+      return;
+    }
+
+    if (etapa === "senhaConfig") {
+      if (campoSenha.value !== CONFIG_SENHA_ESCONDIDA) {
+        mostrarAlerta(alertaLogin, "erro", "Número pessoal ou senha inválidos.");
+        return;
+      }
+      sessionStorage.setItem(CONFIG_SESSAO_CHAVE, "1");
+      window.location.href = "configuracao.html";
       return;
     }
 
